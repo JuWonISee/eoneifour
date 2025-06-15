@@ -30,7 +30,10 @@ public abstract class AbstractMainFrame extends JFrame {
         cardLayout = new CardLayout(); // 화면 전환용 레이아웃
         contentPanel = new JPanel(cardLayout);
         add(contentPanel, BorderLayout.CENTER);
-
+        
+        // TODO --> 식별용 백그라운드. 추후 제거 필요
+        contentPanel.setBackground(new Color(255,250,205));
+        
         // 기본 프레임 설정
         setSize(1280, 800); // 창 크기
         setLocationRelativeTo(null); // 창 가운데 배치
