@@ -1,6 +1,7 @@
 package com.eoneifour.wms.view.frame;
 
 import java.awt.BorderLayout;
+import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -14,6 +15,8 @@ import javax.swing.JPanel;
 
 import com.eoneifour.common.frame.AbstractMainFrame;
 import com.eoneifour.common.util.ButtonUtil;
+import com.eoneifour.wms.view.AdminPage;
+import com.eoneifour.wms.view.HomePage;
 
 /**
  * - WMS 관리자 메인 프레임 - 메인 프레임, 사이드바 구현
@@ -26,6 +29,35 @@ public class MainFrame extends AbstractMainFrame {
 
 	public MainFrame() {
 		super("WMS 메인(관리자)"); // 타이틀 설정
+		
+		
+		/**
+		 * Copilot
+		 */
+		// 기존 contentPanel 제거 후 새로운 구조로 감싸기
+//	    getContentPane().remove(contentPanel); // 부모(AbstractMainFrame)에서 설정된 contentPanel 제거
+//
+//	    // 디테일 패널 생성
+//	    CardLayout detailCardLayout = new CardLayout();
+//	    JPanel detailPanel = new JPanel(detailCardLayout);
+//	    detailPanel.setPreferredSize(new Dimension(1280, 60));
+//	    detailPanel.setBackground(new Color(240, 240, 250)); // 연보라 느낌
+//
+//	    // 새로 구성할 중앙 래퍼 패널
+//	    JPanel centerWrapper = new JPanel(new BorderLayout());
+//	    centerWrapper.add(detailPanel, BorderLayout.NORTH);
+//	    centerWrapper.add(contentPanel, BorderLayout.CENTER); // 기존 cardLayout 적용된 contentPanel 사용
+//
+//	    // 새로 구성된 centerWrapper를 프레임 중앙에 부착
+//	    getContentPane().add(centerWrapper, BorderLayout.CENTER);
+//
+	    initPages();
+
+	}
+	
+	private void initPages() {
+		contentPanel.add(new HomePage(this), "HOME");
+		contentPanel.add(new AdminPage(this), "ADMIN");
 	}
 
 	// 상단패널
@@ -46,15 +78,17 @@ public class MainFrame extends AbstractMainFrame {
 		infoBar.setPreferredSize(new Dimension(1280, 50));
 		infoBar.setBackground(Color.BLACK);
 
-		JLabel homeLabel = new JLabel("HOME");
-		homeLabel.setOpaque(false);
-		homeLabel.setForeground(Color.WHITE);
-		homeLabel.setFont(new Font("맑은 고딕", Font.PLAIN, 20));
-
+		// 로고 
+		JButton homeBtn = new JButton("HOME");
+		ButtonUtil.styleHeaderButton(homeBtn);
+		homeBtn.setContentAreaFilled(false);
+		homeBtn.setFont(new Font("맑은 고딕", Font.PLAIN, 20));
+		homeBtn.addActionListener(e -> showPage("HOME"));
+		
 		// 왼쪽 정렬 + 좌우 15pt,위아래 10px 여백을 위한 Panel
 		JPanel leftWrapper = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 10));
 		leftWrapper.setOpaque(false);
-		leftWrapper.add(homeLabel);
+		leftWrapper.add(homeBtn);
 		infoBar.add(leftWrapper, BorderLayout.WEST);
 
 		// Right Panel: 관리자 이름 포함한 인삿말
@@ -95,16 +129,31 @@ public class MainFrame extends AbstractMainFrame {
 			JButton button = new JButton(menuNames[i]);
 			ButtonUtil.styleMenuButton(button);
 			final String pageKey = pageKeys[i];
+			button.addActionListener(e -> showPage(pageKey));
 			button.setAlignmentX(JButton.CENTER_ALIGNMENT);
 			button.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40)); // 폭 자동 확장
 
 			menuBar.add(Box.createVerticalStrut(20)); // 간격 추가
 			menuBar.add(button);
 		}
-
+		
+		//홈메뉴 등록
 		menuBar.add(Box.createVerticalGlue()); // 아래 공간 채우기
 		return menuBar;
 	}
+	
+	private JPanel createDetailMenuBar() {
+		CardLayout detailCardLayout = new CardLayout();
+		JPanel detailPanel = new JPanel(detailCardLayout);
+		
+		 detailPanel.setPreferredSize(new Dimension(getWidth(), 100));
+		 contentPanel.add(detailPanel, BorderLayout.NORTH);
+		
+		return detailPanel;
+	}
+	
+	
+	
 
 	public static void main(String[] args) {
 		new MainFrame();
