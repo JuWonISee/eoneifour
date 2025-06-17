@@ -24,7 +24,8 @@ public class HomePage extends JPanel{
 		this.mainFrame = frame;
 		
 		ImgUtil imgUtil = new ImgUtil();
-		backgroundImage = imgUtil.getImage("images/homeImage.png", 1280, 800);
+//		backgroundImage = imgUtil.getImage("images/homeImage1.png", 1280, 800);
+		backgroundImage = imgUtil.getImage("images/homeImage2.png", 1280, 800);
 		
 		setLayout(null); // 필요 시 컴포넌트 위치 수동 조절
 		setOpaque(false); // 배경 투명화
