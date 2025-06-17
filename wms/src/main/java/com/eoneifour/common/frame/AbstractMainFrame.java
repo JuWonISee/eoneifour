@@ -15,8 +15,8 @@ public abstract class AbstractMainFrame extends JFrame {
     public JPanel topPanel;
     public JPanel leftPanel;
     public JPanel contentPanel;
-    public JPanel cardTopPanel;
-    public JPanel cardBottomPanel;
+    public JPanel menuCardLayout;
+    public JPanel contentCardLayout;
 //    public CardLayout cardLayout; 미사용
     public CardLayout detailCardLayout;
 
@@ -33,13 +33,13 @@ public abstract class AbstractMainFrame extends JFrame {
         contentPanel = new JPanel(new BorderLayout());
         
         // 위아래 패널
-        cardTopPanel = new JPanel(new CardLayout());
-        cardTopPanel.setPreferredSize(new Dimension(0, 50)); // 원하는 높이 지정
+        menuCardLayout = new JPanel(new CardLayout());
+        menuCardLayout.setPreferredSize(new Dimension(0, 50)); // 원하는 높이 지정
         
-        cardBottomPanel = new JPanel(new CardLayout());
+        contentCardLayout = new JPanel(new CardLayout());
         
-        contentPanel.add(cardTopPanel, BorderLayout.NORTH);
-        contentPanel.add(cardBottomPanel, BorderLayout.CENTER);
+        contentPanel.add(menuCardLayout, BorderLayout.NORTH);
+        contentPanel.add(contentCardLayout, BorderLayout.CENTER);
         
         add(contentPanel, BorderLayout.CENTER);
         
@@ -61,14 +61,14 @@ public abstract class AbstractMainFrame extends JFrame {
     public abstract JPanel createLeftPanel();
 
     // 각 메뉴 클릭 시 화면 전환
-    public void showTopPage(String key) {
-        CardLayout layout = (CardLayout) cardTopPanel.getLayout();
-        layout.show(cardTopPanel, key);
+    public void showTopMenu(String key) {
+        CardLayout layout = (CardLayout) menuCardLayout.getLayout();
+        layout.show(menuCardLayout, key);
     }
     
-    public void showBottomPage(String key) {
-        CardLayout layout = (CardLayout) cardBottomPanel.getLayout();
-        layout.show(cardBottomPanel, key);
+    public void showContent(String key) {
+        CardLayout layout = (CardLayout) contentCardLayout.getLayout();
+        layout.show(contentCardLayout, key);
     }
 
 }
