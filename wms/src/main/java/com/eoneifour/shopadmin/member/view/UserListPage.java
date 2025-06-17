@@ -38,7 +38,7 @@ public class UserListPage extends AbstractTablePage {
         ButtonUtil.configTableButton(addBtn, new Color(25,118,210), 100, 35);
         JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         
-        addBtn.addActionListener(e -> mainFrame.showPage("USER_REGIST"));
+        addBtn.addActionListener(e -> mainFrame.showContent("USER_REGIST"));
         
         rightPanel.setOpaque(false);
         rightPanel.add(addBtn);
