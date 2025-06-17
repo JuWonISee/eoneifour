@@ -1,10 +1,17 @@
 package com.eoneifour.shopadmin.view.frame;
 
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+
 import com.eoneifour.common.frame.AbstractMainFrame;
 import com.eoneifour.common.util.ButtonUtil;
-
-import javax.swing.*;
-import java.awt.*;
+import com.eoneifour.shopadmin.member.view.UserListPage;
 
 /**
  * 쇼핑몰 관리자 메인 프레임
@@ -22,8 +29,9 @@ public class ShopAdminMainFrame extends AbstractMainFrame {
 
     // 페이지 등록
     private void initPages() {
-        //각 페이지 메뉴 연결
-        //contentPanel.add(new UserListPage(this), "USER"); // 회원관리 페이지
+    	//각 페이지 메뉴 연결
+        contentPanel.add(new UserListPage(this), "USER_LIST"); // 회원관리 페이지
+        //contentPanel.add(new UserRegistPage(this), "USER_REGIST"); // 회원등록
         //contentPanel.add(new ProductPage(this), "PRODUCT"); // 상품관리 페이지
         //contentPanel.add(new OrderPage(this), "ORDER"); // 주문관리 페이지
         //contentPanel.add(new PurchasePage(this), "PURCHASE"); // 발주관리 페이지
@@ -76,19 +84,19 @@ public class ShopAdminMainFrame extends AbstractMainFrame {
 
         JButton userBtn = new JButton("회원관리");
         ButtonUtil.styleMenuButton(userBtn);
-        userBtn.addActionListener(e->showPage("USER"));
+        userBtn.addActionListener(e->showPage("USER_LIST"));
 
         JButton productBtn = new JButton("상품관리");
         ButtonUtil.styleMenuButton(productBtn);
-        productBtn.addActionListener(e->showPage("PRODUCT"));
+        productBtn.addActionListener(e->showPage("PRODUCT_LIST"));
 
         JButton orderBtn = new JButton("주문관리");
         ButtonUtil.styleMenuButton(orderBtn);
-        orderBtn.addActionListener(e->showPage("ORDER"));
+        orderBtn.addActionListener(e->showPage("ORDER_LIST"));
 
         JButton purchaseBtn = new JButton("발주관리");
         ButtonUtil.styleMenuButton(purchaseBtn);
-        purchaseBtn.addActionListener(e->showPage("PURCHASE"));
+        purchaseBtn.addActionListener(e->showPage("PURCHASE_LIST"));
 
         JButton settingBtn = new JButton("설정");
         ButtonUtil.styleMenuButton(settingBtn);
