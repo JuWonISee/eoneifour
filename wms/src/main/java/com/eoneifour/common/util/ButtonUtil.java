@@ -75,4 +75,18 @@ public class ButtonUtil {
             }
         });
     }
+    
+    /**
+     * 테이블 버튼 스타일 설정
+     * @param btn
+     * @param color
+     * @param width
+     * @param height
+     */
+    public static void configTableButton(JButton btn, Color color, int width, int height) {
+        btn.setBackground(color);
+        btn.setForeground(Color.WHITE);
+        btn.setPreferredSize(new Dimension(width, height));
+        btn.setFocusPainted(false);
+    }
 }
