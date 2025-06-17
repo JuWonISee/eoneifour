@@ -1,7 +1,6 @@
 package com.eoneifour.wms.view.frame;
 
 import java.awt.BorderLayout;
-import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -15,6 +14,7 @@ import javax.swing.JPanel;
 
 import com.eoneifour.common.frame.AbstractMainFrame;
 import com.eoneifour.common.util.ButtonUtil;
+import com.eoneifour.wms.common.config.Config;
 import com.eoneifour.wms.view.AdminPage;
 import com.eoneifour.wms.view.HomePage;
 
@@ -29,35 +29,15 @@ public class MainFrame extends AbstractMainFrame {
 
 	public MainFrame() {
 		super("WMS 메인(관리자)"); // 타이틀 설정
-		
-		
-//		/**
-//		 * Copilot
-//		 */
-//		 기존 contentPanel 제거 후 새로운 구조로 감싸기
-//	    getContentPane().remove(contentPanel); // 부모(AbstractMainFrame)에서 설정된 contentPanel 제거
-//
-//	    // 디테일 패널 생성
-//	    CardLayout detailCardLayout = new CardLayout();
-//	    JPanel detailPanel = new JPanel(detailCardLayout);
-//	    detailPanel.setPreferredSize(new Dimension(1280, 60));
-//	    detailPanel.setBackground(new Color(240, 240, 250)); // 연보라 느낌
-//
-//	    // 새로 구성할 중앙 래퍼 패널
-//	    JPanel centerWrapper = new JPanel(new BorderLayout());
-//	    centerWrapper.add(detailPanel, BorderLayout.NORTH);
-//	    centerWrapper.add(contentPanel, BorderLayout.CENTER); // 기존 cardLayout 적용된 contentPanel 사용
-//
-//	    // 새로 구성된 centerWrapper를 프레임 중앙에 부착
-//	    getContentPane().add(centerWrapper, BorderLayout.CENTER);
-
-	    initPages();
-
+		initPages();
 	}
-	
+
 	private void initPages() {
-		contentPanel.add(new HomePage(this), "HOME");
-		contentPanel.add(new AdminPage(this), "ADMIN");
+
+		createDetailMenuBar();
+
+		cardBottomPanel.add(new HomePage(this), "HOME");
+
 	}
 
 	// 상단패널
@@ -75,16 +55,16 @@ public class MainFrame extends AbstractMainFrame {
 	private JPanel creatInfoBar() {
 
 		JPanel infoBar = new JPanel(new BorderLayout());
-		infoBar.setPreferredSize(new Dimension(1280, 50));
+		infoBar.setPreferredSize(new Dimension(1280, 30));
 		infoBar.setBackground(Color.BLACK);
 
-		// 로고 
+		// 로고
 		JButton homeBtn = new JButton("HOME");
 		ButtonUtil.styleHeaderButton(homeBtn);
 		homeBtn.setContentAreaFilled(false);
 		homeBtn.setFont(new Font("맑은 고딕", Font.PLAIN, 20));
-		homeBtn.addActionListener(e -> showPage("HOME"));
-		
+		homeBtn.addActionListener(e -> showBottomPage("HOME"));
+
 		// 왼쪽 정렬 + 좌우 15pt,위아래 10px 여백을 위한 Panel
 		JPanel leftWrapper = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 10));
 		leftWrapper.setOpaque(false);
@@ -103,7 +83,7 @@ public class MainFrame extends AbstractMainFrame {
 		infoBar.add(rightWrapper, BorderLayout.EAST);
 
 		return infoBar;
-	}
+	};
 
 	@Override
 	public JPanel createLeftPanel() {
@@ -114,46 +94,50 @@ public class MainFrame extends AbstractMainFrame {
 		leftPanel.add(menuBar, BorderLayout.CENTER);
 
 		return leftPanel;
-	}
+	};
 
 	private JPanel createMenuBar() {
 		JPanel menuBar = new JPanel();
 		menuBar.setLayout(new BoxLayout(menuBar, BoxLayout.Y_AXIS));
 		menuBar.setBackground(Color.WHITE);
 
-		String[] menuNames = { "관리자", "입/출고", "입/출고기록", "재고 수정", "입고율 조회", "입고 조회", "출고 조회", "모니터링" };
-		String[] pageKeys = { "ADMIN", "RECEIV_SHIP", "RECEIV_SHIP_LOG", "STOCK_MODIFY", "RECEVING_RATE", "RECEVING",
-				"SHIPPING", "MONITORING" };
-
-		for (int i = 0; i < menuNames.length; i++) {
-			JButton button = new JButton(menuNames[i]);
+		for (int i = 0; i < Config.MENUNAME.length; i++) {
+			final int idx = i; // 아래 람다식에서 [i] 형식으로 접근 시 에러가 발생하므로, 지역 변수로 생성
+			JButton button = new JButton(Config.MENUNAME[idx]);
 			ButtonUtil.styleMenuButton(button);
-			final String pageKey = pageKeys[i];
-			button.addActionListener(e -> showPage(pageKey));
+			button.addActionListener(e -> showTopPage(Config.MENUKYES[idx]));
 			button.setAlignmentX(JButton.CENTER_ALIGNMENT);
 			button.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40)); // 폭 자동 확장
 
 			menuBar.add(Box.createVerticalStrut(20)); // 간격 추가
 			menuBar.add(button);
 		}
-		
-		//홈메뉴 등록
+		// 홈메뉴 등록
 		menuBar.add(Box.createVerticalGlue()); // 아래 공간 채우기
 		return menuBar;
+	};
+
+	private void createDetailMenuBar() {
+		for (int i = 0; i < Config.PAGENAME.length; i++) {
+			String groupKey = Config.MENUKYES[i];
+
+			JPanel groupPanel = new JPanel();
+			groupPanel.setLayout(new BoxLayout(groupPanel, BoxLayout.X_AXIS));
+			groupPanel.setBackground(Color.LIGHT_GRAY);
+
+			for (int j = 0; j < Config.PAGENAME[i].length; j++) {
+				groupPanel.add(Box.createHorizontalStrut(20));
+
+				JButton button = new JButton(Config.PAGENAME[i][j]);
+				ButtonUtil.styleMenuButton(button);
+				final String pageKey = Config.PAGEKEYS[i][j];
+				button.addActionListener(e -> showBottomPage(pageKey));
+				button.setAlignmentX(JButton.CENTER_ALIGNMENT);
+				groupPanel.add(button);
+			}
+			cardTopPanel.add(groupPanel, groupKey);
+		}
 	}
-	
-	private JPanel createDetailMenuBar() {
-		CardLayout detailCardLayout = new CardLayout();
-		JPanel detailPanel = new JPanel(detailCardLayout);
-		
-		 detailPanel.setPreferredSize(new Dimension(getWidth(), 100));
-		 contentPanel.add(detailPanel, BorderLayout.NORTH);
-		
-		return detailPanel;
-	}
-	
-	
-	
 
 	public static void main(String[] args) {
 		new MainFrame();

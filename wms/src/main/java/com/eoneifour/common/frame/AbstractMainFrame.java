@@ -11,11 +11,14 @@ import java.awt.*;
  *
  * @author 혜원
  */
-public abstract class AbstractMainFrame extends JFrame {
+public abstract class AbstractMainFrame extends JFrame { 
     public JPanel topPanel;
     public JPanel leftPanel;
     public JPanel contentPanel;
-    public CardLayout cardLayout;
+    public JPanel cardTopPanel;
+    public JPanel cardBottomPanel;
+//    public CardLayout cardLayout; 미사용
+    public CardLayout detailCardLayout;
 
     public AbstractMainFrame(String title) {
         // 상단 패널 (필요 없으면 null return)
@@ -26,9 +29,18 @@ public abstract class AbstractMainFrame extends JFrame {
         JPanel leftPanel = createLeftPanel();
         if (leftPanel != null) add(leftPanel, BorderLayout.WEST);
         
-        // 중앙 패널
-        cardLayout = new CardLayout(); // 화면 전환용 레이아웃
-        contentPanel = new JPanel(cardLayout);
+        // 메인 래퍼 패널
+        contentPanel = new JPanel(new BorderLayout());
+        
+        // 위아래 패널
+        cardTopPanel = new JPanel(new CardLayout());
+        cardTopPanel.setPreferredSize(new Dimension(0, 50)); // 원하는 높이 지정
+        
+        cardBottomPanel = new JPanel(new CardLayout());
+        
+        contentPanel.add(cardTopPanel, BorderLayout.NORTH);
+        contentPanel.add(cardBottomPanel, BorderLayout.CENTER);
+        
         add(contentPanel, BorderLayout.CENTER);
         
         // TODO --> 식별용 백그라운드. 추후 제거 필요
@@ -49,7 +61,14 @@ public abstract class AbstractMainFrame extends JFrame {
     public abstract JPanel createLeftPanel();
 
     // 각 메뉴 클릭 시 화면 전환
-    public void showPage(String key) {
-        cardLayout.show(contentPanel, key);
+    public void showTopPage(String key) {
+        CardLayout layout = (CardLayout) cardTopPanel.getLayout();
+        layout.show(cardTopPanel, key);
     }
+    
+    public void showBottomPage(String key) {
+        CardLayout layout = (CardLayout) cardBottomPanel.getLayout();
+        layout.show(cardBottomPanel, key);
+    }
+
 }
