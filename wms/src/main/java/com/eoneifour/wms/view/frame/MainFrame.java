@@ -31,10 +31,10 @@ public class MainFrame extends AbstractMainFrame {
 		super("WMS 메인(관리자)"); // 타이틀 설정
 		
 		
-		/**
-		 * Copilot
-		 */
-		// 기존 contentPanel 제거 후 새로운 구조로 감싸기
+//		/**
+//		 * Copilot
+//		 */
+//		 기존 contentPanel 제거 후 새로운 구조로 감싸기
 //	    getContentPane().remove(contentPanel); // 부모(AbstractMainFrame)에서 설정된 contentPanel 제거
 //
 //	    // 디테일 패널 생성
@@ -50,7 +50,7 @@ public class MainFrame extends AbstractMainFrame {
 //
 //	    // 새로 구성된 centerWrapper를 프레임 중앙에 부착
 //	    getContentPane().add(centerWrapper, BorderLayout.CENTER);
-//
+
 	    initPages();
 
 	}
