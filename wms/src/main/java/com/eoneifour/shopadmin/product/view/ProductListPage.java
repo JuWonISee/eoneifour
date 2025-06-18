@@ -69,7 +69,7 @@ public class ProductListPage extends AbstractTablePage{
         for (int i = 0; i < productList.size(); i++) {
             Product product = productList.get(i);
             data[i][0] = product.getProduct_id();  
-            data[i][1] = product.getSubCategory().getTopcategory().getName();
+            data[i][1] = product.getSub_category().getTop_category().getName();
             data[i][2] = product.getBrand_name();    
             data[i][3] = product.getName();     
             data[i][4] = product.getPrice();      

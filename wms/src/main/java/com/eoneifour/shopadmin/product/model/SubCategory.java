@@ -3,8 +3,7 @@ package com.eoneifour.shopadmin.product.model;
 public class SubCategory {
 	private int sub_category_id;
 	private String name;
-	private TopCategory topcategory;
-	
+	private TopCategory top_category;
 	public int getSub_category_id() {
 		return sub_category_id;
 	}
@@ -17,13 +16,12 @@ public class SubCategory {
 	public void setName(String name) {
 		this.name = name;
 	}
-	public TopCategory getTopcategory() {
-		return topcategory;
+	public TopCategory getTop_category() {
+		return top_category;
 	}
-	public void setTopcategory(TopCategory topcategory) {
-		this.topcategory = topcategory;
+	public void setTop_category(TopCategory top_category) {
+		this.top_category = top_category;
 	}
-	public String toString() {
-		return name;
-	}
+	
+
 }

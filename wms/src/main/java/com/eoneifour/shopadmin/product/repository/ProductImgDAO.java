@@ -1,5 +1,39 @@
 package com.eoneifour.shopadmin.product.repository;
 
-public class ProductImgDAO {
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 
+import com.eoneifour.shopadmin.common.exception.ProductException;
+import com.eoneifour.shopadmin.common.exception.ProductImgException;
+import com.eoneifour.shopadmin.common.util.DBManager;
+import com.eoneifour.shopadmin.product.model.ProductImg;
+
+public class ProductImgDAO {
+	DBManager dbManager = DBManager.getInstance();
+	
+	public void insert(ProductImg productImg) {
+		Connection con=null;
+		PreparedStatement pstmt=null;
+		
+		con=dbManager.getConnection();
+		
+		StringBuffer sql=new StringBuffer();
+		sql.append("insert into product_img(filename, product_id) values(?,?)");
+		
+		try {
+			pstmt=con.prepareStatement(sql.toString());
+			pstmt.setString(1, productImg.getFilename());
+			pstmt.setInt(2, productImg.getProduct().getProduct_id());
+			int result =pstmt.executeUpdate();
+			if(result <1) {
+				throw new ProductImgException("상품 이미지가 등록되지 않았습니다");
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw new ProductException("상품 이미지가 등록되지 않았습니다", e);
+		}finally {
+			dbManager.release(pstmt);
+		}
+	}
 }

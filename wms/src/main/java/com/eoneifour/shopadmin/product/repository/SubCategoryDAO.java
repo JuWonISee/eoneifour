@@ -35,7 +35,7 @@ public class SubCategoryDAO {
 				SubCategory subcategory = new SubCategory(); //empty
 				subcategory.setSub_category_id(rs.getInt("sub_category_id"));
 				subcategory.setName(rs.getString("name"));
-				subcategory.setTopcategory(topcategory);
+				subcategory.setTop_category(topcategory);
 				list.add(subcategory);
 			}
 		} catch (SQLException e) {

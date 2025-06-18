@@ -7,8 +7,8 @@ public class Product {
 	private int price;
 	private int stock_quantity;
 	private String detail;
-	private SubCategory subCategory; //ERD상에서는 자식이 부모의 pk숫자를 보유하지만 , java에서는 부모를 객체형으로 보유해야함.
-	private TopCategory topCategory;
+	private SubCategory sub_category; //ERD상에서는 자식이 부모의 pk숫자를 보유하지만 , java에서는 부모를 객체형으로 보유해야함.
+	private TopCategory top_category;
 	public int getProduct_id() {
 		return product_id;
 	}
@@ -45,17 +45,17 @@ public class Product {
 	public void setDetail(String detail) {
 		this.detail = detail;
 	}
-	public SubCategory getSubCategory() {
-		return subCategory;
+	public SubCategory getSub_category() {
+		return sub_category;
 	}
-	public void setSubCategory(SubCategory subCategory) {
-		this.subCategory = subCategory;
+	public void setSub_category(SubCategory sub_category) {
+		this.sub_category = sub_category;
 	}
-	public TopCategory getTopCategory() {
-		return topCategory;
+	public TopCategory getTop_category() {
+		return top_category;
 	}
-	public void setTopCategory(TopCategory topCategory) {
-		this.topCategory = topCategory;
+	public void setTop_category(TopCategory top_category) {
+		this.top_category = top_category;
 	}
 
 	
