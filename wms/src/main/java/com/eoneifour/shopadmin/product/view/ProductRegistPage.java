@@ -8,6 +8,8 @@ import java.awt.Font;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.File;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -26,8 +28,15 @@ import javax.swing.JTextField;
 import com.eoneifour.common.frame.AbstractMainFrame;
 import com.eoneifour.common.util.ButtonUtil;
 import com.eoneifour.common.util.FieldUtil;
+import com.eoneifour.shopadmin.common.exception.ProductException;
+import com.eoneifour.shopadmin.common.exception.ProductImgException;
+import com.eoneifour.shopadmin.common.util.DBManager;
+import com.eoneifour.shopadmin.product.model.Product;
+import com.eoneifour.shopadmin.product.model.ProductImg;
 import com.eoneifour.shopadmin.product.model.SubCategory;
 import com.eoneifour.shopadmin.product.model.TopCategory;
+import com.eoneifour.shopadmin.product.repository.ProductDAO;
+import com.eoneifour.shopadmin.product.repository.ProductImgDAO;
 import com.eoneifour.shopadmin.product.repository.SubCategoryDAO;
 import com.eoneifour.shopadmin.product.repository.TopCategoryDAO;
 
@@ -44,6 +53,9 @@ public class ProductRegistPage extends JPanel {
 	JFileChooser chooser;
 	File[] files;
 	JTextField imageField;
+	DBManager dbManager = DBManager.getInstance();
+	ProductDAO productDAO = new ProductDAO();
+	ProductImgDAO productImgDAO = new ProductImgDAO();
 
 	public ProductRegistPage(AbstractMainFrame mainFrame) {
 
@@ -124,10 +136,12 @@ public class ProductRegistPage extends JPanel {
 		// 버튼 이벤트 연결
 		registBtn.addActionListener(e -> {
 			regist();
+			
 		});
 
 		listBtn.addActionListener(e -> {
 			returnList();
+			
 		});
 
 		// 버튼 패널
@@ -216,14 +230,64 @@ public class ProductRegistPage extends JPanel {
 		} else if(b_quantity == false){
 			JOptionPane.showMessageDialog(this, "재고는 숫자만 입력하세요.");
 		} else {
-			//insert();
+			insert();
 		}
 		
 	}
 
 	// DB 입력
 	public void insert() {
+		Connection con = dbManager.getConnection();
 		
+		try {
+			con.setAutoCommit(false); //트랜젝션 완료시 commit
+			
+			Product product = new Product();
+			
+			product.setSub_category((SubCategory) cb_subcategory.getSelectedItem());
+			product.setName(t_productName.getText());
+			product.setBrand_name(t_brand.getText());
+			product.setPrice(Integer.parseInt(t_price.getText()));
+			product.setDetail(t_detail.getText());
+			product.setStock_quantity(Integer.parseInt(t_stockQuantity .getText()));
+			
+			productDAO.insert(product);
+			
+
+			
+			//product_img 테이블에 insert (product_id 구해온 후 insert)
+			int product_id = productDAO.selectRecentPk();
+			product.setProduct_id(product_id);
+			
+			for (int i = 0; i < files.length; i++) {
+				File file = files[i]; 
+				ProductImg productImg = new ProductImg();
+				productImg.setProduct(product); 
+				productImg.setFilename(file.getName()); 
+				productImgDAO.insert(productImg);
+			}
+
+			con.commit(); // 에러가 없으면 확정.
+		} catch (ProductException | ProductImgException e) {
+			
+			try {
+				con.rollback();
+			} catch (SQLException e1) {
+				e1.printStackTrace();
+			}
+			e.printStackTrace();
+			JOptionPane.showMessageDialog(this, e.getMessage()); 
+			
+			e.printStackTrace();
+		}catch (SQLException e) {
+			e.printStackTrace();
+		}finally {
+			try {
+				con.setAutoCommit(true);
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 	// 상품 목록 돌아가기

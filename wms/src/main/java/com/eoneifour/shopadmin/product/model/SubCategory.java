@@ -4,6 +4,7 @@ public class SubCategory {
 	private int sub_category_id;
 	private String name;
 	private TopCategory top_category;
+	
 	public int getSub_category_id() {
 		return sub_category_id;
 	}
@@ -23,5 +24,8 @@ public class SubCategory {
 		this.top_category = top_category;
 	}
 	
+	public String toString() {
+		return name;
+	}
 
 }
