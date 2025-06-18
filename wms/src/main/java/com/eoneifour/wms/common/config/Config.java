@@ -7,6 +7,7 @@ public class Config {
 			"MONITORING" };
 	
 	public static final String[][] PAGENAME = { 
+			
 			{ "관리자 가입", "관리자 정보 수정", "회원 탈퇴" }, 
 			{ "입고 지시", "출고 지시", "제품 조회" },
 			{ "입고 기록", "출고 기록" }, 
