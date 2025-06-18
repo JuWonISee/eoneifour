@@ -1,0 +1,63 @@
+package com.eoneifour.shopadmin.product.model;
+
+public class Product {
+	private int product_id;
+	private String name;
+	private String brand_name;
+	private int price;
+	private int stock_quantity;
+	private String detail;
+	private SubCategory subCategory; //ERD상에서는 자식이 부모의 pk숫자를 보유하지만 , java에서는 부모를 객체형으로 보유해야함.
+	private TopCategory topCategory;
+	public int getProduct_id() {
+		return product_id;
+	}
+	public void setProduct_id(int product_id) {
+		this.product_id = product_id;
+	}
+	public String getName() {
+		return name;
+	}
+	public void setName(String name) {
+		this.name = name;
+	}
+	public String getBrand_name() {
+		return brand_name;
+	}
+	public void setBrand_name(String brand_name) {
+		this.brand_name = brand_name;
+	}
+	public int getPrice() {
+		return price;
+	}
+	public void setPrice(int price) {
+		this.price = price;
+	}
+	public int getStock_quantity() {
+		return stock_quantity;
+	}
+	public void setStock_quantity(int stock_quantity) {
+		this.stock_quantity = stock_quantity;
+	}
+	public String getDetail() {
+		return detail;
+	}
+	public void setDetail(String detail) {
+		this.detail = detail;
+	}
+	public SubCategory getSubCategory() {
+		return subCategory;
+	}
+	public void setSubCategory(SubCategory subCategory) {
+		this.subCategory = subCategory;
+	}
+	public TopCategory getTopCategory() {
+		return topCategory;
+	}
+	public void setTopCategory(TopCategory topCategory) {
+		this.topCategory = topCategory;
+	}
+
+	
+	
+}
