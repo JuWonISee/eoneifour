@@ -11,11 +11,16 @@ import java.awt.*;
  *
  * @author 혜원
  */
-public abstract class AbstractMainFrame extends JFrame {
+public abstract class AbstractMainFrame extends JFrame { 
     public JPanel topPanel;
     public JPanel leftPanel;
-    public JPanel contentPanel;
-    public CardLayout cardLayout;
+    public JPanel centerWrapperPanel;
+    
+//    public CardLayout cardLayout; 미사용
+    public JPanel menuCardPanel;
+    
+//    변수 추가
+    public JPanel contentCardPanel;
 
     public AbstractMainFrame(String title) {
         // 상단 패널 (필요 없으면 null return)
@@ -26,13 +31,19 @@ public abstract class AbstractMainFrame extends JFrame {
         JPanel leftPanel = createLeftPanel();
         if (leftPanel != null) add(leftPanel, BorderLayout.WEST);
         
-        // 중앙 패널
-        cardLayout = new CardLayout(); // 화면 전환용 레이아웃
-        contentPanel = new JPanel(cardLayout);
-        add(contentPanel, BorderLayout.CENTER);
+        // 카드 레이아웃 두개를 담을 중앙 패널
+        centerWrapperPanel = new JPanel(new BorderLayout());
         
-        // TODO --> 식별용 백그라운드. 추후 제거 필요
-        contentPanel.setBackground(new Color(255,250,205));
+        // 상단 메뉴바(카드 레이아웃)
+        menuCardPanel = new JPanel(new CardLayout());
+        
+        
+        contentCardPanel = new JPanel(new CardLayout());
+        
+        centerWrapperPanel.add(menuCardPanel, BorderLayout.NORTH);
+        centerWrapperPanel.add(contentCardPanel, BorderLayout.CENTER);
+        
+        add(centerWrapperPanel, BorderLayout.CENTER);
         
         // 기본 프레임 설정
         setSize(1280, 800); // 창 크기
@@ -47,9 +58,10 @@ public abstract class AbstractMainFrame extends JFrame {
 
     // 좌측 side panel
     public abstract JPanel createLeftPanel();
-
-    // 각 메뉴 클릭 시 화면 전환
-    public void showPage(String key) {
-        cardLayout.show(contentPanel, key);
+    
+    public void showContent(String key) {
+        CardLayout layout = (CardLayout) contentCardPanel.getLayout();
+        layout.show(contentCardPanel, key);
     }
+
 }

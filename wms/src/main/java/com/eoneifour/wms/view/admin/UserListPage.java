@@ -1,4 +1,4 @@
-package com.eoneifour.shopadmin.member.view;
+package com.eoneifour.wms.view.admin;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -12,6 +12,7 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTable;
+import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableModel;
 
 import com.eoneifour.common.frame.AbstractMainFrame;
@@ -43,8 +44,6 @@ public class UserListPage extends AbstractTablePage {
         JButton addBtn = ButtonUtil.createPrimaryButton("회원 등록", 14, 120, 40);
         addBtn.addActionListener(e -> mainFrame.showContent("USER_REGIST"));
         JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        
-        addBtn.addActionListener(e -> mainFrame.showContent("USER_REGIST"));
         
         rightPanel.setOpaque(false);
         rightPanel.add(addBtn);

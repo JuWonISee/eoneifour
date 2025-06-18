@@ -31,12 +31,12 @@ public class ShopAdminMainFrame extends AbstractMainFrame {
     // 페이지 등록
     private void initPages() {
     	//각 페이지 메뉴 연결
-        contentPanel.add(new UserListPage(this), "USER_LIST"); // 회원관리 페이지
-        contentPanel.add(new UserRegistPage(this), "USER_REGIST"); // 회원등록
-        //contentPanel.add(new ProductPage(this), "PRODUCT"); // 상품관리 페이지
-        //contentPanel.add(new OrderPage(this), "ORDER"); // 주문관리 페이지
-        //contentPanel.add(new PurchasePage(this), "PURCHASE"); // 발주관리 페이지
-        //contentPanel.add(new SettingPage(this), "SETTING"); // 설정 페이지
+    	contentCardPanel.add(new UserListPage(this), "USER_LIST"); // 회원관리 페이지
+    	contentCardPanel.add(new UserRegistPage(this), "USER_REGIST"); // 회원등록
+        //contentCardPanel.add(new ProductPage(this), "PRODUCT"); // 상품관리 페이지
+        //contentCardPanel.add(new OrderPage(this), "ORDER"); // 주문관리 페이지
+        //contentCardPanel.add(new PurchasePage(this), "PURCHASE"); // 발주관리 페이지
+        //contentCardPanel.add(new SettingPage(this), "SETTING"); // 설정 페이지
     }
 
     // 쇼핑몰은 상단패널 2개 사용
@@ -85,23 +85,23 @@ public class ShopAdminMainFrame extends AbstractMainFrame {
 
         JButton userBtn = new JButton("회원관리");
         ButtonUtil.styleMenuButton(userBtn);
-        userBtn.addActionListener(e->showPage("USER_LIST"));
+        userBtn.addActionListener(e->showContent("USER_LIST"));
 
         JButton productBtn = new JButton("상품관리");
         ButtonUtil.styleMenuButton(productBtn);
-        productBtn.addActionListener(e->showPage("PRODUCT_LIST"));
+        productBtn.addActionListener(e->showContent("PRODUCT_LIST"));
 
         JButton orderBtn = new JButton("주문관리");
         ButtonUtil.styleMenuButton(orderBtn);
-        orderBtn.addActionListener(e->showPage("ORDER_LIST"));
+        orderBtn.addActionListener(e->showContent("ORDER_LIST"));
 
         JButton purchaseBtn = new JButton("발주관리");
         ButtonUtil.styleMenuButton(purchaseBtn);
-        purchaseBtn.addActionListener(e->showPage("PURCHASE_LIST"));
+        purchaseBtn.addActionListener(e->showContent("PURCHASE_LIST"));
 
         JButton settingBtn = new JButton("설정");
         ButtonUtil.styleMenuButton(settingBtn);
-        settingBtn.addActionListener(e->showPage("SETTING"));
+        settingBtn.addActionListener(e->showContent("SETTING"));
 
         menuBar.add(userBtn);
         menuBar.add(productBtn);
