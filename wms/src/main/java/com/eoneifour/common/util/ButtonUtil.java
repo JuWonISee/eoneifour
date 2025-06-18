@@ -9,6 +9,7 @@ import java.awt.event.MouseEvent;
  * 버튼 공통 디자인 유틸 클래스
  * - infobar 버튼 : 빨강(기본) → 진한 빨강(호버)
  * - menubar 버튼 : 검정(기본) → 파랑(호버)
+ * - 기본 버튼 (default/ primary / warning)
  * - 호버 시 마우스 커서 손모양 변경
  *
  * @author 혜원
@@ -20,6 +21,11 @@ public class ButtonUtil {
     // 헤더 버튼 색상 상수
     private static final Color HEADER_BG = new Color(231, 76, 60);  // 기본 빨간색
     private static final Color HEADER_HOVER = new Color(192, 57, 43); // hover시 진한빨강
+    
+    //기본 버튼 색상 상수
+    private static final Color PRIMARY_COLOR = new Color(0, 104, 255);
+    private static final Color WARNING_COLOR = new Color(231, 76, 60);
+    private static final Color DEFAULT_COLOR = new Color(220, 220, 220);
     
     /**
      * InfoBar 버튼
@@ -75,18 +81,31 @@ public class ButtonUtil {
             }
         });
     }
-    
-    /**
-     * 테이블 버튼 스타일 설정
-     * @param btn
-     * @param color
-     * @param width
-     * @param height
-     */
-    public static void configTableButton(JButton btn, Color color, int width, int height) {
-        btn.setBackground(color);
-        btn.setForeground(Color.WHITE);
-        btn.setPreferredSize(new Dimension(width, height));
-        btn.setFocusPainted(false);
+        
+    // 기본 Default 버튼
+    public static JButton createDefaultButton(String text, int fontSize, int width, int height) {
+        return createButton(text, fontSize, DEFAULT_COLOR, Color.BLACK, width, height);
+    }
+
+    // Primary 버튼 (파랑)
+    public static JButton createPrimaryButton(String text, int fontSize, int width, int height) {
+        return createButton(text, fontSize, PRIMARY_COLOR, Color.WHITE, width, height);
+    }
+
+    // Warning 버튼 (빨강)
+    public static JButton createWarningButton(String text, int fontSize, int width, int height) {
+        return createButton(text, fontSize, WARNING_COLOR, Color.WHITE, width, height);
+    }
+
+    // 공통 버튼 생성 메서드
+    private static JButton createButton(String text, int fontSize, Color bgColor, Color fgColor, int width, int height) {
+        JButton button = new JButton(text);
+        button.setFont(new Font("맑은 고딕", Font.BOLD, fontSize));
+        button.setBackground(bgColor);
+        button.setForeground(fgColor);
+        button.setFocusPainted(false);
+        button.setPreferredSize(new Dimension(width, height));
+        
+        return button;
     }
 }

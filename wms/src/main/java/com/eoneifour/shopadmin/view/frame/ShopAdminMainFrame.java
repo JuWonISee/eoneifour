@@ -12,6 +12,7 @@ import javax.swing.JPanel;
 import com.eoneifour.common.frame.AbstractMainFrame;
 import com.eoneifour.common.util.ButtonUtil;
 import com.eoneifour.shopadmin.member.view.UserListPage;
+import com.eoneifour.shopadmin.member.view.UserRegistPage;
 
 /**
  * 쇼핑몰 관리자 메인 프레임
@@ -31,7 +32,7 @@ public class ShopAdminMainFrame extends AbstractMainFrame {
     private void initPages() {
     	//각 페이지 메뉴 연결
         contentPanel.add(new UserListPage(this), "USER_LIST"); // 회원관리 페이지
-        //contentPanel.add(new UserRegistPage(this), "USER_REGIST"); // 회원등록
+        contentPanel.add(new UserRegistPage(this), "USER_REGIST"); // 회원등록
         //contentPanel.add(new ProductPage(this), "PRODUCT"); // 상품관리 페이지
         //contentPanel.add(new OrderPage(this), "ORDER"); // 주문관리 페이지
         //contentPanel.add(new PurchasePage(this), "PURCHASE"); // 발주관리 페이지
