@@ -37,10 +37,6 @@ public abstract class AbstractMainFrame extends JFrame {
         // 상단 메뉴바(카드 레이아웃)
         menuCardPanel = new JPanel(new CardLayout());
         
-//  	menuCard는 WMS에서만 사용하기에 WMS 메인페이지에서 크기 지정.
-//      menuCardPanel.setPreferredSize(new Dimension(0, 50));
-
-        
         
         contentCardPanel = new JPanel(new CardLayout());
         
@@ -62,12 +58,6 @@ public abstract class AbstractMainFrame extends JFrame {
 
     // 좌측 side panel
     public abstract JPanel createLeftPanel();
-
-    // 각 메뉴 클릭 시 화면 전환
-    public void showTopMenu(String key) {
-        CardLayout layout = (CardLayout) menuCardPanel.getLayout();
-        layout.show(menuCardPanel, key);
-    }
     
     public void showContent(String key) {
         CardLayout layout = (CardLayout) contentCardPanel.getLayout();
