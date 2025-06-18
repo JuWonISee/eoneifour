@@ -29,6 +29,7 @@ public class MainFrame extends AbstractMainFrame {
 
 	public MainFrame() {
 		super("WMS 메인(관리자)"); // 타이틀 설정
+		menuCardPanel.setPreferredSize(new Dimension(0, 50));
 		initPages();
 		showContent("HOME");
 	}
@@ -43,14 +44,14 @@ public class MainFrame extends AbstractMainFrame {
 		createSubMenu();
 		
 		// 홈 버튼 연결
-		contentCardLayout.add(new HomePage(this), "HOME");
+		contentCardPanel.add(new HomePage(this), "HOME");
 		
 		// ex) 혜원님이 만들어놓은 패널
-		contentCardLayout.add(new UserListPage(this), "ADMIN_REGISTER");
+		contentCardPanel.add(new UserListPage(this), "ADMIN_REGISTER");
 		
 		// 초기 화면을 홈 화면으로 고정하기 위한 메서드.
-	    contentCardLayout.revalidate(); 
-	    contentCardLayout.repaint(); 
+	    contentCardPanel.revalidate(); 
+	    contentCardPanel.repaint(); 
 
 		
 		// inforBar 이벤트 연결
@@ -151,7 +152,7 @@ public class MainFrame extends AbstractMainFrame {
 				button.setAlignmentX(JButton.CENTER_ALIGNMENT);
 				groupPanel.add(button);
 			}
-			menuCardLayout.add(groupPanel, groupKey);
+			menuCardPanel.add(groupPanel, groupKey);
 		}
 	}
 
