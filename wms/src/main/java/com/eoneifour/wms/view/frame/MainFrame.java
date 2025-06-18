@@ -1,6 +1,7 @@
 package com.eoneifour.wms.view.frame;
 
 import java.awt.BorderLayout;
+import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -155,6 +156,11 @@ public class MainFrame extends AbstractMainFrame {
 			menuCardPanel.add(groupPanel, groupKey);
 		}
 	}
+	
+	public void showTopMenu(String key) {
+        CardLayout layout = (CardLayout) menuCardPanel.getLayout();
+        layout.show(menuCardPanel, key);
+    }
 
 	public static void main(String[] args) {
 		new MainFrame();
