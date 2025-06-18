@@ -14,11 +14,13 @@ import java.awt.*;
 public abstract class AbstractMainFrame extends JFrame { 
     public JPanel topPanel;
     public JPanel leftPanel;
-    public JPanel contentPanel;
-    public JPanel menuCardLayout;
-    public JPanel contentCardLayout;
+    public JPanel centerWrapperPanel;
+    
 //    public CardLayout cardLayout; 미사용
-    public CardLayout detailCardLayout;
+    public JPanel menuCardPanel;
+    
+//    변수 추가
+    public JPanel contentCardPanel;
 
     public AbstractMainFrame(String title) {
         // 상단 패널 (필요 없으면 null return)
@@ -29,22 +31,23 @@ public abstract class AbstractMainFrame extends JFrame {
         JPanel leftPanel = createLeftPanel();
         if (leftPanel != null) add(leftPanel, BorderLayout.WEST);
         
-        // 메인 래퍼 패널
-        contentPanel = new JPanel(new BorderLayout());
+        // 카드 레이아웃 두개를 담을 중앙 패널
+        centerWrapperPanel = new JPanel(new BorderLayout());
         
-        // 위아래 패널
-        menuCardLayout = new JPanel(new CardLayout());
-        menuCardLayout.setPreferredSize(new Dimension(0, 50)); // 원하는 높이 지정
+        // 상단 메뉴바(카드 레이아웃)
+        menuCardPanel = new JPanel(new CardLayout());
         
-        contentCardLayout = new JPanel(new CardLayout());
+//  	menuCard는 WMS에서만 사용하기에 WMS 메인페이지에서 크기 지정.
+//      menuCardPanel.setPreferredSize(new Dimension(0, 50));
+
         
-        contentPanel.add(menuCardLayout, BorderLayout.NORTH);
-        contentPanel.add(contentCardLayout, BorderLayout.CENTER);
         
-        add(contentPanel, BorderLayout.CENTER);
+        contentCardPanel = new JPanel(new CardLayout());
         
-        // TODO --> 식별용 백그라운드. 추후 제거 필요
-        contentPanel.setBackground(new Color(255,250,205));
+        centerWrapperPanel.add(menuCardPanel, BorderLayout.NORTH);
+        centerWrapperPanel.add(contentCardPanel, BorderLayout.CENTER);
+        
+        add(centerWrapperPanel, BorderLayout.CENTER);
         
         // 기본 프레임 설정
         setSize(1280, 800); // 창 크기
@@ -62,13 +65,13 @@ public abstract class AbstractMainFrame extends JFrame {
 
     // 각 메뉴 클릭 시 화면 전환
     public void showTopMenu(String key) {
-        CardLayout layout = (CardLayout) menuCardLayout.getLayout();
-        layout.show(menuCardLayout, key);
+        CardLayout layout = (CardLayout) menuCardPanel.getLayout();
+        layout.show(menuCardPanel, key);
     }
     
     public void showContent(String key) {
-        CardLayout layout = (CardLayout) contentCardLayout.getLayout();
-        layout.show(contentCardLayout, key);
+        CardLayout layout = (CardLayout) contentCardPanel.getLayout();
+        layout.show(contentCardPanel, key);
     }
 
 }
