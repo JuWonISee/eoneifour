@@ -1,4 +1,4 @@
-# Eclipse/STS 프로젝트 설정파일
+# Eclipse/STS 설정
 .metadata/
 .settings/
 .project
@@ -9,6 +9,7 @@ target/
 
 # Java 빌드 결과
 *.class
+**/bin/
 
 # 로그파일
 *.log
@@ -17,6 +18,8 @@ target/
 .DS_Store
 Thumbs.db
 
-# test DB 설정 파일 제외
-src/main/java/com/eoneifour/common/config/PrivateConfig.java
+# 민감 설정 제외
+wms/src/main/java/com/eoneifour/common/config/PrivateConfig.java
 
+# SQL 파일 무시
+wms/src/main/resources/sql/
