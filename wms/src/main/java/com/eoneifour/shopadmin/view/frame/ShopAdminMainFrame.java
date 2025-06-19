@@ -13,6 +13,7 @@ import com.eoneifour.common.frame.AbstractMainFrame;
 import com.eoneifour.common.util.ButtonUtil;
 import com.eoneifour.shopadmin.member.view.UserListPage;
 import com.eoneifour.shopadmin.member.view.UserRegistPage;
+import com.eoneifour.shopadmin.product.view.ProductDetailPage;
 import com.eoneifour.shopadmin.product.view.ProductListPage;
 import com.eoneifour.shopadmin.product.view.ProductRegistPage;
 
@@ -32,12 +33,16 @@ public class ShopAdminMainFrame extends AbstractMainFrame {
 
     // 페이지 등록
     private void initPages() {
+    	//regist페이지에 list페이지 인스턴스 연결
+    	ProductDetailPage produtDetailPage = new ProductDetailPage(this, null);
+    	ProductListPage productListPage = new ProductListPage(this,produtDetailPage);
+    	ProductRegistPage productRegistPage = new ProductRegistPage(this, productListPage);
     	//각 페이지 메뉴 연결
     	contentCardPanel.add(new UserListPage(this), "USER_LIST"); // 회원관리 페이지
     	contentCardPanel.add(new UserRegistPage(this), "USER_REGIST"); // 회원등록
-        contentCardPanel.add(new ProductListPage(this), "PRODUCT_LIST"); // 상품관리 페이지
-        contentCardPanel.add(new ProductRegistPage(this), "PRODUCT_REGIST"); // 주문관리 페이지
-        //contentCardPanel.add(new PurchasePage(this), "PURCHASE"); // 발주관리 페이지
+        contentCardPanel.add(productListPage, "PRODUCT_LIST"); // 상품관리 페이지
+        contentCardPanel.add(productRegistPage, "PRODUCT_REGIST"); // 상품등록 페이지
+        contentCardPanel.add(produtDetailPage, "PRODUCT_DETAIL"); // 상품상세 페이지
         //contentCardPanel.add(new SettingPage(this), "SETTING"); // 설정 페이지
     }
 

@@ -55,20 +55,74 @@ public class ProductDAO {
 		}
 	}
 
+	public Product getProduct(int productId) {
+		Product product = new Product();
+		Connection con = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+
+		con = dbManager.getConnection();
+		StringBuffer sql = new StringBuffer();
+		sql.append("select ");
+		sql.append(" p.product_id, t.top_category_id, t.name AS top_category_name");
+		sql.append(" , s.sub_category_id, s.name AS sub_category_name, ");
+		sql.append(" p.brand_name, p.name AS product_name, p.price, p.detail, p.stock_quantity");
+		sql.append(" from product p");
+		sql.append(" join sub_category s on p.sub_category_id = s.sub_category_id");
+		sql.append(" join top_category t on s.top_category_id = t.top_category_id");
+		sql.append(" where p.product_id = ?;");
+
+		try {
+			pstmt = con.prepareStatement(sql.toString());
+
+			pstmt.setInt(1, productId);
+			rs = pstmt.executeQuery();
+			
+			if (rs.next()) {
+				product.setProduct_id(rs.getInt("product_id"));
+				product.setBrand_name(rs.getString("brand_name"));
+				product.setName(rs.getString("product_name"));
+				product.setPrice(rs.getInt("price"));
+				product.setDetail(rs.getString("detail"));
+				product.setStock_quantity(rs.getInt("stock_quantity"));
+				
+				TopCategory topCategory = new TopCategory();
+				topCategory.setTop_category_id(rs.getInt("top_category_id"));
+				topCategory.setName(rs.getString("top_category_name"));
+				
+				SubCategory subCategory = new SubCategory();
+				subCategory.setSub_category_id(rs.getInt("sub_category_id"));
+				subCategory.setName(rs.getString("sub_category_name"));
+				
+				subCategory.setTop_category(topCategory);
+				product.setSub_category(subCategory);
+
+			}
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			dbManager.release(pstmt, rs);
+		}
+		return product;
+	}
+
+	// 전체 상품 리스트 가져오기
 	public List getProductList() {
 		Connection con = null;
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 
-		List<Product> list = new ArrayList();
+		List<Product> list = new ArrayList<>();
 
 		con = dbManager.getConnection();
 
 		StringBuffer sql = new StringBuffer();
-		sql.append("select product_id, t.name, brand_name, p.name, price, stock_quantity ");
+		sql.append("select product_id, t.name AS top_category_name, brand_name, p.name AS product_name, price, stock_quantity ");
 		sql.append(" from top_category t , sub_category s , product p");
 		sql.append(" where t.top_category_id = s.top_category_id and");
 		sql.append(" s.sub_category_id = p.sub_category_id");
+		sql.append(" order by product_id asc");
 
 		try {
 			pstmt = con.prepareStatement(sql.toString());
@@ -80,12 +134,12 @@ public class ProductDAO {
 
 				SubCategory subCategory = new SubCategory();
 				TopCategory topCategory = new TopCategory();
-				topCategory.setName(rs.getString("t.name"));
+				topCategory.setName(rs.getString("top_category_name"));
 				subCategory.setTop_category(topCategory);
 				product.setSub_category(subCategory);
 
 				product.setBrand_name(rs.getString("brand_name"));
-				product.setName(rs.getString("p.name"));
+				product.setName(rs.getString("product_name"));
 				product.setPrice(rs.getInt("price"));
 				product.setStock_quantity(rs.getInt("stock_quantity"));
 
