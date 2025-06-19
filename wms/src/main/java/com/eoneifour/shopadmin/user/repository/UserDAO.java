@@ -13,7 +13,7 @@ import com.eoneifour.shopadmin.user.model.User;
 
 public class UserDAO {
 	DBManager db = DBManager.getInstance();
-	
+		
 	public List<User> getUserList() {
 		List<User> list = new ArrayList<>();
 		String sql = "select * from user order by user_id desc";
@@ -75,5 +75,25 @@ public class UserDAO {
 		}
 		
 		return result;
+	}
+	
+	public boolean existByEmail(String email) {
+		boolean isExist = false;
+		String sql = "select * from user where email like ?";
+		
+		Connection con = db.getConnetion();
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		
+		try {
+			pstmt = con.prepareStatement(sql);
+			pstmt.setString(1, email);
+			rs = pstmt.executeQuery();
+			isExist = rs.next()? true : false;
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+		return isExist;
 	}
 }

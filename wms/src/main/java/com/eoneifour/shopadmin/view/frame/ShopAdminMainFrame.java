@@ -22,7 +22,8 @@ import com.eoneifour.shopadmin.user.view.UserRegistPage;
  * @author 혜원
  */
 public class ShopAdminMainFrame extends AbstractMainFrame {
-
+	public UserListPage userListPage;
+	
     public ShopAdminMainFrame() {
         super("쇼핑몰 메인 (관리자)"); // 타이틀 설정
         initPages();
@@ -30,8 +31,10 @@ public class ShopAdminMainFrame extends AbstractMainFrame {
 
     // 페이지 등록
     private void initPages() {
-    	//각 페이지 메뉴 연결
-    	contentCardPanel.add(new UserListPage(this), "USER_LIST"); // 회원관리 페이지
+    	// 페이지 생성
+    	userListPage = new UserListPage(this);
+    	// 각 페이지 메뉴 연결
+    	contentCardPanel.add(userListPage, "USER_LIST"); // 회원관리 페이지
     	contentCardPanel.add(new UserRegistPage(this), "USER_REGIST"); // 회원등록
     	//contentCardPanel.add(new UserDetailPage(this), "USER_DETAIL"); // 회원상세
         //contentCardPanel.add(new ProductPage(this), "PRODUCT"); // 상품관리 페이지
@@ -86,7 +89,10 @@ public class ShopAdminMainFrame extends AbstractMainFrame {
 
         JButton userBtn = new JButton("회원관리");
         ButtonUtil.styleMenuButton(userBtn);
-        userBtn.addActionListener(e->showContent("USER_LIST"));
+        userBtn.addActionListener(e-> {
+        	userListPage.refresh(); // 목록 새로고침
+        	showContent("USER_LIST");
+        });
 
         JButton productBtn = new JButton("상품관리");
         ButtonUtil.styleMenuButton(productBtn);

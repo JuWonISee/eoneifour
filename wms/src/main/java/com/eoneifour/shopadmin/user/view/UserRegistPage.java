@@ -20,15 +20,17 @@ import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
 import com.eoneifour.common.exception.UserException;
-import com.eoneifour.common.frame.AbstractMainFrame;
 import com.eoneifour.common.util.ButtonUtil;
 import com.eoneifour.common.util.DBManager;
 import com.eoneifour.common.util.FieldUtil;
 import com.eoneifour.shopadmin.user.model.User;
 import com.eoneifour.shopadmin.user.repository.UserDAO;
+import com.eoneifour.shopadmin.view.frame.ShopAdminMainFrame;
 
 
 public class UserRegistPage extends JPanel {
+	private ShopAdminMainFrame mainFrame;
+	
 	private JTextField emailField;
     private JPasswordField passwordField;
     private JPasswordField confirmPasswordField;
@@ -40,7 +42,11 @@ public class UserRegistPage extends JPanel {
     private UserDAO userDAO;
     private DBManager dbManager = DBManager.getInstance();
     
-    public UserRegistPage(AbstractMainFrame mainFrame) {
+    private boolean isEmailChecked = false; // 중복체크 클릭 유무
+    private boolean isEmailDuplicate = false; // 이메일 중복 유무
+    
+    public UserRegistPage(ShopAdminMainFrame mainFrame) {
+    	this.mainFrame = mainFrame;
     	userDAO = new UserDAO();
     	
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
@@ -93,11 +99,25 @@ public class UserRegistPage extends JPanel {
         JButton registBtn = ButtonUtil.createPrimaryButton("저장", 15, 120, 40);
         JButton listBtn = ButtonUtil.createDefaultButton("목록", 15, 120, 40);
         
+        // 버튼 이벤트
+        checkBtn.addActionListener(e->{
+        	isEmailDuplicate = userDAO.existByEmail(emailField.getText());
+        	
+        	if (isEmailDuplicate) {
+        		isEmailChecked = false;
+        		showErrorMessage("이메일이 중복됐습니다. 다른 이메일을 입력해주세요.");
+        	} else {
+        		isEmailChecked = true;
+        		JOptionPane.showMessageDialog(this, "사용 가능한 이메일입니다.");
+        	}
+        });
+        
         registBtn.addActionListener(e->{
         	if(validateForm()) {
         		registerUser();
         		JOptionPane.showMessageDialog(this, "등록이 완료되었습니다.");
-//        		mainFrame.showContent("USER_DETAIL");
+        		mainFrame.userListPage.refresh();
+        		mainFrame.showContent("USER_LIST");
         	}
         });
 
@@ -155,22 +175,24 @@ public class UserRegistPage extends JPanel {
     
     // 회원 등록 폼 유효성 검사
     public boolean validateForm() {
-        if (emailField.getText().trim().isEmpty()) return showMessage("이메일을 입력해주세요.");
-        
+        if (emailField.getText().trim().isEmpty()) return showErrorMessage("이메일을 입력해주세요.");
+        if (!isEmailChecked) return showErrorMessage("이메일 중복확인을 해주세요.");
+        if (isEmailDuplicate) return showErrorMessage("이메일이 중복됐습니다. 다른 이메일을 입력해주세요.");
         String password = new String(passwordField.getPassword()).trim();
         String confirmPassword = new String(confirmPasswordField.getPassword()).trim();
         
-        if (password.isEmpty()) return showMessage("비밀번호를 입력해주세요.");
-        if (confirmPassword.isEmpty()) return showMessage("비밀번호 확인을 입력해주세요.");
-        if (!password.equals(confirmPassword)) return showMessage("비밀번호가 일치하지 않습니다.");
+        if (password.isEmpty()) return showErrorMessage("비밀번호를 입력해주세요.");
+        if (confirmPassword.isEmpty()) return showErrorMessage("비밀번호 확인을 입력해주세요.");
+        if (!password.equals(confirmPassword)) return showErrorMessage("비밀번호가 일치하지 않습니다.");
 
-        if (addressField.getText().trim().isEmpty()) return showMessage("도로명 주소를 입력해주세요.");
-        if (addressDetailField.getText().trim().isEmpty()) return showMessage("상세 주소를 입력해주세요.");
+        if (addressField.getText().trim().isEmpty()) return showErrorMessage("도로명 주소를 입력해주세요.");
+        if (addressDetailField.getText().trim().isEmpty()) return showErrorMessage("상세 주소를 입력해주세요.");
         
         return true;
     }
     
-    private boolean showMessage(String msg) {
+    // 오류 메시지 출력
+    private boolean showErrorMessage(String msg) {
         JOptionPane.showMessageDialog(this, msg);
         return false;
     }

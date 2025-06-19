@@ -7,7 +7,6 @@ import java.awt.Font;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.BorderFactory;
@@ -17,17 +16,20 @@ import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
-import com.eoneifour.common.frame.AbstractMainFrame;
 import com.eoneifour.common.frame.AbstractTablePage;
 import com.eoneifour.common.util.ButtonUtil;
 import com.eoneifour.common.util.TableUtil;
 import com.eoneifour.shopadmin.user.model.User;
 import com.eoneifour.shopadmin.user.repository.UserDAO;
+import com.eoneifour.shopadmin.view.frame.ShopAdminMainFrame;
 
 public class UserListPage extends AbstractTablePage {
-	private AbstractMainFrame mainFrame;
+	private ShopAdminMainFrame mainFrame;
+	private List<User> userList;
+	private UserDAO userDAO;
+	private String[] cols = {"회원번호", "이름", "이메일", "가입일", "권한", "상태", "수정", "삭제"};
 	
-	public UserListPage(AbstractMainFrame mainFrame) {
+	public UserListPage(ShopAdminMainFrame mainFrame) {
 		super(mainFrame);
 		this.mainFrame = mainFrame;
 		
@@ -59,26 +61,10 @@ public class UserListPage extends AbstractTablePage {
 	}
 	
 	public void initTable() {
-		UserDAO userDAO = new UserDAO();
-		List<User> userList = userDAO.getUserList();
-		// System.out.println("사용자 수: " + userList.size());
-		
-        String[] cols = {"회원번호", "이름", "이메일", "가입일", "권한", "상태", "수정", "삭제"};
-        Object[][] data = new Object[userList.size()][cols.length];
-
-        for(int i=0;i<userList.size();i++) {
-        	User user = userList.get(i);
-        	data[i][0] = user.getUserId();
-        	data[i][1] = user.getName();
-        	data[i][2] = user.getEmail();
-        	data[i][3] = new SimpleDateFormat("yyyy-MM-dd").format(user.getCreatedAt());
-        	data[i][4] = (user.getRole() == 0) ? "user" : "admin";
-        	data[i][5] = (user.getStatus() == 0) ? "활성" : "비활성";
-        	data[i][6] = "수정";
-        	data[i][7] = "삭제";
-        }
+		userDAO = new UserDAO();
+		userList = userDAO.getUserList();
         
-        model = new DefaultTableModel(data, cols) {
+        model = new DefaultTableModel(toTableData(userList), cols) {
             public boolean isCellEditable(int row, int column) { return false; }
         };
         
@@ -98,5 +84,30 @@ public class UserListPage extends AbstractTablePage {
                 }
             }
         });
+	}
+	
+	// 회원목록 새로고침
+	public void refresh() {
+		userList = userDAO.getUserList();
+		model.setDataVector(toTableData(userList), cols);
+	}
+	
+	
+	// 테이블에 들어갈 배열 데이터로 변경
+	private Object[][] toTableData(List<User> userList) {
+		Object[][] data = new Object[userList.size()][cols.length];
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		for (int i = 0; i < userList.size(); i++) {
+			User u = userList.get(i);
+			data[i] = new Object[] {
+				u.getUserId(), u.getName(), u.getEmail(),
+				sdf.format(u.getCreatedAt()),
+				(u.getRole() == 0) ? "user" : "admin",
+				(u.getStatus() == 0) ? "활성" : "비활성",
+				"수정", "삭제"
+			};
+		}
+		
+		return data;
 	}
 }
