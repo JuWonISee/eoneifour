@@ -12,6 +12,10 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+
+/* javax.swing.Timer는 자바의 스윙(Swing) GUI 애플리케이션에서 주기적인 작업을 간편하게 수행할 수 있도록 도와주는 클래스. 
+ * 특히 이벤트 디스패치 스레드(Event Dispatch Thread, EDT) 에서 동작하기 때문에 GUI를 안전하게 조작할 수 있다는 장점이 있음.
+ */
 import javax.swing.Timer;
 
 import com.eoneifour.common.frame.AbstractMainFrame;
@@ -29,15 +33,20 @@ import com.eoneifour.wms.common.config.Config;
 public class MainFrame extends AbstractMainFrame {
 	JLabel dbStatusLabel;
 	DBManager db;
+
 	public MainFrame() {
 		super("WMS 메인(관리자)"); // 타이틀 설정
-		connectDB();
+
+		connectDB(); // 프로그램 가동시 DB 연결
 		menuCardPanel.setPreferredSize(new Dimension(0, 50));
 		initPages();
-		showContent("HOME");
-		
-//		DB 연결
-		updateDBstatus(dbStatusLabel); // 프로그램 실행시 DB 연결상태 딜레이(5초) 없이 표시
+		showContent("HOME"); // 초기 HOME 화면 설정
+
+		// DB연결
+		updateDBstatus(dbStatusLabel);
+
+		// 정해진 시간 간격으로 ActionEvent(ActionListener의 actionPerformed()) 를 발생시키는 메서드.
+		// 5초 간격마다 DB 연결 상태 체크.
 		new Timer(5000, e -> updateDBstatus(dbStatusLabel)).start();
 	}
 
@@ -54,17 +63,16 @@ public class MainFrame extends AbstractMainFrame {
 		// 홈 버튼 연결
 		contentCardPanel.add(new HomePage(this), "HOME");
 
-		// ex) 혜원님이 만들어놓은 패널
+		// ex) 화면 전환 확인용 임시 페이지
 		contentCardPanel.add(new UserListPage(this), "ADMIN_REGISTER");
 
 		// 초기 화면을 홈 화면으로 고정하기 위한 메서드.
 		contentCardPanel.revalidate();
 		contentCardPanel.repaint();
 
-		// inforBar 이벤트 연결
 	}
 
-	// 상단패널
+	// 최상단 패널
 	@Override
 	public JPanel createTopPanel() {
 		JPanel infoBar = creatInfoBar();
@@ -75,7 +83,7 @@ public class MainFrame extends AbstractMainFrame {
 		return topPanel;
 	}
 
-	// 상단패널에 부착할 InfoBar
+	// 최상달 패널에 부착할 내용
 	private JPanel creatInfoBar() {
 
 		JPanel infoBar = new JPanel(new BorderLayout());
@@ -90,13 +98,13 @@ public class MainFrame extends AbstractMainFrame {
 		homeBtn.setFont(new Font("맑은 고딕", Font.PLAIN, 15));
 		homeBtn.addActionListener(e -> showContent("HOME"));
 
-		//DB 접속상태
+		// DB 접속상태
 		dbStatusLabel = new JLabel("DB 접속중");
 		dbStatusLabel.setPreferredSize(null);
-		dbStatusLabel.setFont(new Font("Noto Sans CJK KR", Font.PLAIN, 15));
+		dbStatusLabel.setFont(new Font("Noto Sans CJK KR", Font.PLAIN, 15)); // Noto Sans CJK KR --> 이모지를 위한 별도 글꼴
 		dbStatusLabel.setForeground(Color.YELLOW);
-		
-		//테스트용 DB 연결해제 버튼
+
+		// 테스트용 DB 연결해제 버튼
 		JButton disconnectDB = new JButton("DB 연결해제");
 		ButtonUtil.styleHeaderButton(disconnectDB);
 		disconnectDB.setFont(new Font("맑은 고딕", Font.PLAIN, 15));
@@ -128,6 +136,7 @@ public class MainFrame extends AbstractMainFrame {
 		return infoBar;
 	};
 
+	// 카테고리별 메인 메뉴를 담을 패널
 	@Override
 	public JPanel createLeftPanel() {
 		JPanel menuBar = createMainMenu();
@@ -139,11 +148,13 @@ public class MainFrame extends AbstractMainFrame {
 		return leftPanel;
 	};
 
+	// 카테고리별 세부 페이지
 	private JPanel createMainMenu() {
 		JPanel menuPanel = new JPanel();
 		menuPanel.setLayout(new BoxLayout(menuPanel, BoxLayout.Y_AXIS));
 		menuPanel.setBackground(Color.WHITE);
 
+		// wms config에 정의된 페이지의 key값, name값을 가져와 디자인 및 이벤트 연결
 		for (int i = 0; i < Config.MENUNAME.length; i++) {
 			int index = i;
 			JButton button = new JButton(Config.MENUNAME[index]);
@@ -155,11 +166,12 @@ public class MainFrame extends AbstractMainFrame {
 			menuPanel.add(Box.createVerticalStrut(20)); // 간격 추가
 			menuPanel.add(button);
 		}
-		// 홈메뉴 등록
+		//
 		menuPanel.add(Box.createVerticalGlue()); // 아래 공간 채우기
 		return menuPanel;
 	};
 
+	// wms config에 정의된 페이지의 key값, name값을 가져와 디자인 및 이벤트 연결
 	private void createSubMenu() {
 		for (int i = 0; i < Config.PAGENAME.length; i++) {
 			String groupKey = Config.MENUKYES[i];
@@ -182,11 +194,13 @@ public class MainFrame extends AbstractMainFrame {
 		}
 	}
 
+	// 메인 카테고리 버튼 클릭에 대응되는 세부 카테고리 패널
 	public void showTopMenu(String key) {
 		CardLayout layout = (CardLayout) menuCardPanel.getLayout();
 		layout.show(menuCardPanel, key);
 	}
 
+	// DB 접속 상태를 체크하는 메서드.
 	private void updateDBstatus(JLabel dbStatus) {
 		boolean isConnected = DBManager.getInstance().isConnected();
 		if (isConnected) {
@@ -198,6 +212,7 @@ public class MainFrame extends AbstractMainFrame {
 		}
 	}
 
+	// DB 연결
 	public void connectDB() {
 		db = DBManager.getInstance();
 	}
