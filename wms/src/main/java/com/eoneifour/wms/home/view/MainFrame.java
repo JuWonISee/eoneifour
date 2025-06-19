@@ -1,4 +1,4 @@
-package com.eoneifour.wms.view.frame;
+package com.eoneifour.wms.home.view;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
@@ -15,9 +15,8 @@ import javax.swing.JPanel;
 
 import com.eoneifour.common.frame.AbstractMainFrame;
 import com.eoneifour.common.util.ButtonUtil;
+import com.eoneifour.wms.admin.view.UserListPage;
 import com.eoneifour.wms.common.config.Config;
-import com.eoneifour.wms.view.HomePage;
-import com.eoneifour.wms.view.admin.UserListPage;
 
 /**
  * - WMS 관리자 메인 프레임 - 메인 프레임, 사이드바 구현
@@ -36,25 +35,25 @@ public class MainFrame extends AbstractMainFrame {
 	}
 
 	/***
-	 * Content(세부 메뉴별 Panel) 클래스 생성 후 아래 메서드에서 new 해야함.
-	 * 2번째 매개변수(String)는 Config.java를 확인 후 대응되는 KEYS값을 넣어주면 됨.
+	 * Content(세부 메뉴별 Panel) 클래스 생성 후 아래 메서드에서 new 해야함. 2번째 매개변수(String)는
+	 * Config.java를 확인 후 대응되는 KEYS값을 넣어주면 됨.
+	 * 
 	 * @TODO 각 메뉴별 기능 구현이 완료되면 맵핑이나.. 다른 방식 활용해서 리팩토링 예정
 	 * @author 재환
 	 */
 	private void initPages() {
 		createSubMenu();
-		
+
 		// 홈 버튼 연결
 		contentCardPanel.add(new HomePage(this), "HOME");
-		
+
 		// ex) 혜원님이 만들어놓은 패널
 		contentCardPanel.add(new UserListPage(this), "ADMIN_REGISTER");
-		
-		// 초기 화면을 홈 화면으로 고정하기 위한 메서드.
-	    contentCardPanel.revalidate(); 
-	    contentCardPanel.repaint(); 
 
-		
+		// 초기 화면을 홈 화면으로 고정하기 위한 메서드.
+		contentCardPanel.revalidate();
+		contentCardPanel.repaint();
+
 		// inforBar 이벤트 연결
 	}
 
@@ -156,13 +155,9 @@ public class MainFrame extends AbstractMainFrame {
 			menuCardPanel.add(groupPanel, groupKey);
 		}
 	}
-	
-	public void showTopMenu(String key) {
-        CardLayout layout = (CardLayout) menuCardPanel.getLayout();
-        layout.show(menuCardPanel, key);
-    }
 
-	public static void main(String[] args) {
-		new MainFrame();
+	public void showTopMenu(String key) {
+		CardLayout layout = (CardLayout) menuCardPanel.getLayout();
+		layout.show(menuCardPanel, key);
 	}
 }

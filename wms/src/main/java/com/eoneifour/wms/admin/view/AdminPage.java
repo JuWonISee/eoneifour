@@ -1,11 +1,11 @@
-package com.eoneifour.wms.view;
+package com.eoneifour.wms.admin.view;
 
 import java.awt.Color;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-import com.eoneifour.wms.view.frame.MainFrame;
+import com.eoneifour.wms.home.view.MainFrame;
 
 public class AdminPage extends JPanel{
 	
