@@ -6,7 +6,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import com.eoneifour.common.config.Config;
+import com.eoneifour.common.config.PrivateConfig;
 
 public class DBManager {
 	private static DBManager instance;
@@ -15,7 +15,7 @@ public class DBManager {
     private DBManager() {
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
-            con = DriverManager.getConnection(Config.URL, Config.USER, Config.PASS);
+            con = DriverManager.getConnection(PrivateConfig.URL, PrivateConfig.USER, PrivateConfig.PASS);
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         } catch (SQLException e) {
@@ -51,5 +51,17 @@ public class DBManager {
         try { if (rs != null) rs.close(); } catch (SQLException e) { e.printStackTrace(); }
         try { if (pstmt != null) pstmt.close(); } catch (SQLException e) { e.printStackTrace(); }
         try { if (con != null) con.close(); } catch (SQLException e) { e.printStackTrace(); }
+    }
+    
+    /**
+     * DB 접속 상태를 반환하는 메서드.
+     * @author 재환
+     */
+    public boolean isConnected() {
+    	try {
+			return con != null && !con.isClosed();
+		} catch (SQLException e) {
+			return false;
+		}
     }
 }
