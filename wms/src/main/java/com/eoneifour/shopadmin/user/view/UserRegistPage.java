@@ -1,4 +1,4 @@
-package com.eoneifour.shopadmin.member.view;
+package com.eoneifour.shopadmin.user.view;
 
 import java.awt.Color;
 import java.awt.Component;
