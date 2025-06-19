@@ -11,8 +11,8 @@ import javax.swing.JPanel;
 
 import com.eoneifour.common.frame.AbstractMainFrame;
 import com.eoneifour.common.util.ButtonUtil;
-import com.eoneifour.shopadmin.member.view.UserListPage;
-import com.eoneifour.shopadmin.member.view.UserRegistPage;
+import com.eoneifour.shopadmin.user.view.UserListPage;
+import com.eoneifour.shopadmin.user.view.UserRegistPage;
 
 /**
  * 쇼핑몰 관리자 메인 프레임
