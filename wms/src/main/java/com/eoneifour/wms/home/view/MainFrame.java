@@ -17,6 +17,7 @@ import com.eoneifour.common.frame.AbstractMainFrame;
 import com.eoneifour.common.util.ButtonUtil;
 import com.eoneifour.wms.admin.view.UserListPage;
 import com.eoneifour.wms.common.config.Config;
+import com.eoneifour.wms.iobound.view.InboundOrder;
 
 /**
  * - WMS 관리자 메인 프레임 - 메인 프레임, 사이드바 구현
@@ -49,6 +50,7 @@ public class MainFrame extends AbstractMainFrame {
 
 		// ex) 혜원님이 만들어놓은 패널
 		contentCardPanel.add(new UserListPage(this), "ADMIN_REGISTER");
+		contentCardPanel.add(new InboundOrder(this), "INBOUND_ORDER");
 
 		// 초기 화면을 홈 화면으로 고정하기 위한 메서드.
 		contentCardPanel.revalidate();

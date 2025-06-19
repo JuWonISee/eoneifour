@@ -1,6 +1,5 @@
 package com.eoneifour.wms.home.view;
 
-import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Image;
 
