@@ -20,3 +20,5 @@ Thumbs.db
 # test DB 설정 파일 제외
 src/main/java/com/eoneifour/common/config/PrivateConfig.java
 
+# sql문 제외
+src/main/resources/sql/
