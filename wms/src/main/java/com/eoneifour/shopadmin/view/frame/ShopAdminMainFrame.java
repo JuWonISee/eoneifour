@@ -33,6 +33,7 @@ public class ShopAdminMainFrame extends AbstractMainFrame {
     	//각 페이지 메뉴 연결
     	contentCardPanel.add(new UserListPage(this), "USER_LIST"); // 회원관리 페이지
     	contentCardPanel.add(new UserRegistPage(this), "USER_REGIST"); // 회원등록
+    	//contentCardPanel.add(new UserDetailPage(this), "USER_DETAIL"); // 회원상세
         //contentCardPanel.add(new ProductPage(this), "PRODUCT"); // 상품관리 페이지
         //contentCardPanel.add(new OrderPage(this), "ORDER"); // 주문관리 페이지
         //contentCardPanel.add(new PurchasePage(this), "PURCHASE"); // 발주관리 페이지
