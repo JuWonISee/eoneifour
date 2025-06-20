@@ -11,10 +11,13 @@ import javax.swing.JPanel;
 
 import com.eoneifour.common.frame.AbstractMainFrame;
 import com.eoneifour.common.util.ButtonUtil;
+import com.eoneifour.shopadmin.product.view.ProductDetailPage;
+import com.eoneifour.shopadmin.product.view.ProductListPage;
+import com.eoneifour.shopadmin.product.view.ProductRegistPage;
 import com.eoneifour.shopadmin.user.view.UserDetailPage;
-import com.eoneifour.shopadmin.user.view.UserUpdatePage;
 import com.eoneifour.shopadmin.user.view.UserListPage;
 import com.eoneifour.shopadmin.user.view.UserRegistPage;
+import com.eoneifour.shopadmin.user.view.UserUpdatePage;
 
 /**
  * 쇼핑몰 관리자 메인 프레임
@@ -22,14 +25,22 @@ import com.eoneifour.shopadmin.user.view.UserRegistPage;
  * - 각 메뉴별 페이지 등록
  * 
  * @author 혜원
+ *
+ * 병합 중, productPage들의 접근지정자를 default에서 public으로 수정하였습니다.
+ * @author JH
  */
+
 public class ShopAdminMainFrame extends AbstractMainFrame {
 	public UserRegistPage userRegistPage;
 	public UserDetailPage userDetailPage;
 	public UserUpdatePage userUpdatePage;
 	public UserListPage userListPage;
 	
-	// 초기 페이지 등록
+	public ProductDetailPage productDetailPage; // produt - product 오타수정 @JH
+	public ProductListPage productListPage;
+	public ProductRegistPage productRegistPage;
+	
+
     public ShopAdminMainFrame() {
         super("쇼핑몰 메인 (관리자)"); // 타이틀 설정
         
@@ -38,7 +49,12 @@ public class ShopAdminMainFrame extends AbstractMainFrame {
         userDetailPage = new UserDetailPage(this);
         userUpdatePage = new UserUpdatePage(this);
         userListPage = new UserListPage(this);
-
+        
+        // 양식에 맞추어 코드 수정 @JH
+    	productDetailPage = new ProductDetailPage(this);
+    	productListPage = new ProductListPage(this);
+    	productRegistPage = new ProductRegistPage(this);
+        
         initPages();
         
         // 회원 목록을 초기화면으로
@@ -48,16 +64,19 @@ public class ShopAdminMainFrame extends AbstractMainFrame {
 
     // 페이지 등록
     private void initPages() {
-    	
     	// 각 페이지 메뉴 연결
     	contentCardPanel.add(userListPage, "USER_LIST"); 				// 회원관리 페이지
     	contentCardPanel.add(userRegistPage, "USER_REGIST"); 	// 회원등록
     	contentCardPanel.add(userDetailPage, "USER_DETAIL"); 	// 회원상세
     	contentCardPanel.add(userUpdatePage, "USER_UPDATE"); 		// 회원수정
-        //contentCardPanel.add(new ProductPage(this), "PRODUCT"); 		// 상품관리 페이지
-        //contentCardPanel.add(new OrderPage(this), "ORDER"); 			// 주문관리 페이지
-        //contentCardPanel.add(new PurchasePage(this), "PURCHASE"); 	// 발주관리 페이지
-        //contentCardPanel.add(new SettingPage(this), "SETTING"); 		// 설정 페이지
+    	
+    	// 생성과 동시에 add 하던 메서드 분리 @JH
+    	contentCardPanel.add(userListPage, "USER_LIST"); // 회원관리 페이지
+    	contentCardPanel.add(userRegistPage, "USER_REGIST"); // 회원등록
+        contentCardPanel.add(productListPage, "PRODUCT_LIST"); // 상품관리 페이지
+        contentCardPanel.add(productRegistPage, "PRODUCT_REGIST"); // 상품등록 페이지
+        contentCardPanel.add(productDetailPage, "PRODUCT_DETAIL"); // 상품상세 페이지
+        //contentCardPanel.add(new SettingPage(this), "SETTING"); // 설정 페이지
     }
 
     // 상단 정보 바 + 메뉴 바 구성
