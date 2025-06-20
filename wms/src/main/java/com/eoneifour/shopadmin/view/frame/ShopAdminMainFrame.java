@@ -11,6 +11,8 @@ import javax.swing.JPanel;
 
 import com.eoneifour.common.frame.AbstractMainFrame;
 import com.eoneifour.common.util.ButtonUtil;
+import com.eoneifour.shopadmin.user.view.UserDetailPage;
+import com.eoneifour.shopadmin.user.view.UserUpdatePage;
 import com.eoneifour.shopadmin.user.view.UserListPage;
 import com.eoneifour.shopadmin.user.view.UserRegistPage;
 
@@ -22,24 +24,43 @@ import com.eoneifour.shopadmin.user.view.UserRegistPage;
  * @author 혜원
  */
 public class ShopAdminMainFrame extends AbstractMainFrame {
-
+	public UserRegistPage userRegistPage;
+	public UserDetailPage userDetailPage;
+	public UserUpdatePage userUpdatePage;
+	public UserListPage userListPage;
+	
+	// 초기 페이지 등록
     public ShopAdminMainFrame() {
         super("쇼핑몰 메인 (관리자)"); // 타이틀 설정
+        
+        // 페이지 생성
+        userRegistPage = new UserRegistPage(this);
+        userDetailPage = new UserDetailPage(this);
+        userUpdatePage = new UserUpdatePage(this);
+        userListPage = new UserListPage(this);
+
         initPages();
+        
+        // 회원 목록을 초기화면으로
+        userListPage.refresh();
+        showContent("USER_LIST");
     }
 
     // 페이지 등록
     private void initPages() {
-    	//각 페이지 메뉴 연결
-    	contentCardPanel.add(new UserListPage(this), "USER_LIST"); // 회원관리 페이지
-    	contentCardPanel.add(new UserRegistPage(this), "USER_REGIST"); // 회원등록
-        //contentCardPanel.add(new ProductPage(this), "PRODUCT"); // 상품관리 페이지
-        //contentCardPanel.add(new OrderPage(this), "ORDER"); // 주문관리 페이지
-        //contentCardPanel.add(new PurchasePage(this), "PURCHASE"); // 발주관리 페이지
-        //contentCardPanel.add(new SettingPage(this), "SETTING"); // 설정 페이지
+    	
+    	// 각 페이지 메뉴 연결
+    	contentCardPanel.add(userListPage, "USER_LIST"); 				// 회원관리 페이지
+    	contentCardPanel.add(userRegistPage, "USER_REGIST"); 	// 회원등록
+    	contentCardPanel.add(userDetailPage, "USER_DETAIL"); 	// 회원상세
+    	contentCardPanel.add(userUpdatePage, "USER_UPDATE"); 		// 회원수정
+        //contentCardPanel.add(new ProductPage(this), "PRODUCT"); 		// 상품관리 페이지
+        //contentCardPanel.add(new OrderPage(this), "ORDER"); 			// 주문관리 페이지
+        //contentCardPanel.add(new PurchasePage(this), "PURCHASE"); 	// 발주관리 페이지
+        //contentCardPanel.add(new SettingPage(this), "SETTING"); 		// 설정 페이지
     }
 
-    // 쇼핑몰은 상단패널 2개 사용
+    // 상단 정보 바 + 메뉴 바 구성
     @Override
     public JPanel createTopPanel() {
         JPanel infoBar = createInfoBar();
@@ -85,7 +106,11 @@ public class ShopAdminMainFrame extends AbstractMainFrame {
 
         JButton userBtn = new JButton("회원관리");
         ButtonUtil.styleMenuButton(userBtn);
-        userBtn.addActionListener(e->showContent("USER_LIST"));
+        // 목록 새로고침 후 화면 이동
+        userBtn.addActionListener(e-> {
+        	userListPage.refresh();
+        	showContent("USER_LIST");
+        });
 
         JButton productBtn = new JButton("상품관리");
         ButtonUtil.styleMenuButton(productBtn);
