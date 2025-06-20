@@ -105,7 +105,8 @@ public class ProductListPage extends AbstractTablePage {
 				} else if(col == table.getColumn("상품번호").getModelIndex()) {
 				    System.out.println("상세 클릭" + row);
 				    productId = (Integer) table.getValueAt(row, 0); 
-				    productDetailpage.setProduct(productId);              
+				    productDetailpage.setProduct(productId);
+				    productDetailpage.selectedId = productId;
 				    mainFrame.showContent("PRODUCT_DETAIL");             
 				}
 			}  

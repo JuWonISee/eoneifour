@@ -21,13 +21,13 @@ import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-import javax.swing.SwingUtilities;
 
 import com.eoneifour.common.frame.AbstractMainFrame;
 import com.eoneifour.common.util.ButtonUtil;
 import com.eoneifour.common.util.FieldUtil;
 import com.eoneifour.shopadmin.common.util.DBManager;
 import com.eoneifour.shopadmin.product.model.Product;
+import com.eoneifour.shopadmin.product.model.ProductImg;
 import com.eoneifour.shopadmin.product.model.SubCategory;
 import com.eoneifour.shopadmin.product.model.TopCategory;
 import com.eoneifour.shopadmin.product.repository.ProductDAO;
@@ -52,7 +52,9 @@ public class ProductDetailPage extends JPanel {
 	DBManager dbManager = DBManager.getInstance();
 	ProductDAO productDAO = new ProductDAO();
 	ProductImgDAO productImgDAO = new ProductImgDAO();
-
+	int selectedId;
+	
+	
 	public ProductDetailPage(AbstractMainFrame mainFrame, ProductListPage productListPage) {
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 		setBackground(new Color(245, 247, 250));
@@ -129,7 +131,7 @@ public class ProductDetailPage extends JPanel {
 		JButton listBtn = ButtonUtil.createDefaultButton("목록", 15, 120, 40);
 		// 버튼 이벤트 연결
 		editBtn.addActionListener(e -> {
-			edit(mainFrame);
+			edit();
 			productListPage.refresh(); // refresh 기능 구현 추가 필요
 		});
 
@@ -183,19 +185,12 @@ public class ProductDetailPage extends JPanel {
 		}
 	}
 
-	public void edit(AbstractMainFrame mainFrame) {
-		// 가격에 숫자(정수)를 입력하였는지 검사 , 유효성에서 정수가 아니면 반환
-		String price = t_price.getText();
-		boolean b_price = price.matches("\\d+");
 
-		// 재고에 숫자(정수)를 입력하였는지 검사 , 유효성에서 정수가 아니면 반환
-		String quantity = t_stockQuantity.getText();
-		boolean b_quantity = quantity.matches("\\d+");
-	}
 
 	// 지정한 상품에 대한 정보 출력
 	public void setProduct(int productId) {
 		Product product = productDAO.getProduct(productId);
+		List<ProductImg> imgList = productImgDAO.getProductImgs(productId);
 
 		// 카테고리 콤보박스에 들어가있는 것은 객체이므로
 		// 콤보박스에 들어간 item의 index와 topcategory의 id가 동일 한 것을 선택
@@ -233,7 +228,37 @@ public class ProductDetailPage extends JPanel {
 		t_price.setText(Integer.toString(product.getPrice()));
 		t_detail.setText(product.getDetail());
 		t_stockQuantity.setText(Integer.toString(product.getStock_quantity()));
+		
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < imgList.size(); i++) {
+		    sb.append(imgList.get(i).getFilename());
+		    if (i < imgList.size() - 1) {
+		        sb.append(", "); // 마지막엔 쉼표 안 붙이기
+		    }
+		}
+		
+		imageField.setText(sb.toString());
 	}
 
+	public void edit() {
+		// 가격에 숫자(정수)를 입력하였는지 검사 , 유효성에서 정수가 아니면 반환
+		String price = t_price.getText();
+		boolean b_price = price.matches("\\d+");
+
+		// 재고에 숫자(정수)를 입력하였는지 검사 , 유효성에서 정수가 아니면 반환
+		String quantity = t_stockQuantity.getText();
+		boolean b_quantity = quantity.matches("\\d+");
+		
+        Product product = new Product();
+        product.setProduct_id(selectedId); // ← 중요: 수정 대상 ID 설정
+        product.setBrand_name(t_brand.getText());
+        product.setName(t_productName.getText());
+        product.setPrice(Integer.parseInt(t_price.getText()));
+        product.setDetail(t_detail.getText());
+        product.setStock_quantity(Integer.parseInt(t_stockQuantity .getText()));
+        product.setSub_category((SubCategory) cb_subcategory.getSelectedItem());
+	}
+	
+	
 }
 

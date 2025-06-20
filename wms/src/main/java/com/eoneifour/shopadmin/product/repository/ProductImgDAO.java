@@ -2,7 +2,10 @@ package com.eoneifour.shopadmin.product.repository;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.eoneifour.shopadmin.common.exception.ProductException;
 import com.eoneifour.shopadmin.common.exception.ProductImgException;
@@ -35,5 +38,36 @@ public class ProductImgDAO {
 		}finally {
 			dbManager.release(pstmt);
 		}
+	}
+	
+	public List<ProductImg> getProductImgs(int productId) {
+		List<ProductImg> imgList = new ArrayList<>();
+		ProductImg productImg = new ProductImg();
+		Connection con = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+
+		con = dbManager.getConnection();
+		StringBuffer sql = new StringBuffer();
+		sql.append("select filename from product_img ");
+		sql.append(" where product_id = ?;");
+
+		try {
+			pstmt = con.prepareStatement(sql.toString());
+
+			pstmt.setInt(1, productId);
+			rs = pstmt.executeQuery();
+			
+			while (rs.next()) {
+				productImg.setFilename(rs.getString("filename"));
+				imgList.add(productImg);
+			}
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			dbManager.release(pstmt, rs);
+		}
+		return imgList;
 	}
 }
