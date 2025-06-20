@@ -12,7 +12,6 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-
 /* javax.swing.Timer는 자바의 스윙(Swing) GUI 애플리케이션에서 주기적인 작업을 간편하게 수행할 수 있도록 도와주는 클래스. 
  * 특히 이벤트 디스패치 스레드(Event Dispatch Thread, EDT) 에서 동작하기 때문에 GUI를 안전하게 조작할 수 있다는 장점이 있음.
  */
@@ -23,8 +22,14 @@ import com.eoneifour.common.util.ButtonUtil;
 import com.eoneifour.common.util.DBManager;
 import com.eoneifour.wms.admin.view.UserListPage;
 import com.eoneifour.wms.common.config.Config;
+
+import com.eoneifour.wms.iobound.view.InboundOrderPage;
+import com.eoneifour.wms.iobound.view.OutBoundOrder;
+import com.eoneifour.wms.iobound.view.lookupProduct;
+
 import com.eoneifour.wms.iobound.view.InboundOrder;
 import com.eoneifour.wms.inboundrate.view.AllInboundRatePage;
+
 
 /**
  * - 사이드 메뉴바, 상단 메뉴바 구현. - 상태바에 DB 상태 표시. (추후 클래스 분리해야 함.)
@@ -65,10 +70,14 @@ public class MainFrame extends AbstractMainFrame {
 		// 홈 버튼 연결
 		contentCardPanel.add(new HomePage(this), "HOME");
 
-		// ex) 화면 전환 확인용 임시 페이지
-		contentCardPanel.add(new UserListPage(this), "ADMIN_REGISTER");
-		contentCardPanel.add(new InboundOrder(this), "INBOUND_ORDER");
+
+		// 세부 페이지 부착
+		contentCardPanel.add(new UserListPage(this), "ADMIN_REGISTER"); // 더미 페이지
+		contentCardPanel.add(new InboundOrderPage(this), "INBOUND_ORDER");
+		contentCardPanel.add(new OutBoundOrder(this), "OUTBOUND_ORDER");
+		contentCardPanel.add(new lookupProduct(this), "PRODUCT_LOOKUP");
 		contentCardPanel.add(new AllInboundRatePage(this), "ALL_INBOUND_RATE");
+
 		// 초기 화면을 홈 화면으로 고정하기 위한 메서드.
 		contentCardPanel.revalidate();
 		contentCardPanel.repaint();

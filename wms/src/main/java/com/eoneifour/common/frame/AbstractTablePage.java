@@ -38,7 +38,7 @@ public abstract class AbstractTablePage extends JPanel {
         table.setGridColor(Color.LIGHT_GRAY);
         table.setIntercellSpacing(new Dimension(0, 5));
         
-        TableUtil.applyDefaultTableStyle(table);
+        
 
         // 테이블 래퍼 및 여백
         JScrollPane scroll = new JScrollPane(table);
