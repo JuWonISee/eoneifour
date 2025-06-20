@@ -14,7 +14,6 @@ import javax.swing.table.DefaultTableCellRenderer;
  * - 컬럼 이동 제한, 전체 정렬, 컬럼 렌더러 적용 등 처리
  */
 public class TableUtil {
-
     /**
      * 테이블 공통 스타일 적용
      * - 컬럼 이동 제한
@@ -23,8 +22,15 @@ public class TableUtil {
     public static void applyDefaultTableStyle(JTable table) {
         // 컬럼 이동 못하게
         table.getTableHeader().setReorderingAllowed(false);
-
         // 전체 가운데 정렬
+        centerTableCells(table);
+    }
+    
+    /**
+     * 테이블 전체 가운데 정렬
+     * @param table
+     */
+    public static void centerTableCells(JTable table) {
         DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
         centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
         for (int i = 0; i < table.getColumnCount(); i++) {
@@ -33,20 +39,29 @@ public class TableUtil {
     }
 
     /**
-     * 특정 컬럼에만 컬러 박스 렌더러 적용
-     * @param table 적용할 테이블
-     * @param columnName 컬럼명
-     * @param color 배경색
+     * 특정 컬럼만 원하는 색상으로 폰트 색상 변경
+     * @param table
+     * @param columnName
+     * @param fontColor
      */
-    public static void applyColoredLabelRenderer(JTable table, String columnName, Color color) {
-        table.getColumn(columnName).setCellRenderer((tbl, val, sel, focus, row, col) -> {
-            JLabel label = new JLabel(val.toString(), SwingConstants.CENTER);
-            label.setOpaque(true);
-            label.setBackground(color);
-            label.setForeground(Color.WHITE);
-            label.setFont(new Font("맑은 고딕", Font.BOLD, 13));
-            label.setBorder(BorderFactory.createEmptyBorder(3, 8, 3, 8));
-            return label;
+    public static void applyColorTextRenderer(JTable table, String columnName, Color fontColor) {
+        table.getColumn(columnName).setCellRenderer(new DefaultTableCellRenderer() {
+            @Override
+            public java.awt.Component getTableCellRendererComponent(
+                JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+
+                JLabel label = (JLabel) super.getTableCellRendererComponent(
+                    table, value, isSelected, hasFocus, row, column
+                );
+
+                // 컬러 강조만 변경, 나머지 스타일은 기본 유지
+                label.setForeground(fontColor);
+                label.setFont(new Font("맑은 고딕", Font.BOLD, 13));
+                label.setHorizontalAlignment(SwingConstants.CENTER);
+
+                return label;
+            }
         });
     }
+
 }
