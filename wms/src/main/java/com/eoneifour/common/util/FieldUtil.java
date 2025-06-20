@@ -1,13 +1,21 @@
 package com.eoneifour.common.util;
 
-import javax.swing.*;
-import java.awt.*;
+import java.awt.Dimension;
+import java.awt.Font;
+
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
 
 /**
  * Form 필드 생성 유틸
  */
 public class FieldUtil {
-	
 	// 기본 텍스트 필드 라벨
     public static JPanel createField(String labelText, JTextField field) {
         JPanel panel = new JPanel();
