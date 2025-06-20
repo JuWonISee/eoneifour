@@ -22,14 +22,10 @@ import com.eoneifour.common.util.ButtonUtil;
 import com.eoneifour.common.util.DBManager;
 import com.eoneifour.wms.admin.view.UserListPage;
 import com.eoneifour.wms.common.config.Config;
-
+import com.eoneifour.wms.inboundrate.view.AllInboundRatePage;
 import com.eoneifour.wms.iobound.view.InboundOrderPage;
 import com.eoneifour.wms.iobound.view.OutBoundOrder;
 import com.eoneifour.wms.iobound.view.lookupProduct;
-
-import com.eoneifour.wms.iobound.view.InboundOrder;
-import com.eoneifour.wms.inboundrate.view.AllInboundRatePage;
-
 
 /**
  * - 사이드 메뉴바, 상단 메뉴바 구현. - 상태바에 DB 상태 표시. (추후 클래스 분리해야 함.)
@@ -69,6 +65,10 @@ public class MainFrame extends AbstractMainFrame {
 
 		// 홈 버튼 연결
 		contentCardPanel.add(new HomePage(this), "HOME");
+		
+		// 초기 화면을 홈 화면으로 고정하기 위한 메서드.
+	    contentCardPanel.revalidate(); 
+	    contentCardPanel.repaint(); 
 
 
 		// 세부 페이지 부착
