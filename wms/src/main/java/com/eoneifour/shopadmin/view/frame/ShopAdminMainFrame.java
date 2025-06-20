@@ -127,7 +127,7 @@ public class ShopAdminMainFrame extends AbstractMainFrame {
         ButtonUtil.styleMenuButton(userBtn);
         // 목록 새로고침 후 화면 이동
         userBtn.addActionListener(e-> {
-        	userListPage.refresh();
+//        	userListPage.refresh();
         	showContent("USER_LIST");
         });
 

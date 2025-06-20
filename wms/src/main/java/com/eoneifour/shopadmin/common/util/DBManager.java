@@ -6,7 +6,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import com.eoneifour.shopadmin.common.config.Config;
+import com.eoneifour.common.config.PrivateConfig;
 
 public class DBManager {
 	
@@ -22,7 +22,8 @@ public class DBManager {
 			Class.forName("com.mysql.cj.jdbc.Driver");
 
 			// 2) 접속
-			con = DriverManager.getConnection(Config.url, Config.user, Config.pass);
+			// 서버 DB로 접속하게 변경. (상수는 대문자로 부탁드립니다.)
+			con = DriverManager.getConnection(PrivateConfig.URL, PrivateConfig.USER, PrivateConfig.PASS);
 
 		} catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block
