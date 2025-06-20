@@ -23,6 +23,7 @@ import com.eoneifour.common.util.ButtonUtil;
 import com.eoneifour.common.util.DBManager;
 import com.eoneifour.wms.admin.view.UserListPage;
 import com.eoneifour.wms.common.config.Config;
+import com.eoneifour.wms.iobound.view.InboundOrder;
 import com.eoneifour.wms.inboundrate.view.AllInboundRatePage;
 
 /**
@@ -66,8 +67,8 @@ public class MainFrame extends AbstractMainFrame {
 
 		// ex) 화면 전환 확인용 임시 페이지
 		contentCardPanel.add(new UserListPage(this), "ADMIN_REGISTER");
+		contentCardPanel.add(new InboundOrder(this), "INBOUND_ORDER");
 		contentCardPanel.add(new AllInboundRatePage(this), "ALL_INBOUND_RATE");
-		
 		// 초기 화면을 홈 화면으로 고정하기 위한 메서드.
 		contentCardPanel.revalidate();
 		contentCardPanel.repaint();
