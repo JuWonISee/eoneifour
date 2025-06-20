@@ -1,4 +1,4 @@
-package com.eoneifour.wms.view.admin;
+package com.eoneifour.wms.admin.view;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
