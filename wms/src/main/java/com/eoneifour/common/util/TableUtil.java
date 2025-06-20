@@ -3,7 +3,6 @@ package com.eoneifour.common.util;
 import java.awt.Color;
 import java.awt.Font;
 
-import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.SwingConstants;
