@@ -1,7 +1,7 @@
 package com.eoneifour.common.config;
 
 public class PrivateConfig {
-	public static final String URL   = "jdbc:mysql://182.221.77.73:4406/test";
-	public static final String USER = "incuser";
-	public static final String PASS  = "ssginc1234";
+	public static final String URL   = "jdbc:mysql://private:4406/test";
+	public static final String USER = "private";
+	public static final String PASS  = "private";
 }
