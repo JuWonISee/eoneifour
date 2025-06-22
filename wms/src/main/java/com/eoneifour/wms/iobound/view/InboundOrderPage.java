@@ -5,79 +5,132 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
-import java.awt.Insets;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
 
-import com.eoneifour.common.frame.AbstractMainFrame;
 import com.eoneifour.common.frame.AbstractTablePage;
 import com.eoneifour.common.util.ButtonUtil;
 import com.eoneifour.common.util.TableUtil;
+import com.eoneifour.wms.home.view.MainFrame;
+import com.eoneifour.wms.iobound.model.InBoundOrder;
+import com.eoneifour.wms.iobound.repository.InBoundOrderDAO;
 
 public class InboundOrderPage extends AbstractTablePage {
-	private AbstractMainFrame mainFrame;
+	private MainFrame mainFrame;
 
-	public InboundOrderPage(AbstractMainFrame mainFrame) {
+	private List<InBoundOrder> orderList;
+	private InBoundOrderDAO inBoundOrderDAO;
+	private String[] cols = { "상품번호", "입고위치", "입고" };
+
+	public InboundOrderPage(MainFrame mainFrame) {
 		super(mainFrame);
 		this.mainFrame = mainFrame;
-		
+		this.inBoundOrderDAO = new InBoundOrderDAO();
+
 		initTopPanel();
 		initTable();
 		applyTableStyle();
 	}
-	
+
 	public void initTopPanel() {
 		JPanel topPanel = new JPanel(new BorderLayout());
-        // 패널 안쪽 여백 설정 (시계반대방향)
+		// 패널 안쪽 여백 설정 (시계반대방향)
 		topPanel.setBorder(BorderFactory.createEmptyBorder(10, 50, 0, 50));
-		
-        // 제목 라벨
-        JLabel title = new JLabel("제품 목록");
-        title.setFont(new Font("맑은 고딕",Font.BOLD,20));
-        topPanel.add(title, BorderLayout.WEST);
-        
-        // 검색 키워드
-        JTextField searchField = new JTextField();
-        searchField.setPreferredSize(new Dimension(200, 30));
-        
-        // 등록 버튼
-        JButton searchBtn = ButtonUtil.createPrimaryButton("검색", 20, 100, 30);
 
-        searchBtn.setBorderPainted(false);
-        searchBtn.addActionListener(e -> {
+		// 제목 라벨
+		JLabel title = new JLabel("제품 목록");
+		title.setFont(new Font("맑은 고딕", Font.BOLD, 20));
+		topPanel.add(title, BorderLayout.WEST);
+
+		// 검색 키워드
+		JTextField searchField = new JTextField();
+		searchField.setPreferredSize(new Dimension(200, 30));
+
+		// 등록 버튼
+		JButton searchBtn = ButtonUtil.createPrimaryButton("검색", 20, 100, 30);
+
+		searchBtn.setBorderPainted(false);
+		searchBtn.addActionListener(e -> {
 //        	userRegistPage.prepare();
 //			mainFrame.showContent("USER_REGIST");
-        });
-        JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        
-        rightPanel.setOpaque(false);	
-        rightPanel.add(searchField);
-        rightPanel.add(searchBtn);
-        topPanel.add(rightPanel, BorderLayout.EAST);
+		});
+		JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 
-        add(topPanel, BorderLayout.NORTH);
+		rightPanel.setOpaque(false);
+		rightPanel.add(searchField);
+		rightPanel.add(searchBtn);
+		topPanel.add(rightPanel, BorderLayout.EAST);
+
+		add(topPanel, BorderLayout.NORTH);
 	}
 
 	@Override
 	public void initTable() {
-		String[] cols = { "제품명", "입고위치", "입고" };
-		Object[][] data = { { "DRINK_1", "1-1-1-1", "입고" }, { "DRINK_1", "2-2-2-2", "입고하기" } };
+		orderList = inBoundOrderDAO.getOrderList();
 
-		model = new DefaultTableModel(data, cols) {
+		model = new DefaultTableModel(toTableData(orderList), cols) {
 			public boolean isCellEditable(int row, int column) {
 				return false;
 			}
 		};
-		table = new JTable(model);    
-		table.setRowHeight(20);
-		
+
+		table = new JTable(model);
+
+		table.setRowHeight(36); // cell 높이 설정
+		// 테이블 컬럼 스타일 적용 (파랑색)
+		TableUtil.applyColorTextRenderer(table, "입고", new Color(25, 118, 210));
+
+		table.addMouseListener(new MouseAdapter() {
+			public void mouseClicked(MouseEvent e) {
+				int row = table.rowAtPoint(e.getPoint());
+				int col = table.columnAtPoint(e.getPoint());
+
+				int productId = (int) model.getValueAt(row, 0);
+//	                String rack = (String)model.getValueAt(row, 1); 입고위치 구현 필요
+
+				// 회원 수정
+				if (col == table.getColumn("입고").getModelIndex()) {
+					// 입고 처리 로직
+					String msg = "입고처리가 완료되었습니다.";
+					JOptionPane.showMessageDialog(null, msg ,"Info", JOptionPane.INFORMATION_MESSAGE);
+				}
+			}
+		});
+	}
+
+	// 테이블 데이터 새로고침
+	public void refresh() {
+		orderList = inBoundOrderDAO.getOrderList();
+		model.setDataVector(toTableData(orderList), cols);
+
 		TableUtil.applyDefaultTableStyle(table);
-		TableUtil.applyColorTextRenderer(table, "입고" , new Color(25, 118, 210));
+
+		TableUtil.applyColorTextRenderer(table, "수정", new Color(25, 118, 210));
+		TableUtil.applyColorTextRenderer(table, "삭제", new Color(211, 47, 47));
+	}
+
+	/**
+	 * TODO Product id로 서브쿼리 날리기.
+	 * 
+	 * @author JH
+	 */
+	// 테이블로 데이터로 변환
+	private Object[][] toTableData(List<InBoundOrder> orderList) {
+		Object[][] data = new Object[orderList.size()][cols.length];
+		for (int i = 0; i < orderList.size(); i++) {
+			InBoundOrder order = orderList.get(i);
+			data[i] = new Object[] { order.getProduct_id(), "입고 위치 로직은 구현중" + i, "입고" };
+		}
+		return data;
 	}
 }

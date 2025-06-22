@@ -18,7 +18,7 @@ public class UserDAO {
 	public List<User> getUserList() {
 		String sql = "select * from user where status = 0 order by user_id desc";
 		
-		Connection conn = db.getConnetion();
+		Connection conn = db.getConnection();
 		PreparedStatement pstmt = null; 
 		ResultSet rs = null;
 		try {
@@ -54,7 +54,7 @@ public class UserDAO {
 	public User getUserById(int userId) {
 		String sql = "select * from user where user_id = ?";
 		
-		Connection conn = db.getConnetion();
+		Connection conn = db.getConnection();
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		
@@ -90,7 +90,7 @@ public class UserDAO {
 	public void insertUser(User user) throws UserException {
 		String sql = "insert into user(email, password, name, address, address_detail, role) values(?,?,?,?,?,?)";
 		
-		Connection conn = db.getConnetion();
+		Connection conn = db.getConnection();
 		PreparedStatement pstmt = null; 
 		
 		try {
@@ -122,7 +122,7 @@ public class UserDAO {
 		sql.append("address_detail = ?, ");
 		sql.append("role = ? ");
 		sql.append("where user_id = ?");
-		Connection conn = db.getConnetion();
+		Connection conn = db.getConnection();
 		PreparedStatement pstmt = null; 
 		
 		try {
@@ -150,7 +150,7 @@ public class UserDAO {
 	public boolean existByEmail(String email) {
 		String sql = "select 1 from user where email = ?";
 		
-		Connection conn = db.getConnetion();
+		Connection conn = db.getConnection();
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		

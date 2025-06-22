@@ -23,8 +23,8 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 import com.eoneifour.common.util.ButtonUtil;
+import com.eoneifour.common.util.DBManager;
 import com.eoneifour.common.util.FieldUtil;
-import com.eoneifour.shopadmin.common.util.DBManager;
 import com.eoneifour.shopadmin.product.model.Product;
 import com.eoneifour.shopadmin.product.model.ProductImg;
 import com.eoneifour.shopadmin.product.model.SubCategory;

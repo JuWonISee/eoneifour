@@ -7,7 +7,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.eoneifour.shopadmin.common.util.DBManager;
+import com.eoneifour.common.util.DBManager;
 import com.eoneifour.shopadmin.product.model.TopCategory;
 
 public class TopCategoryDAO {

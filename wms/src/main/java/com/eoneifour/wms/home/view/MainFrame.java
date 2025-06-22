@@ -65,11 +65,10 @@ public class MainFrame extends AbstractMainFrame {
 
 		// 홈 버튼 연결
 		contentCardPanel.add(new HomePage(this), "HOME");
-		
-		// 초기 화면을 홈 화면으로 고정하기 위한 메서드.
-	    contentCardPanel.revalidate(); 
-	    contentCardPanel.repaint(); 
 
+		// 초기 화면을 홈 화면으로 고정하기 위한 메서드.
+		contentCardPanel.revalidate();
+		contentCardPanel.repaint();
 
 		// 세부 페이지 부착
 		contentCardPanel.add(new UserListPage(this), "ADMIN_REGISTER"); // 더미 페이지
@@ -88,7 +87,7 @@ public class MainFrame extends AbstractMainFrame {
 	@Override
 	public JPanel createTopPanel() {
 		JPanel infoBar = creatInfoBar();
- 
+
 		JPanel topPanel = new JPanel(new BorderLayout());
 		topPanel.add(infoBar, BorderLayout.NORTH);
 
@@ -122,7 +121,7 @@ public class MainFrame extends AbstractMainFrame {
 		disconnectDB.setFont(new Font("맑은 고딕", Font.PLAIN, 15));
 		disconnectDB.setPreferredSize(null);
 		disconnectDB.addActionListener(e -> {
-			db.release(db.getConnetion());
+			db.release(db.getConnection());
 			updateDBstatus(dbStatusLabel); // 즉시 갱신
 		});
 

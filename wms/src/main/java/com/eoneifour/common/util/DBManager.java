@@ -30,7 +30,8 @@ public class DBManager {
         return instance;
     }
     
-    public Connection getConnetion() {
+    // 오타수정 getConnection
+    public Connection getConnection() {
 		return con;
 	}
     
