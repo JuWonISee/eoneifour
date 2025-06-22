@@ -23,6 +23,7 @@ import com.eoneifour.common.util.DBManager;
 import com.eoneifour.wms.admin.view.UserListPage;
 import com.eoneifour.wms.common.config.Config;
 import com.eoneifour.wms.inboundrate.view.AllInboundRatePage;
+import com.eoneifour.wms.inboundrate.view.StackerInboundRate;
 import com.eoneifour.wms.iobound.view.InboundOrderPage;
 import com.eoneifour.wms.iobound.view.OutBoundOrder;
 import com.eoneifour.wms.iobound.view.lookupProduct;
@@ -76,6 +77,7 @@ public class MainFrame extends AbstractMainFrame {
 		contentCardPanel.add(new OutBoundOrder(this), "OUTBOUND_ORDER");
 		contentCardPanel.add(new lookupProduct(this), "PRODUCT_LOOKUP");
 		contentCardPanel.add(new AllInboundRatePage(this), "ALL_INBOUND_RATE");
+		contentCardPanel.add(new StackerInboundRate(this), "STACKER_INBOUND_RATE");
 
 		// 초기 화면을 홈 화면으로 고정하기 위한 메서드.
 		contentCardPanel.revalidate();
