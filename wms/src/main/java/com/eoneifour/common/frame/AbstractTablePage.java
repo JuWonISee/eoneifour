@@ -11,7 +11,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
-import com.eoneifour.common.util.TableUtil;
+import com.eoneifour.common.util.Refreshable;
 
 /**
  * 공통 테이블 페이지
@@ -19,7 +19,7 @@ import com.eoneifour.common.util.TableUtil;
  * - applyTableStyle : 테이블 스타일 고정 (자식 클래스에서 반드시 호출)
  * @author 혜원
  */
-public abstract class AbstractTablePage extends JPanel {
+public abstract class AbstractTablePage extends JPanel  implements Refreshable{
     public JTable table;
     public DefaultTableModel model;
 
@@ -29,6 +29,10 @@ public abstract class AbstractTablePage extends JPanel {
 
     // 테이블 및 모델 생성
     public abstract void initTable();
+    
+    @Override
+    public void refresh() {}
+
 
     // 테이블 스타일
     public void applyTableStyle() {

@@ -2,6 +2,8 @@ package com.eoneifour.wms.iobound.model;
 
 import java.sql.Date;
 
+import com.eoneifour.shopadmin.product.model.Product;
+
 /*
 발주 테이블
 테이블명 : purchase_order
@@ -9,6 +11,7 @@ import java.sql.Date;
 */ 
 
 public class InBoundOrder {
+	
 	private int purchase_order_id;
 	private int quantity;
 	private int status;
@@ -16,7 +19,14 @@ public class InBoundOrder {
 	private Date complete_date;
 	private int  requested_by;
 	private int product_id;
+	private Product product;
 	
+	public Product getProduct() {
+		return product;
+	}
+	public void setProduct(Product product) {
+		this.product = product;
+	}
 	public int getPurchase_order_id() {
 		return purchase_order_id;
 	}
