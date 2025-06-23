@@ -266,7 +266,7 @@ public class ProductDAO {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
-			dbManager.release(con, pstmt, rs);
+			dbManager.release(pstmt, rs);
 		}
 
 		return exists;
