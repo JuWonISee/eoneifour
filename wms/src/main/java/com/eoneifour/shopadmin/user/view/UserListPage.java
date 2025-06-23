@@ -14,18 +14,22 @@ import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
+import com.eoneifour.common.exception.UserException;
 import com.eoneifour.common.frame.AbstractTablePage;
 import com.eoneifour.common.util.ButtonUtil;
+import com.eoneifour.common.util.Refreshable;
+import com.eoneifour.common.util.SessionUtil;
 import com.eoneifour.common.util.TableUtil;
 import com.eoneifour.shopadmin.user.model.User;
 import com.eoneifour.shopadmin.user.repository.UserDAO;
 import com.eoneifour.shopadmin.view.ShopAdminMainFrame;
 
-public class UserListPage extends AbstractTablePage {
+public class UserListPage extends AbstractTablePage implements Refreshable {
 	private ShopAdminMainFrame mainFrame;
 	private UserRegistPage userRegistPage;
 	
@@ -78,10 +82,11 @@ public class UserListPage extends AbstractTablePage {
         
         table = new JTable(model);
         table.setRowHeight(36); // cell 높이 설정
+        TableUtil.applyDefaultTableStyle(table);
         // 테이블 컬럼 스타일 적용 (수정: 파랑, 삭제: 빨강)
         TableUtil.applyColorTextRenderer(table, "수정", new Color(25, 118, 210));  // 파랑
         TableUtil.applyColorTextRenderer(table, "삭제", new Color(211, 47, 47));  // 빨강
-
+        
         // 상세, 수정, 삭제 이벤트
         table.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
@@ -93,9 +98,25 @@ public class UserListPage extends AbstractTablePage {
                 
                 // 회원 수정
                 if (col == table.getColumn("수정").getModelIndex()) {
-                	// 회원 수정 로직
+                	mainFrame.userUpdatePage.prepare(userId);
+                	mainFrame.showContent("USER_UPDATE");
                 } else if (col == table.getColumn("삭제").getModelIndex()) {
-                	// 회원 삭제 로직
+                	if(userId == SessionUtil.getLoginUser().getUserId()) {
+                		JOptionPane.showMessageDialog(null, "현재 로그인된 계정은 삭제할 수 없습니다.");
+                	} else {
+                		int confirm = JOptionPane.showConfirmDialog(null, "정말 " + userName + "님을 삭제하시겠습니까?", "회원 삭제", JOptionPane.WARNING_MESSAGE ,JOptionPane.YES_NO_OPTION);
+                		if (confirm == JOptionPane.YES_OPTION) {
+                			try {
+                				userDAO.deleteUser(userId);
+                				refresh();
+                				JOptionPane.showMessageDialog(null, userName + "님이 삭제 처리되었습니다.");
+                				
+                			} catch (UserException e2) {
+                				JOptionPane.showMessageDialog(null, e2.getMessage(), "오류", JOptionPane.ERROR_MESSAGE);
+                			}
+                			
+                		}
+                	}
                 } else { // 회원 상세
                 	mainFrame.userDetailPage.setUser(userId);
                 	mainFrame.showContent("USER_DETAIL");
@@ -120,15 +141,18 @@ public class UserListPage extends AbstractTablePage {
         });
 	}
 	
-	// 테이블 데이터 새로고침
-	public void refresh() {
-		userList = userDAO.getUserList();
-		model.setDataVector(toTableData(userList), cols);
-
+	private void applyStyle() {
 		TableUtil.applyDefaultTableStyle(table);
 		
 		TableUtil.applyColorTextRenderer(table, "수정", new Color(25, 118, 210));
 		TableUtil.applyColorTextRenderer(table, "삭제", new Color(211, 47, 47));
+	}
+	
+	// 테이블 데이터 새로고침
+	public void refresh() {
+		userList = userDAO.getUserList();
+		model.setDataVector(toTableData(userList), cols);
+		applyStyle();
 	}
 	
 	// 테이블용 데이터로 변환

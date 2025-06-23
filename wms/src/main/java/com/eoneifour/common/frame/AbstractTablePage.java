@@ -12,7 +12,7 @@ import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
 import com.eoneifour.common.util.Refreshable;
-
+ 
 /**
  * 공통 테이블 페이지
  * - initTable() : 자식 클래스에서 상단패널/테이블/모델 설정
