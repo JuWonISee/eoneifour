@@ -60,7 +60,7 @@ public abstract class AbstractMainFrame extends JFrame {
 	// 좌측 side panel
 	public abstract JPanel createLeftPanel();
 
-	/**
+	/**  v                                                                                                                      
 	 * 페이지(메뉴) 선택시, Refreshable을 구현한 페이지일 경우 최신 상태로 새로고침되는 기능 추가하였습니다.
 	 * @author JH
 	 */

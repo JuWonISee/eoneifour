@@ -26,7 +26,7 @@ import com.eoneifour.wms.home.view.MainFrame;
 import com.eoneifour.wms.iobound.model.InBoundOrder;
 import com.eoneifour.wms.iobound.repository.InBoundOrderDAO;
 
-public class InboundOrderPage extends AbstractTablePage implements Refreshable{
+public class InboundOrderPage extends AbstractTablePage implements Refreshable {
 	private MainFrame mainFrame;
 
 	private List<InBoundOrder> orderList;
@@ -56,8 +56,6 @@ public class InboundOrderPage extends AbstractTablePage implements Refreshable{
 		// 검색 키워드
 		JTextField searchField = new JTextField();
 		searchField.setPreferredSize(new Dimension(200, 30));
-		
-
 
 		// 등록 버튼
 		JButton searchBtn = ButtonUtil.createPrimaryButton("검색", 20, 100, 30);
@@ -75,21 +73,20 @@ public class InboundOrderPage extends AbstractTablePage implements Refreshable{
 				searchResults = inBoundOrderDAO.getOrderList();
 				searchField.setText(null);
 			}
-			
-			if(searchResults.isEmpty()) {
-				 JOptionPane.showMessageDialog(null, "해당 제품이 없습니다.", "Info", JOptionPane.INFORMATION_MESSAGE);
-					searchResults = inBoundOrderDAO.getOrderList();
-					searchField.setText(null);
-		    }
 
+			if (searchResults.isEmpty()) {
+				JOptionPane.showMessageDialog(null, "해당 제품이 없습니다.", "Info", JOptionPane.INFORMATION_MESSAGE);
+				searchResults = inBoundOrderDAO.getOrderList();
+				searchField.setText(null);
+			}
 
 			model.setDataVector(toTableData(searchResults), cols);
-			TableUtil.applyColorTextRenderer(table, "작업", new Color(25, 118, 210));
+			applyStyle();
 		});
-		
-		//엔터 이벤트
+
+		// 엔터 이벤트
 		searchField.addActionListener(e -> {
-		    searchBtn.doClick(); //
+			searchBtn.doClick(); //
 		});
 
 		JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
@@ -113,20 +110,13 @@ public class InboundOrderPage extends AbstractTablePage implements Refreshable{
 		};
 
 		table = new JTable(model);
-
 		table.setRowHeight(36); // cell 높이 설정
-		// 테이블 컬럼 스타일 적용 (파랑색)
-		TableUtil.applyColorTextRenderer(table, "작업", new Color(25, 118, 210));
-
+		
 		table.addMouseListener(new MouseAdapter() {
 			public void mouseClicked(MouseEvent e) {
 				int row = table.rowAtPoint(e.getPoint());
 				int col = table.columnAtPoint(e.getPoint());
 
-//				int productId = (int) model.getValueAt(row, 0);
-//	                String rack = (String)model.getValueAt(row, 1); 입고위치 구현 필요
-
-				// 회원 수정
 				if (col == table.getColumn("작업").getModelIndex()) {
 					// 입고 처리 로직
 					String msg = "입고처리가 완료되었습니다.";
@@ -136,29 +126,25 @@ public class InboundOrderPage extends AbstractTablePage implements Refreshable{
 		});
 	}
 
-	// 테이블 데이터 새로고침
-	public void refresh() {
-		orderList = inBoundOrderDAO.getOrderList();
-		model.setDataVector(toTableData(orderList), cols);
-
-		TableUtil.applyDefaultTableStyle(table);
-		
-		TableUtil.applyColorTextRenderer(table, "작업", new Color(25, 118, 210));
-	}
-
-	/**
-	 * TODO Product id로 서브쿼리 날리기.
-	 * 
-	 * @author JH
-	 */
 	// 테이블로 데이터로 변환
 	private Object[][] toTableData(List<InBoundOrder> orderList) {
 		Object[][] data = new Object[orderList.size()][cols.length];
 		for (int i = 0; i < orderList.size(); i++) {
-			InBoundOrder order = orderList.get(i);
+			InBoundOrder order = orderList.get(i); 
 			data[i] = new Object[] { order.getProduct().getName(), "입고 위치 로직은 구현중" + i, "수정" };
 		}
 		return data;
 	}
-	
+
+	private void applyStyle() {
+		TableUtil.applyDefaultTableStyle(table);
+		TableUtil.applyColorTextRenderer(table, "작업", new Color(25, 118, 210));
+	}
+
+	// 테이블 데이터 새로고침
+	public void refresh() {
+		orderList = inBoundOrderDAO.getOrderList();
+		model.setDataVector(toTableData(orderList), cols);
+		applyStyle();
+	}
 }

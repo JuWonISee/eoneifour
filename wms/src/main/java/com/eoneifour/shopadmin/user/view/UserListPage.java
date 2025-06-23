@@ -23,7 +23,7 @@ import com.eoneifour.common.util.ButtonUtil;
 import com.eoneifour.common.util.TableUtil;
 import com.eoneifour.shopadmin.user.model.User;
 import com.eoneifour.shopadmin.user.repository.UserDAO;
-import com.eoneifour.shopadmin.view.frame.ShopAdminMainFrame;
+import com.eoneifour.shopadmin.view.ShopAdminMainFrame;
 
 public class UserListPage extends AbstractTablePage {
 	private ShopAdminMainFrame mainFrame;

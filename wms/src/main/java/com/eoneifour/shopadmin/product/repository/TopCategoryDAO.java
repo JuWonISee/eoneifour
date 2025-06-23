@@ -22,7 +22,7 @@ public class TopCategoryDAO {
 	con = dbManager.getConnection();
 	try {
 		StringBuffer sql = new StringBuffer();
-		sql.append("select *from top_category");
+		sql.append("select *from shop_top_category");
 		pstmt = con.prepareStatement(sql.toString());
 		rs=pstmt.executeQuery();
 		list = new ArrayList();

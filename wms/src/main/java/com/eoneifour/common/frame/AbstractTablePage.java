@@ -19,7 +19,7 @@ import com.eoneifour.common.util.Refreshable;
  * - applyTableStyle : 테이블 스타일 고정 (자식 클래스에서 반드시 호출)
  * @author 혜원
  */
-public abstract class AbstractTablePage extends JPanel  implements Refreshable{
+public abstract class AbstractTablePage extends JPanel{
     public JTable table;
     public DefaultTableModel model;
 
@@ -30,9 +30,6 @@ public abstract class AbstractTablePage extends JPanel  implements Refreshable{
     // 테이블 및 모델 생성
     public abstract void initTable();
     
-    @Override
-    public void refresh() {}
-
 
     // 테이블 스타일
     public void applyTableStyle() {

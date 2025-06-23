@@ -22,7 +22,7 @@ public class SubCategoryDAO {
 		ArrayList list = new ArrayList(); //size 0
 		
 		StringBuffer sql = new StringBuffer();
-		sql.append("select * from sub_category where top_category_id = ?");
+		sql.append("select * from shop_sub_category where top_category_id = ?");
 		
 		con = dbManager.getConnection();
 		

@@ -20,6 +20,7 @@ public class InBoundOrderDAO {
 		String sql = "SELECT p.name " + "FROM product p " + "JOIN purchase_order po ON p.product_id = po.product_id "
 				+ "WHERE po.status = 0";
 
+		Connection conn = db.getConnection();
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 
