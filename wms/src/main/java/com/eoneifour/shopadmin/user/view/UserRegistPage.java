@@ -19,7 +19,7 @@ import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
-import com.eoneifour.shopadmin.common.exception.UserException;
+import com.eoneifour.common.exception.UserException;
 import com.eoneifour.common.util.ButtonUtil;
 import com.eoneifour.common.util.FieldUtil;
 import com.eoneifour.shopadmin.user.model.User;

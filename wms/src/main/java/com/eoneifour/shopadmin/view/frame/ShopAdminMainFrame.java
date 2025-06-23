@@ -26,7 +26,11 @@ import com.eoneifour.shopadmin.user.view.UserUpdatePage;
  * - 각 메뉴별 페이지 등록
  * 
  * @author 혜원
+ *
+ * 병합 중, productPage들의 접근지정자를 default에서 public으로 수정하였습니다.
+ * @author JH
  */
+
 public class ShopAdminMainFrame extends AbstractMainFrame {
 	public UserRegistPage userRegistPage;
 	public UserDetailPage userDetailPage;
@@ -37,35 +41,40 @@ public class ShopAdminMainFrame extends AbstractMainFrame {
 	public ProductDetailPage productDetailPage;
 	public ProductUpdatePage productUpdatePage;
 	public ProductListPage productListPage;
+
 	
+
     public ShopAdminMainFrame() {
         super("쇼핑몰 메인 (관리자)"); // 타이틀 설정
         
+        // 페이지 생성
         userRegistPage = new UserRegistPage(this);
         userDetailPage = new UserDetailPage(this);
         userUpdatePage = new UserUpdatePage(this);
         userListPage = new UserListPage(this);
         
+
         productRegistPage = new ProductRegistPage(this);
         productDetailPage = new ProductDetailPage(this);
         productUpdatePage = new ProductUpdatePage(this);
     	productListPage = new ProductListPage(this);
     		
         initPages();
+        
+        // 회원 목록을 초기화면으로
+        userListPage.refresh();
+        showContent("USER_LIST");
     }
 
     // 페이지 등록
     private void initPages() {
-
+    	// 각 페이지 메뉴 연결
     	contentCardPanel.add(userListPage, "USER_LIST"); 				// 회원관리 페이지
     	contentCardPanel.add(userRegistPage, "USER_REGIST"); 	// 회원등록
     	contentCardPanel.add(userDetailPage, "USER_DETAIL"); 	// 회원상세
     	contentCardPanel.add(userUpdatePage, "USER_UPDATE"); 		// 회원수정
     	
-    	//regist페이지에 list페이지 인스턴스 연결
-
-    	//각 페이지 메뉴 연결
-
+    	// 생성과 동시에 add 하던 메서드 분리 @JH
         contentCardPanel.add(productListPage, "PRODUCT_LIST"); // 상품관리 페이지
         contentCardPanel.add(productRegistPage, "PRODUCT_REGIST"); // 상품등록 페이지
         contentCardPanel.add(productUpdatePage, "PRODUCT_UPDATE"); // 상품수정 페이지
@@ -73,7 +82,7 @@ public class ShopAdminMainFrame extends AbstractMainFrame {
         //contentCardPanel.add(new SettingPage(this), "SETTING"); // 설정 페이지
     }
 
-    // 쇼핑몰은 상단패널 2개 사용
+    // 상단 정보 바 + 메뉴 바 구성
     @Override
     public JPanel createTopPanel() {
         JPanel infoBar = createInfoBar();

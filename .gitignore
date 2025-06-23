@@ -1,14 +1,15 @@
-# Eclipse/STS 프로젝트 설정파일
+# Eclipse/STS 설정
 .metadata/
 .settings/
 .project
 .classpath
 
 # Maven 빌드 결과
-wms/target/
+target/
 
 # Java 빌드 결과
 *.class
+**/bin/
 
 # 로그파일
 *.log
@@ -16,3 +17,9 @@ wms/target/
 # OS 임시파일
 .DS_Store
 Thumbs.db
+
+# 민감 설정 제외
+wms/src/main/java/com/eoneifour/common/config/PrivateConfig.java
+
+# SQL 파일 무시
+wms/src/main/resources/sql/

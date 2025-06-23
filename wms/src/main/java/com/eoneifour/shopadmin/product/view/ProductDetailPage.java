@@ -5,22 +5,28 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.io.File;
 import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 import com.eoneifour.common.util.ButtonUtil;
+import com.eoneifour.common.util.DBManager;
 import com.eoneifour.common.util.FieldUtil;
 import com.eoneifour.shopadmin.product.model.Product;
 import com.eoneifour.shopadmin.product.model.ProductImg;
+import com.eoneifour.shopadmin.product.model.TopCategory;
 import com.eoneifour.shopadmin.product.repository.ProductDAO;
 import com.eoneifour.shopadmin.product.repository.ProductImgDAO;
+import com.eoneifour.shopadmin.product.repository.SubCategoryDAO;
+import com.eoneifour.shopadmin.product.repository.TopCategoryDAO;
 import com.eoneifour.shopadmin.view.frame.ShopAdminMainFrame;
 
 public class ProductDetailPage extends JPanel{
@@ -30,9 +36,9 @@ public class ProductDetailPage extends JPanel{
 	private JTextField topcategoryField;
 	private JTextField subcategoryField;
 	private JTextField productNameField;
-    private JTextField brandField;;
-    private JTextField priceField;;
-    private JTextField detailField;;
+    private JTextField brandField;
+    private JTextField priceField;
+    private JTextField detailField;
     private JTextField stockQuantityField;
     private JTextField imageField;
     
@@ -41,10 +47,8 @@ public class ProductDetailPage extends JPanel{
     
     private int productId;
 	
-	
 	public ProductDetailPage(ShopAdminMainFrame mainFrame) {
 		this.mainFrame = mainFrame;
-		
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         setBackground(new Color(245, 247, 250));
         
@@ -173,5 +177,4 @@ public class ProductDetailPage extends JPanel{
 
 			imageField.setText(sb.toString());
 		}
-		
-	}
+}

@@ -7,8 +7,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.eoneifour.common.util.DBManager;
 import com.eoneifour.shopadmin.common.exception.UserException;
-import com.eoneifour.shopadmin.common.util.DBManager;
 import com.eoneifour.shopadmin.user.model.User;
 
 public class UserDAO {

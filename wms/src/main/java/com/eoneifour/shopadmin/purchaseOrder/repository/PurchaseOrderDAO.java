@@ -4,8 +4,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
+import com.eoneifour.common.util.DBManager;
 import com.eoneifour.shopadmin.common.exception.PurchaseOrderException;
-import com.eoneifour.shopadmin.common.util.DBManager;
 import com.eoneifour.shopadmin.purchaseOrder.model.PurchaseOrder;
 
 public class PurchaseOrderDAO {

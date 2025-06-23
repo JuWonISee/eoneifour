@@ -1,6 +1,7 @@
 package com.eoneifour.shopadmin.user.model;
 
 import java.sql.Date;
+import java.text.SimpleDateFormat;
 
 public class User {
 	private int userId;

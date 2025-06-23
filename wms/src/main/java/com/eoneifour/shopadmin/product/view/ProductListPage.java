@@ -48,7 +48,6 @@ public class ProductListPage extends AbstractTablePage {
 		this.productUpdatePage = mainFrame.productUpdatePage;
 		this.productDAO = new ProductDAO();
 		this.purchaseOrderDAO = new PurchaseOrderDAO();
-
 		initTopPanel();
 		initTable();
 		applyTableStyle();
@@ -91,8 +90,8 @@ public class ProductListPage extends AbstractTablePage {
 		table = new JTable(model);
 		table.setRowHeight(36); // cell 높이 설정
 
-		// 테이블 컬럼 스타일 적용 (품절 상태 , 발주 , 수정 : 파랑 / 삭제 : 빨강)
-		TableUtil.applyColorTextRenderer(table, "발주요청", new Color(25, 118, 210));
+		// 테이블 컬럼 스타일 적용 (품절 상태 , 발주 : 노랑 , 수정 : 파랑 / 삭제 : 빨강)
+		TableUtil.applyColorTextRenderer(table, "발주요청", Color.YELLOW);
 		TableUtil.applyColorTextRenderer(table, "수정", new Color(25, 118, 210));
 		TableUtil.applyColorTextRenderer(table, "삭제", new Color(211, 47, 47));
 
