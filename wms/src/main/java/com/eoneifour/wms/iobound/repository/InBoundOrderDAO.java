@@ -16,7 +16,7 @@ public class InBoundOrderDAO {
 	public List<InBoundOrder> getOrderList(){
 		String sql = "select * from purchase_order where status = 1";
 		
-		Connection conn = db.getConnetion();
+		Connection conn = db.getConnection();
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		

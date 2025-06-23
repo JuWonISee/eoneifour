@@ -7,8 +7,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.eoneifour.shopadmin.common.exception.ProductException;
-import com.eoneifour.shopadmin.common.util.DBManager;
+import com.eoneifour.common.exception.UserException;
+import com.eoneifour.common.util.DBManager;
 import com.eoneifour.shopadmin.product.model.Product;
 import com.eoneifour.shopadmin.product.model.SubCategory;
 import com.eoneifour.shopadmin.product.model.TopCategory;
@@ -16,95 +16,7 @@ import com.eoneifour.shopadmin.product.model.TopCategory;
 public class ProductDAO {
 	DBManager dbManager = DBManager.getInstance();
 
-	// 1건 등록
-	public void insert(Product product) throws ProductException {
-
-		Connection con = null;
-		PreparedStatement pstmt = null;
-		int result = 0; // 쿼리 실행 성공 여부 결정짓는 변수
-
-		con = dbManager.getConnection();
-
-		StringBuffer sql = new StringBuffer();
-		sql.append("insert into product(name, brand_name, price,detail, stock_quantity, sub_category_id)");
-		sql.append(" values(?,?,?,?,?,?)");
-
-		try {
-			pstmt = con.prepareStatement(sql.toString());
-
-			pstmt.setString(1, product.getName());
-			pstmt.setString(2, product.getBrand_name());
-			pstmt.setInt(3, product.getPrice());
-			pstmt.setString(4, product.getDetail());
-			pstmt.setInt(5, product.getStock_quantity());
-			pstmt.setInt(6, product.getSub_category().getSub_category_id());
-
-			result = pstmt.executeUpdate();
-			if (result == 0) {
-				throw new ProductException("등록이 되지 않았습니다");
-			}
-
-		} catch (SQLException e) {
-			e.printStackTrace();
-			throw new ProductException("등록에 실패하였습니다.", e);
-		} finally {
-			dbManager.release(pstmt);
-		}
-	}
-
-	public Product getProduct(int productId) {
-		Product product = new Product();
-		Connection con = null;
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-
-		con = dbManager.getConnection();
-		StringBuffer sql = new StringBuffer();
-		sql.append("select ");
-		sql.append(" p.product_id, t.top_category_id, t.name AS top_category_name");
-		sql.append(" , s.sub_category_id, s.name AS sub_category_name, ");
-		sql.append(" p.brand_name, p.name AS product_name, p.price, p.detail, p.stock_quantity");
-		sql.append(" from product p");
-		sql.append(" join sub_category s on p.sub_category_id = s.sub_category_id");
-		sql.append(" join top_category t on s.top_category_id = t.top_category_id");
-		sql.append(" where p.product_id = ?;");
-
-		try {
-			pstmt = con.prepareStatement(sql.toString());
-
-			pstmt.setInt(1, productId);
-			rs = pstmt.executeQuery();
-			
-			if (rs.next()) {
-				product.setProduct_id(rs.getInt("product_id"));
-				product.setBrand_name(rs.getString("brand_name"));
-				product.setName(rs.getString("product_name"));
-				product.setPrice(rs.getInt("price"));
-				product.setDetail(rs.getString("detail"));
-				product.setStock_quantity(rs.getInt("stock_quantity"));
-				
-				TopCategory topCategory = new TopCategory();
-				topCategory.setTop_category_id(rs.getInt("top_category_id"));
-				topCategory.setName(rs.getString("top_category_name"));
-				
-				SubCategory subCategory = new SubCategory();
-				subCategory.setSub_category_id(rs.getInt("sub_category_id"));
-				subCategory.setName(rs.getString("sub_category_name"));
-				
-				subCategory.setTop_category(topCategory);
-				product.setSub_category(subCategory);
-
-			}
-
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} finally {
-			dbManager.release(pstmt, rs);
-		}
-		return product;
-	}
-
-	// 전체 상품 리스트 가져오기
+	// 전체 상품 리스트 조회
 	public List getProductList() {
 		Connection con = null;
 		PreparedStatement pstmt = null;
@@ -115,11 +27,13 @@ public class ProductDAO {
 		con = dbManager.getConnection();
 
 		StringBuffer sql = new StringBuffer();
-		sql.append("select product_id, t.name AS top_category_name, brand_name, p.name AS product_name, price, stock_quantity ");
-		sql.append(" from top_category t , sub_category s , product p");
+		sql.append(
+				"select product_id, t.name AS top_category_name, brand_name, p.name AS product_name, price, p.status, stock_quantity ");
+		sql.append(" from shop_top_category t , shop_sub_category s , shop_product p");
 		sql.append(" where t.top_category_id = s.top_category_id and");
-		sql.append(" s.sub_category_id = p.sub_category_id");
-		sql.append(" order by product_id asc");
+		sql.append(" s.sub_category_id = p.sub_category_id and");
+		sql.append(" p.status = 0");
+		sql.append(" order by product_id desc");
 
 		try {
 			pstmt = con.prepareStatement(sql.toString());
@@ -138,20 +52,75 @@ public class ProductDAO {
 				product.setBrand_name(rs.getString("brand_name"));
 				product.setName(rs.getString("product_name"));
 				product.setPrice(rs.getInt("price"));
+				product.setStatus(rs.getInt("p.status"));
 				product.setStock_quantity(rs.getInt("stock_quantity"));
 
 				list.add(product);
-
 			}
-
+			return list;
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+			throw new UserException("상품 목록 조회 중 오류 발생", e);
 		} finally {
 			dbManager.release(pstmt, rs);
 		}
 
-		return list;
+	}
+
+	// Product_id 기준으로 상품 1건 조회
+	public Product getProduct(int productId) {
+		Product product = new Product();
+		Connection con = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+
+		con = dbManager.getConnection();
+		StringBuffer sql = new StringBuffer();
+		sql.append("select ");
+		sql.append(" p.product_id, t.top_category_id, t.name AS top_category_name");
+		sql.append(" , s.sub_category_id, s.name AS sub_category_name, ");
+		sql.append(" p.brand_name, p.name AS product_name, p.price, p.detail, p.stock_quantity");
+		sql.append(" from shop_product p");
+		sql.append(" join shop_sub_category s on p.sub_category_id = s.sub_category_id");
+		sql.append(" join shop_top_category t on s.top_category_id = t.top_category_id");
+		sql.append(" where p.product_id = ?;");
+
+		try {
+			pstmt = con.prepareStatement(sql.toString());
+
+			pstmt.setInt(1, productId);
+			rs = pstmt.executeQuery();
+
+			if (rs.next()) {
+				product.setProduct_id(rs.getInt("product_id"));
+				product.setBrand_name(rs.getString("brand_name"));
+				product.setName(rs.getString("product_name"));
+				product.setPrice(rs.getInt("price"));
+				product.setDetail(rs.getString("detail"));
+				product.setStock_quantity(rs.getInt("stock_quantity"));
+
+				TopCategory topCategory = new TopCategory();
+				topCategory.setTop_category_id(rs.getInt("top_category_id"));
+				topCategory.setName(rs.getString("top_category_name"));
+
+				SubCategory subCategory = new SubCategory();
+				subCategory.setSub_category_id(rs.getInt("sub_category_id"));
+				subCategory.setName(rs.getString("sub_category_name"));
+
+				subCategory.setTop_category(topCategory);
+				product.setSub_category(subCategory);
+
+				return product;
+			} else {
+				throw new UserException("해당 상품이 존재하지 않습니다.");
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw new UserException("상품 조회 중 오류가 발생했습니다.", e);
+		} finally {
+			dbManager.release(pstmt, rs);
+		}
+
 	}
 
 	// product_img table에서 참조할 product_id 값을 넣기 위한 함수
@@ -172,6 +141,7 @@ public class ProductDAO {
 
 			if (rs.next()) {
 				pk = rs.getInt("product_id");
+
 			}
 
 		} catch (SQLException e) {
@@ -182,43 +152,183 @@ public class ProductDAO {
 
 		return pk;
 	}
-	
-	public void editProduct(Product product) throws ProductException {
-	    Connection con = null;
-	    PreparedStatement pstmt = null;
-	    int result = 0;
 
-	    con = dbManager.getConnection();
+	// 1건 등록
+	public void insertProduct(Product product) throws UserException {
 
-	    StringBuffer sql = new StringBuffer();
-	    sql.append("UPDATE product ");
-	    sql.append("SET name = ?, brand_name = ?, price = ?, detail = ?, stock_quantity = ?, sub_category_id = ? ");
-	    sql.append("WHERE product_id = ?");
+		Connection con = null;
+		PreparedStatement pstmt = null;
 
-	    try {
-	        pstmt = con.prepareStatement(sql.toString());
-	        pstmt.setString(1, product.getName());
-	        pstmt.setString(2, product.getBrand_name());
-	        pstmt.setInt(3, product.getPrice());
-	        pstmt.setString(4, product.getDetail());
-	        pstmt.setInt(5, product.getStock_quantity());
-	        pstmt.setInt(6, product.getSub_category().getSub_category_id());
-	        pstmt.setInt(7, product.getProduct_id()); 
+		con = dbManager.getConnection();
 
-	        result = pstmt.executeUpdate();
-	        if (result == 0) {
-	            throw new ProductException("수정이 되지 않았습니다");
-	        }
+		StringBuffer sql = new StringBuffer();
+		sql.append("insert into shop_product(name, brand_name, price,detail, stock_quantity, sub_category_id)");
+		sql.append(" values(?,?,?,?,?,?)");
 
-	    } catch (SQLException e) {
-	        e.printStackTrace();
-	        throw new ProductException("수정에 실패하였습니다.", e);
-	    } finally {
-	        dbManager.release(pstmt);
-	    }
+		try {
+			pstmt = con.prepareStatement(sql.toString());
+
+			pstmt.setString(1, product.getName());
+			pstmt.setString(2, product.getBrand_name());
+			pstmt.setInt(3, product.getPrice());
+			pstmt.setString(4, product.getDetail());
+			pstmt.setInt(5, product.getStock_quantity());
+			pstmt.setInt(6, product.getSub_category().getSub_category_id());
+
+			int result = pstmt.executeUpdate();
+			if (result == 0) {
+				throw new UserException("상품 등록에 실패했습니다");
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw new UserException("상품 등록 중 오류가 발생하였하였습니다.", e);
+		} finally {
+			dbManager.release(pstmt);
+		}
+	}
+
+	// 상품 1건 수정
+	public void updateProduct(Product product) throws UserException {
+		Connection con = null;
+		PreparedStatement pstmt = null;
+
+		con = dbManager.getConnection();
+
+		StringBuffer sql = new StringBuffer();
+		sql.append("UPDATE shop_product ");
+		sql.append("SET name = ?, brand_name = ?, price = ?, detail = ?, stock_quantity = ?, sub_category_id = ? ");
+		sql.append("WHERE product_id = ?");
+
+		try {
+			pstmt = con.prepareStatement(sql.toString());
+			pstmt.setString(1, product.getName());
+			pstmt.setString(2, product.getBrand_name());
+			pstmt.setInt(3, product.getPrice());
+			pstmt.setString(4, product.getDetail());
+			pstmt.setInt(5, product.getStock_quantity());
+			pstmt.setInt(6, product.getSub_category().getSub_category_id());
+			pstmt.setInt(7, product.getProduct_id());
+
+			int result = pstmt.executeUpdate();
+			if (result == 0) {
+				throw new UserException("상품 수정에 실패했습니다");
+			}
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw new UserException("상품 수정 중 오류가 발생했습니다.", e);
+		} finally {
+			dbManager.release(pstmt);
+		}
+	}
+
+	// 상품 등록시 상품명 중복 여부 확인
+	public boolean existByProductName(String productName) {
+		String sql = "select 1 from shop_product where name = ?";
+
+		Connection conn = dbManager.getConnection();
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+
+		try {
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setString(1, productName);
+			rs = pstmt.executeQuery();
+			return rs.next();
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw new UserException("상품명 중복 확인 중 오류 발생했습니다.", e);
+		} finally {
+			dbManager.release(pstmt, rs);
+		}
+	}
+
+	// 상품 수정 시 , 현재 조회된 상품을 제외한 상품들중 상품명 중복 여부 확인
+
+	public boolean existByProductNameExceptCurrent(String name, int productId) {
+		Connection con = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		boolean exists = false;
+
+		try {
+			con = dbManager.getConnection();
+			String sql = "SELECT COUNT(*) FROM shop_product WHERE name = ? AND product_id != ?";
+			pstmt = con.prepareStatement(sql);
+			pstmt.setString(1, name);
+			pstmt.setInt(2, productId);
+			rs = pstmt.executeQuery();
+
+			if (rs.next() && rs.getInt(1) > 0) {
+				exists = true;
+			}
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			dbManager.release(con, pstmt, rs);
+		}
+
+		return exists;
+	}
+
+	// 상품 삭제 (DB에서 삭제 X, status 1로 변경)
+	public void deleteProduct(int productId) throws UserException {
+		Product product = new Product();
+		Connection con = null;
+		PreparedStatement pstmt = null;
+		int result = 0;
+
+		con = dbManager.getConnection();
+
+		StringBuffer sql = new StringBuffer();
+		sql.append("UPDATE shop_product ");
+		sql.append("SET status = 1 ");
+		sql.append("WHERE product_id = ?");
+
+		try {
+			pstmt = con.prepareStatement(sql.toString());
+			pstmt.setInt(1, productId);
+
+			result = pstmt.executeUpdate();
+			if (result == 0) {
+				throw new UserException("상품이 삭제 되지 않았습니다");
+			}
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw new UserException("상품 삭제 중 오류가 발생했습니다.", e);
+		} finally {
+			dbManager.release(pstmt);
+		}
 	}
 	
-	
-	
-	
+	public void updateStock_quantity(Product product , int quantity) throws UserException{
+		Connection con = null;
+		PreparedStatement pstmt = null;
+
+		con = dbManager.getConnection();
+
+		StringBuffer sql = new StringBuffer();
+		sql.append("UPDATE shop_product ");
+		sql.append("SET stock_quantity = ? ");
+		sql.append(" WHERE product_id = ? ");
+
+		try {
+			pstmt = con.prepareStatement(sql.toString());
+			pstmt.setInt(1, product.getStock_quantity() + quantity);
+			pstmt.setInt(2, product.getProduct_id());
+
+			int result = pstmt.executeUpdate();
+			if (result == 0) {
+				throw new UserException("재고 수정에 실패했습니다");
+			}
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw new UserException("재고 수정 중 오류가 발생했습니다.", e);
+		} finally {
+			dbManager.release(pstmt);
+		}
+	}
 }

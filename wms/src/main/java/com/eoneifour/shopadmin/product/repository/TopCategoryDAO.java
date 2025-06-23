@@ -7,7 +7,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.eoneifour.shopadmin.common.util.DBManager;
+import com.eoneifour.common.util.DBManager;
 import com.eoneifour.shopadmin.product.model.TopCategory;
 
 public class TopCategoryDAO {
@@ -22,7 +22,7 @@ public class TopCategoryDAO {
 	con = dbManager.getConnection();
 	try {
 		StringBuffer sql = new StringBuffer();
-		sql.append("select *from top_category");
+		sql.append("select *from shop_top_category");
 		pstmt = con.prepareStatement(sql.toString());
 		rs=pstmt.executeQuery();
 		list = new ArrayList();

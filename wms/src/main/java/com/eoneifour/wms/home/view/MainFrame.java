@@ -124,7 +124,7 @@ public class MainFrame extends AbstractMainFrame {
 		disconnectDB.setFont(new Font("맑은 고딕", Font.PLAIN, 15));
 		disconnectDB.setPreferredSize(null);
 		disconnectDB.addActionListener(e -> {
-			db.release(db.getConnetion());
+			db.release(db.getConnection());
 			updateDBstatus(dbStatusLabel); // 즉시 갱신
 		});
 
