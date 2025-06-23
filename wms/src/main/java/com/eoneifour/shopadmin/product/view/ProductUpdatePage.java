@@ -210,7 +210,6 @@ public class ProductUpdatePage extends JPanel {
 					if (result == JOptionPane.YES_OPTION) {
 						updateProduct();
 						JOptionPane.showMessageDialog(this, "수정이 완료되었습니다.");
-						mainFrame.productListPage.refresh();
 						mainFrame.showContent("PRODUCT_LIST");
 					}
 				}

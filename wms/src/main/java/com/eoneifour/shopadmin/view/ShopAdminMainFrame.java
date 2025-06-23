@@ -62,7 +62,6 @@ public class ShopAdminMainFrame extends AbstractMainFrame {
         initPages();
         
         // 회원 목록을 초기화면으로
-        userListPage.refresh();
         showContent("USER_LIST");
     }
 

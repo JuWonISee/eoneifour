@@ -6,7 +6,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import com.eoneifour.common.config.PrivateConfig;
+import com.eoneifour.common.config.LocalConfig;
 
 public class DBManager {
 	private static DBManager instance;
@@ -15,7 +15,7 @@ public class DBManager {
     private DBManager() {
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
-            con = DriverManager.getConnection(PrivateConfig.URL, PrivateConfig.USER, PrivateConfig.PASS);
+            con = DriverManager.getConnection(LocalConfig.URL, LocalConfig.USER, LocalConfig.PASS);
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         } catch (SQLException e) {

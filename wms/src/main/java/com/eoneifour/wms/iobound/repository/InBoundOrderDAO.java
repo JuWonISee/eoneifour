@@ -17,8 +17,8 @@ public class InBoundOrderDAO {
 	Connection conn = db.getConnection();
 
 	public List<InBoundOrder> getOrderList() {
-		String sql = "SELECT p.name " + "FROM product p " + "JOIN purchase_order po ON p.product_id = po.product_id "
-				+ "WHERE po.status = 0";
+		String sql = "SELECT p.name " + "FROM shop_product p " + "JOIN shop_purchase_order po ON p.product_id = po.product_id "
+				+ "WHERE po.status = 1";
 
 		Connection conn = db.getConnection();
 		PreparedStatement pstmt = null;
@@ -27,6 +27,7 @@ public class InBoundOrderDAO {
 		try {
 			List<InBoundOrder> list = new ArrayList<>();
 			pstmt = conn.prepareStatement(sql);
+			System.out.println(sql);
 			rs = pstmt.executeQuery();
 
 			while (rs.next()) {
@@ -49,8 +50,8 @@ public class InBoundOrderDAO {
 	}
 
 	public List<InBoundOrder> searchByProductName(String keyword) {
-		String sql = "SELECT p.name FROM product p " + "JOIN purchase_order po ON p.product_id = po.product_id "
-				+ "WHERE po.status = 0 AND p.name LIKE ?";
+		String sql = "SELECT p.name FROM shop_product p " + "JOIN shop_purchase_order po ON p.product_id = po.product_id "
+				+ "WHERE po.status = 1 AND p.name LIKE ?";
 
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
