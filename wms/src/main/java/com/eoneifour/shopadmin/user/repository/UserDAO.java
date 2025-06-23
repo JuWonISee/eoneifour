@@ -115,7 +115,7 @@ public class UserDAO {
 	// 사용자 수정
 	public void updateUser(User user) throws UserException {
 		StringBuffer sql = new StringBuffer();
-		sql.append("update user ");
+		sql.append("update shop_user ");
 		sql.append("set password = ?, ");
 		sql.append("name = ?, ");
 		sql.append("address = ?, ");
