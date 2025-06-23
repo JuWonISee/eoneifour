@@ -33,24 +33,14 @@ public abstract class AbstractModalDialog extends JDialog {
 
 		// 버튼 영역
 		buttonPanel = new JPanel();
-		confirmBtn = new JButton("확인");
-		cancelBtn = new JButton("취소");
-
-		confirmBtn.setBackground(new Color(25, 118, 210));
-		confirmBtn.setForeground(Color.WHITE);
-		cancelBtn.setBackground(new Color(230, 230, 230));
-
-		cancelBtn.addActionListener(e -> dispose());
-
-		buttonPanel.add(confirmBtn);
-		buttonPanel.add(cancelBtn);
-
+		createButtons(); // 버튼 생성은 별도 메서드로 위임
 		add(buttonPanel, BorderLayout.SOUTH);
 
 	}
 
 	protected abstract void initComponents();
-
+	protected abstract void createButtons();
+	
 	public boolean isConfirmed() {
 		return confirmed;
 	}

@@ -19,7 +19,7 @@ public class PurchaseOrderDAO {
 	        con = dbManager.getConnection();
 
 	        StringBuffer sql = new StringBuffer();
-	        sql.append("INSERT INTO purchase_order(quantity, status, complete_date, requested_by, product_id) ");
+	        sql.append("INSERT INTO shop_purchase_order(quantity, status, complete_date, requested_by, product_id) ");
 	        sql.append("VALUES (?, ?, ?, ?, ?)");
 
 	        PurchaseOrder purchaseOrder = new PurchaseOrder();
