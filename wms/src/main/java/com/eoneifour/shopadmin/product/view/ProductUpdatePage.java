@@ -8,8 +8,6 @@ import java.awt.Font;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.File;
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -29,8 +27,6 @@ import javax.swing.event.DocumentListener;
 
 import com.eoneifour.common.util.ButtonUtil;
 import com.eoneifour.common.util.FieldUtil;
-import com.eoneifour.shopadmin.common.exception.ProductException;
-import com.eoneifour.shopadmin.common.exception.ProductImgException;
 import com.eoneifour.shopadmin.product.model.Product;
 import com.eoneifour.shopadmin.product.model.ProductImg;
 import com.eoneifour.shopadmin.product.model.SubCategory;
@@ -41,9 +37,9 @@ import com.eoneifour.shopadmin.product.repository.SubCategoryDAO;
 import com.eoneifour.shopadmin.product.repository.TopCategoryDAO;
 import com.eoneifour.shopadmin.view.frame.ShopAdminMainFrame;
 
-public class ProductRegistPage extends JPanel {
+public class ProductUpdatePage extends JPanel {
 	private ShopAdminMainFrame mainFrame;
-	
+
 	private JComboBox cb_topcategory;
 	private JComboBox cb_subcategory;
 
@@ -52,44 +48,46 @@ public class ProductRegistPage extends JPanel {
 	private JTextField priceField;
 	private JTextField detailField;
 	private JTextField stockQuantityField;
-	
+
 	private JFileChooser chooser;
 	private File[] files;
 	private JTextField imageField;
-	
-	private JButton registBtn;
+
+	private JButton updateBtn;
 	private JButton checkBtn;
 	private JButton imgBtn;
 	private JButton listBtn;
 	
-	
+    private int productId;
+
 	private TopCategoryDAO topCategoryDAO;
 	private SubCategoryDAO subCategoryDAO;
 	private ProductDAO productDAO;
 	private ProductImgDAO productImgDAO;
-	
-	private boolean isProductNameChecked = false; //상품명 중복체크 클릭 여부
+
+	private boolean isProductNameChecked = false; // 상품명 중복체크 클릭 여부
 	private boolean isProductNameDuplicate = false; // 상품명 중복 여부
 
-	public ProductRegistPage(ShopAdminMainFrame mainFrame) {
+	public ProductUpdatePage(ShopAdminMainFrame mainFrame) {
+
 		this.mainFrame = mainFrame;
-		
+
 		productDAO = new ProductDAO();
 		productImgDAO = new ProductImgDAO();
 		topCategoryDAO = new TopCategoryDAO();
 		subCategoryDAO = new SubCategoryDAO();
-		
+
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 		setBackground(new Color(245, 247, 250));
 
 		JPanel formPanel = initFormPanel();
-		
+
 		add(Box.createVerticalGlue());
 		add(formPanel);
 		add(Box.createVerticalGlue());
-		
+
 	}
-	
+
 	private JPanel initFormPanel() {
 		JPanel formPanel = new JPanel();
 		formPanel.setLayout(new BoxLayout(formPanel, BoxLayout.Y_AXIS));
@@ -99,8 +97,8 @@ public class ProductRegistPage extends JPanel {
 		formPanel.setMinimumSize(new Dimension(500, 610));
 		formPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-		//타이틀 생성
-		JLabel title = new JLabel("상품 등록");
+		// 타이틀 생성
+		JLabel title = new JLabel("상품 수정");
 		title.setFont(new Font("맑은 고딕", Font.BOLD, 24));
 		title.setAlignmentX(Component.CENTER_ALIGNMENT);
 		formPanel.add(title);
@@ -116,41 +114,48 @@ public class ProductRegistPage extends JPanel {
 		formPanel.add(FieldUtil.createComboField("하위 카테고리", cb_subcategory));
 		formPanel.add(Box.createVerticalStrut(18));
 
-		//카테고리 설정
+		// 카테고리 설정
 		setCategory();
-		
-		//상품명 필드 + 중복확인 버튼
+
+		// 상품명 필드 + 중복확인 버튼
 		productNameField = new JTextField(16);
 		checkBtn = ButtonUtil.createDefaultButton("중복확인", 13, 90, 36);
 		formPanel.add(FieldUtil.createFieldWithButton("상품명", productNameField, checkBtn));
 		formPanel.add(Box.createVerticalStrut(12));
-		
-		//상품명 바뀌면 중복검사 상태 초기화
-		productNameField.getDocument().addDocumentListener(new DocumentListener() {
-            public void insertUpdate(DocumentEvent e) { markEmailUnchecked(); }
-            public void removeUpdate(DocumentEvent e) { markEmailUnchecked(); }
-            public void changedUpdate(DocumentEvent e) { markEmailUnchecked(); }
 
-            private void markEmailUnchecked() {
-            	isProductNameChecked = false;
-            	isProductNameDuplicate = false;
-            }
-        });
+		// 상품명 바뀌면 중복검사 상태 초기화
+		productNameField.getDocument().addDocumentListener(new DocumentListener() {
+			public void insertUpdate(DocumentEvent e) {
+				markEmailUnchecked();
+			}
+
+			public void removeUpdate(DocumentEvent e) {
+				markEmailUnchecked();
+			}
+
+			public void changedUpdate(DocumentEvent e) {
+				markEmailUnchecked();
+			}
+
+			private void markEmailUnchecked() {
+				isProductNameChecked = false;
+				isProductNameDuplicate = false;
+			}
+		});
 
 		// 기본 필드
-        brandField = new JTextField(16);
-        formPanel.add(FieldUtil.createField("브랜드", brandField));
-        formPanel.add(Box.createVerticalStrut(12));
-        priceField = new JTextField(16);
-        formPanel.add(FieldUtil.createField("가격", priceField));
-        formPanel.add(Box.createVerticalStrut(12));
-        detailField = new JTextField(16);
-        formPanel.add(FieldUtil.createField("상품설명", detailField));
-        formPanel.add(Box.createVerticalStrut(12));
-        stockQuantityField = new JTextField(16);
-        formPanel.add(FieldUtil.createField("수량", stockQuantityField));
-        formPanel.add(Box.createVerticalStrut(12));
-
+		brandField = new JTextField(16);
+		formPanel.add(FieldUtil.createField("브랜드", brandField));
+		formPanel.add(Box.createVerticalStrut(12));
+		priceField = new JTextField(16);
+		formPanel.add(FieldUtil.createField("가격", priceField));
+		formPanel.add(Box.createVerticalStrut(12));
+		detailField = new JTextField(16);
+		formPanel.add(FieldUtil.createField("상품설명", detailField));
+		formPanel.add(Box.createVerticalStrut(12));
+		stockQuantityField = new JTextField(16);
+		formPanel.add(FieldUtil.createField("수량", stockQuantityField));
+		formPanel.add(Box.createVerticalStrut(12));
 
 		// 이미지 필드 + 이미지 업로드 버튼 (imageField는 편집 불가)
 		imageField = new JTextField(16);
@@ -165,53 +170,54 @@ public class ProductRegistPage extends JPanel {
 		imgBtn.addActionListener(e -> {
 			selectImg();
 		});
-		
-		
+
 		formPanel.add(createButtonPanel());
-		
+
 		return formPanel;
 	}
-	
+
 	private JPanel createButtonPanel() {
-		
-		// 등록 , 목록으로 돌아가기 버튼 생성
-		registBtn = ButtonUtil.createPrimaryButton("저장", 15, 120, 40);
+
+		// 수정 , 목록으로 돌아가기 버튼 생성
+		updateBtn = ButtonUtil.createPrimaryButton("수정", 15, 120, 40);
 		listBtn = ButtonUtil.createDefaultButton("목록", 15, 120, 40);
 
-		//중복 확인 버튼 이벤트
-        checkBtn.addActionListener(e->{
-        	isProductNameDuplicate  = productDAO.existByProductName(productNameField.getText());
-        	if (isProductNameDuplicate ) {
-        		isProductNameChecked  = false;
-        		showErrorMessage("상품명이 중복됐습니다. 다른 상품명을 입력해주세요.");
-        	} else {
-        		isProductNameChecked  = true;
-        		JOptionPane.showMessageDialog(this, "사용 가능한 상품명입니다.");
-        	}
-        });
-		// 등록 버튼 이벤트 연결 (등록 이벤트 중복 방지)
-        if (registBtn.getActionListeners().length == 0) {
-	        registBtn.addActionListener(e->{
-	        	if (validateForm()) {
-	        		int result = JOptionPane.showConfirmDialog(
-	        			this,
-	        			"정말 등록하시겠습니까?",
-	        			"확인",
-	        			JOptionPane.YES_NO_OPTION
-	        		);
+		// 중복 확인 버튼 이벤트
+		checkBtn.addActionListener(e -> {
+			String name = productNameField.getText().trim();
+			
+			isProductNameDuplicate = productDAO.existByProductNameExceptCurrent(name,productId);
+			
+			if (isProductNameDuplicate) {
+				isProductNameChecked = false;
+				showErrorMessage("상품명이 중복됐습니다. 다른 상품명을 입력해주세요.");
+			} else {
+				isProductNameChecked = true;
+				JOptionPane.showMessageDialog(this, "사용 가능한 상품명입니다.");
+			}
+		});
+		// 수정 버튼 이벤트 연결 (등록 이벤트 중복 방지)
+		if (updateBtn.getActionListeners().length == 0) {
+			updateBtn.addActionListener(e -> {
+				if (validateForm()) {
+					int result = JOptionPane.showConfirmDialog(
+						this,
+						"정말 수정하시겠습니까?",
+						"수정 확인",
+						JOptionPane.YES_NO_OPTION
+					);
 
-	        		if (result == JOptionPane.YES_OPTION) {
-	        			registerProduct();
-	        			clearForm();
-	        			JOptionPane.showMessageDialog(this, "등록이 완료되었습니다.");
-	        			mainFrame.productListPage.refresh();
-	        			mainFrame.showContent("PRODUCT_LIST");
-	        		}
-	        	}
-	        });
-        }
-		
-		//목록 버튼 이벤트
+					if (result == JOptionPane.YES_OPTION) {
+						updateProduct();
+						JOptionPane.showMessageDialog(this, "수정이 완료되었습니다.");
+						mainFrame.productListPage.refresh();
+						mainFrame.showContent("PRODUCT_LIST");
+					}
+				}
+			});
+		}
+
+		// 목록 버튼 이벤트
 		listBtn.addActionListener(e -> {
 			mainFrame.productListPage.refresh();
 			mainFrame.showContent("PRODUCT_LIST");
@@ -220,15 +226,14 @@ public class ProductRegistPage extends JPanel {
 		// 버튼 패널
 		JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 0));
 		buttonPanel.setOpaque(false);
-		buttonPanel.add(registBtn);
+		buttonPanel.add(updateBtn);
 		buttonPanel.add(listBtn);
 		buttonPanel.setMaximumSize(new Dimension(300, 50));
 		buttonPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
-		
+
 		return buttonPanel;
 	}
 
-	//상위 카테고리 항목 채우기
 	public void getTopCategory() {
 		List<TopCategory> topList = topCategoryDAO.selectAll();
 
@@ -262,7 +267,6 @@ public class ProductRegistPage extends JPanel {
 		}
 	}
 	
-	//상위 , 하위 카테고리 채워넣기
 	public void setCategory() {
 		// 상위 카테고리 불러오기
 		topCategoryDAO = new TopCategoryDAO();
@@ -274,7 +278,6 @@ public class ProductRegistPage extends JPanel {
 			@Override
 			public void itemStateChanged(ItemEvent e) {
 				if (e.getStateChange() == ItemEvent.SELECTED) {
-					// 내가 선택한 아이템의 pk를 출력해 보기. 신발 = 3
 					TopCategory topCategory = (TopCategory) cb_topcategory.getSelectedItem();
 					getSubCategory(topCategory);
 				}
@@ -282,9 +285,8 @@ public class ProductRegistPage extends JPanel {
 		});
 	}
 
-	//filechooser로 이미지 선택했을 때 , 파일명만 보이게 하기
 	public void selectImg() {
-		chooser.showOpenDialog(ProductRegistPage.this);
+		chooser.showOpenDialog(ProductUpdatePage.this);
 		files = chooser.getSelectedFiles();
 		if (files.length > 0) {
 			String fileNames = Arrays.stream(files).map(File::getName).collect(Collectors.joining(", "));
@@ -292,7 +294,102 @@ public class ProductRegistPage extends JPanel {
 		}
 	}
 
-	// 유효성 검사 후 insert
+	// 지정한 상품에 대한 정보 출력
+	public void setProduct(int productId) {
+		this.productId = productId;
+		loadProduct();
+	}
+	
+	public void loadProduct() {
+		Product product = productDAO.getProduct(productId);
+		List<ProductImg> imgList = productImgDAO.getProductImgs(productId);
+
+		// 카테고리 콤보박스에 들어가있는 것은 객체이므로
+		// 콤보박스에 들어간 item의 index와 topcategory의 id가 동일 한 것을 선택
+		TopCategory selectedTopCategory = product.getSub_category().getTop_category();
+		
+		int topIndex = -1;
+		
+		for (int i = 0; i < cb_topcategory.getItemCount(); i++) {
+			TopCategory item = (TopCategory) cb_topcategory.getItemAt(i);
+			if (item != null && item.getTop_category_id() == selectedTopCategory.getTop_category_id()) {
+				topIndex = i;
+				break;
+			}
+		}
+
+		if (topIndex != -1) cb_topcategory.setSelectedIndex(topIndex);
+
+		//콤보박스에 들어간 item의 index와 subcategory의 id가 동일 한 것을 선택
+		getSubCategory(selectedTopCategory);
+
+		SubCategory selectedSubCategory = product.getSub_category();
+		int subIndex = -1;
+		for (int i = 0; i < cb_subcategory.getItemCount(); i++) {
+			SubCategory item = (SubCategory) cb_subcategory.getItemAt(i);
+			if (item != null && item.getSub_category_id() == selectedSubCategory.getSub_category_id()) {
+				subIndex = i;
+				break;
+			}
+		}
+
+		if (subIndex != -1) cb_subcategory.setSelectedIndex(subIndex);
+
+		brandField.setText(product.getBrand_name());
+		productNameField.setText(product.getName());
+		priceField.setText(Integer.toString(product.getPrice()));
+		detailField.setText(product.getDetail());
+		stockQuantityField.setText(Integer.toString(product.getStock_quantity()));
+
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < imgList.size(); i++) {
+			sb.append(imgList.get(i).getFilename());
+			if (i < imgList.size() - 1) {
+				sb.append(", "); // 마지막엔 쉼표 안 붙이기
+			}
+		}
+
+		imageField.setText(sb.toString());
+	}
+	
+
+	public void updateProduct() {
+		Product product = new Product();
+		ProductImgDAO productImgDAO = new ProductImgDAO();
+		ProductImg productImg = new ProductImg();
+
+		product.setProduct_id(productId);
+		product.setSub_category((SubCategory) cb_subcategory.getSelectedItem());
+		product.setName(productNameField.getText());
+		product.setBrand_name(brandField.getText());
+		product.setPrice(Integer.parseInt(priceField.getText()));
+		product.setDetail(detailField.getText());
+		product.setStock_quantity(Integer.parseInt(stockQuantityField .getText()));
+		
+		productDAO.updateProduct(product);
+
+		for (int i = 0; i < files.length; i++) {
+			File file = files[i]; 
+			productImg.setProduct(product); 
+			productImg.setFilename(file.getAbsolutePath()); 
+			
+			//update만 계속 돌게 되면 맨 마지막 파일만 남으므로
+			//0번째 index만 update , 그 이후는 insert
+			if(i==0) {
+				productImgDAO.updateProductImg(productImg);
+			}else {
+				productImgDAO.insertProductImg(productImg);
+			}
+			
+		}
+	}
+	
+	//오류 메세지 출력
+	private boolean showErrorMessage(String msg) {
+		JOptionPane.showMessageDialog(this, msg);
+		return false;
+	}
+	
 	public boolean validateForm() {
 		
 		//가격에 0이상의 정수를 입력하였는지 검사
@@ -315,7 +412,7 @@ public class ProductRegistPage extends JPanel {
         if(detailField.getText().trim().isEmpty()) return showErrorMessage("상품설명을 입력해주세요");
         if(stockQuantityField.getText().trim().isEmpty()) return showErrorMessage("재고를 입력해주세요");
         
-        if (files == null || files.length == 0) return showErrorMessage("파일을 최소 1개 이상 선택해주세요");
+        if (imageField.getText().trim().isEmpty()) return showErrorMessage("파일을 최소 1개 이상 선택해주세요");
         
         if(b_price == false) return showErrorMessage("가격은 0이상의 정수만 입력하세요.");
         if(b_quantity == false) return showErrorMessage("재고는 0이상의 정수만 입력하세요.");
@@ -323,60 +420,4 @@ public class ProductRegistPage extends JPanel {
         return true;
 	}
 
-	// DB 입력
-	public void registerProduct() {
-		try {
-			Product product = new Product();
-			ProductImg productImg = new ProductImg();
-			
-			product.setSub_category((SubCategory) cb_subcategory.getSelectedItem());
-			product.setName(productNameField.getText());
-			product.setBrand_name(brandField.getText());
-			product.setPrice(Integer.parseInt(priceField.getText()));
-			product.setDetail(detailField.getText());
-			product.setStock_quantity(Integer.parseInt(stockQuantityField .getText()));
-			
-			productDAO.insertProduct(product);
-			
-			//product_img 테이블에 insert (product_id 구해온 후 insert)
-			int product_id = productDAO.selectRecentPk();
-			product.setProduct_id(product_id);
-			
-			for (int i = 0; i < files.length; i++) {
-				File file = files[i]; 
-				productImg.setProduct(product); 
-				productImg.setFilename(file.getAbsolutePath()); 
-				productImgDAO.insertProductImg(productImg);
-			}
-
-		} catch (ProductException e) {
-			JOptionPane.showMessageDialog(this, e.getMessage());
-			e.printStackTrace();
-		}
-
-	}
-
-	//오류 메세지 출력
-	private boolean showErrorMessage(String msg) {
-		JOptionPane.showMessageDialog(this, msg);
-		return false;
-	}
-	
-	//등록 폼 초기화
-	private void clearForm() {
-    	cb_topcategory.setSelectedIndex(0);
-		productNameField.setText("");
-		brandField.setText("");
-		priceField.setText("");
-		detailField.setText("");
-		stockQuantityField.setText("");
-    	isProductNameChecked  = false;
-    	isProductNameDuplicate  = false;
-		
-	}
-	
-	// 진입 전 필수 함수 호출
-	public void prepare() {
-		clearForm();
-	}
 }

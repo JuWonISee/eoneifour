@@ -7,7 +7,6 @@ import java.awt.*;
  * Form 필드 생성 유틸
  */
 public class FieldUtil {
-	
 	// 기본 텍스트 필드 라벨
     public static JPanel createField(String labelText, JTextField field) {
         JPanel panel = new JPanel();
@@ -62,3 +61,4 @@ public class FieldUtil {
         return panel;
     }
 }
+

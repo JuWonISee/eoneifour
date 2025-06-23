@@ -11,11 +11,14 @@ import javax.swing.JPanel;
 
 import com.eoneifour.common.frame.AbstractMainFrame;
 import com.eoneifour.common.util.ButtonUtil;
-import com.eoneifour.shopadmin.member.view.UserListPage;
-import com.eoneifour.shopadmin.member.view.UserRegistPage;
 import com.eoneifour.shopadmin.product.view.ProductDetailPage;
 import com.eoneifour.shopadmin.product.view.ProductListPage;
 import com.eoneifour.shopadmin.product.view.ProductRegistPage;
+import com.eoneifour.shopadmin.product.view.ProductUpdatePage;
+import com.eoneifour.shopadmin.user.view.UserDetailPage;
+import com.eoneifour.shopadmin.user.view.UserListPage;
+import com.eoneifour.shopadmin.user.view.UserRegistPage;
+import com.eoneifour.shopadmin.user.view.UserUpdatePage;
 
 /**
  * 쇼핑몰 관리자 메인 프레임
@@ -25,27 +28,50 @@ import com.eoneifour.shopadmin.product.view.ProductRegistPage;
  * @author 혜원
  */
 public class ShopAdminMainFrame extends AbstractMainFrame {
-	ProductDetailPage produtDetailPage;
-	ProductListPage productListPage;
-	ProductRegistPage productRegistPage;
+	public UserRegistPage userRegistPage;
+	public UserDetailPage userDetailPage;
+	public UserUpdatePage userUpdatePage;
+	public UserListPage userListPage;
+	
+	public ProductRegistPage productRegistPage;
+	public ProductDetailPage productDetailPage;
+	public ProductUpdatePage productUpdatePage;
+	public ProductListPage productListPage;
 	
     public ShopAdminMainFrame() {
         super("쇼핑몰 메인 (관리자)"); // 타이틀 설정
+        
+        userRegistPage = new UserRegistPage(this);
+        userDetailPage = new UserDetailPage(this);
+        userUpdatePage = new UserUpdatePage(this);
+        userListPage = new UserListPage(this);
+        
+        productRegistPage = new ProductRegistPage(this);
+        productDetailPage = new ProductDetailPage(this);
+        productUpdatePage = new ProductUpdatePage(this);
+    	productListPage = new ProductListPage(this);
+    	
+    	
+    	
         initPages();
     }
 
     // 페이지 등록
     private void initPages() {
+
+    	contentCardPanel.add(userListPage, "USER_LIST"); 				// 회원관리 페이지
+    	contentCardPanel.add(userRegistPage, "USER_REGIST"); 	// 회원등록
+    	contentCardPanel.add(userDetailPage, "USER_DETAIL"); 	// 회원상세
+    	contentCardPanel.add(userUpdatePage, "USER_UPDATE"); 		// 회원수정
+    	
     	//regist페이지에 list페이지 인스턴스 연결
-    	produtDetailPage = new ProductDetailPage(this, null);
-    	productListPage = new ProductListPage(this,produtDetailPage);
-    	productRegistPage = new ProductRegistPage(this, productListPage);
+
     	//각 페이지 메뉴 연결
-    	contentCardPanel.add(new UserListPage(this), "USER_LIST"); // 회원관리 페이지
-    	contentCardPanel.add(new UserRegistPage(this), "USER_REGIST"); // 회원등록
+
         contentCardPanel.add(productListPage, "PRODUCT_LIST"); // 상품관리 페이지
         contentCardPanel.add(productRegistPage, "PRODUCT_REGIST"); // 상품등록 페이지
-        contentCardPanel.add(produtDetailPage, "PRODUCT_DETAIL"); // 상품상세 페이지
+        contentCardPanel.add(productUpdatePage, "PRODUCT_UPDATE"); // 상품수정 페이지
+        contentCardPanel.add(productDetailPage, "PRODUCT_DETAIL"); // 상품상세 페이지
         //contentCardPanel.add(new SettingPage(this), "SETTING"); // 설정 페이지
     }
 
@@ -95,7 +121,11 @@ public class ShopAdminMainFrame extends AbstractMainFrame {
 
         JButton userBtn = new JButton("회원관리");
         ButtonUtil.styleMenuButton(userBtn);
-        userBtn.addActionListener(e->showContent("USER_LIST"));
+        // 목록 새로고침 후 화면 이동
+        userBtn.addActionListener(e-> {
+//        	userListPage.refresh();
+        	showContent("USER_LIST");
+        });
 
         JButton productBtn = new JButton("상품관리");
         ButtonUtil.styleMenuButton(productBtn);

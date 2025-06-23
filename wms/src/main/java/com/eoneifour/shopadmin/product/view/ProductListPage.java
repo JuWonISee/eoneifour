@@ -2,40 +2,59 @@ package com.eoneifour.shopadmin.product.view;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionAdapter;
 import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTable;
+import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
 
-import com.eoneifour.common.frame.AbstractMainFrame;
 import com.eoneifour.common.frame.AbstractTablePage;
 import com.eoneifour.common.util.ButtonUtil;
 import com.eoneifour.common.util.TableUtil;
+import com.eoneifour.shopadmin.common.exception.ProductException;
 import com.eoneifour.shopadmin.product.model.Product;
 import com.eoneifour.shopadmin.product.repository.ProductDAO;
+import com.eoneifour.shopadmin.product.repository.PurchaseOrderDAO;
+import com.eoneifour.shopadmin.view.frame.ShopAdminMainFrame;
 
 public class ProductListPage extends AbstractTablePage {
-	private AbstractMainFrame mainFrame;
-	int productId =0; // product 상세 보기를 위해 product ID 를 담기 위한 변수
-	ProductDetailPage productDetailpage;
+	private ShopAdminMainFrame mainFrame;
+	int productId = 0; // product 상세 보기를 위해 product ID 를 담기 위한 변수
+	private ProductRegistPage productRegistPage;
+	private ProductDetailPage productDetailPage;
+	private ProductUpdatePage productUpdatePage;
 
-	public ProductListPage(AbstractMainFrame mainFrame,ProductDetailPage productDetailpage) {
+	private ProductDAO productDAO;
+	private PurchaseOrderDAO purchaseOrderDAO;
+	private List<Product> productList;
+	private String[] cols = { "상품번호", "카테고리", "브랜드", "상품명", "가격", "재고수량", "품절상태", "상태", "발주요청", "수정", "삭제" };
+
+	public ProductListPage(ShopAdminMainFrame mainFrame) {
 		super(mainFrame);
 		this.mainFrame = mainFrame;
-		this.productDetailpage = productDetailpage; 
+		this.productRegistPage = mainFrame.productRegistPage;
+		this.productDetailPage = mainFrame.productDetailPage;
+		this.productUpdatePage = mainFrame.productUpdatePage;
+		this.productDAO = new ProductDAO();
+		this.purchaseOrderDAO = new PurchaseOrderDAO();
+
 		initTopPanel();
 		initTable();
 		applyTableStyle();
 	}
 
+	// 사상단 패널 UI 구성 (제목 + 등록 버튼)
 	public void initTopPanel() {
 		JPanel topPanel = new JPanel(new BorderLayout());
 		// 패널 안쪽 여백 설정 (시계반대방향)
@@ -45,76 +64,150 @@ public class ProductListPage extends AbstractTablePage {
 		title.setFont(new Font("맑은 고딕", Font.BOLD, 24));
 		topPanel.add(title, BorderLayout.WEST);
 		// 등록 버튼
-		JButton addBtn = ButtonUtil.createPrimaryButton("상품 등록", 14, 120, 40);
-		addBtn.addActionListener(e -> mainFrame.showContent("PRODUCT_REGIST"));
+		JButton registBtn = ButtonUtil.createPrimaryButton("상품 등록", 14, 120, 40);
+		registBtn.addActionListener(e -> {
+			productRegistPage.prepare();
+			mainFrame.showContent("PRODUCT_REGIST");
+		});
 		JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 
 		rightPanel.setOpaque(false);
-		rightPanel.add(addBtn);
+		rightPanel.add(registBtn);
 		topPanel.add(rightPanel, BorderLayout.EAST);
 
 		add(topPanel, BorderLayout.NORTH);
 	}
 
+	// 테이블 초기화 및 클릭 이벤트 연결
 	public void initTable() {
-		ProductDAO productDAO = new ProductDAO();
-		List<Product> productList = productDAO.getProductList();
-		// 테이블 헤더
-		String[] cols = { "상품번호", "카테고리", "브랜드", "상품명", "가격", "재고수량", "품절상태", "수정", "삭제" };
-		// 테이블 바디 샘플 데이터
-		Object[][] data = new Object[productList.size()][9]; // 컬럼 수에 맞춰 배열 크기 설정
+		productList = productDAO.getProductList();
 
-		for (int i = 0; i < productList.size(); i++) {
-			Product product = productList.get(i);
-			data[i][0] = product.getProduct_id();
-			data[i][1] = product.getSub_category().getTop_category().getName();
-			data[i][2] = product.getBrand_name();
-			data[i][3] = product.getName();
-			data[i][4] = product.getPrice();
-			data[i][5] = product.getStock_quantity();
-
-			if (product.getStock_quantity() == 0) {
-				data[i][6] = "품절";
-			} else {
-				data[i][6] = "판매중";
-			}
-
-			data[i][7] = "수정";
-			data[i][8] = "삭제";
-		}
-
-		model = new DefaultTableModel(data, cols) {
+		model = new DefaultTableModel(toTableData(productList), cols) {
 			public boolean isCellEditable(int row, int column) {
 				return false;
 			}
 		};
+
 		table = new JTable(model);
+		table.setRowHeight(36); // cell 높이 설정
 
-		TableUtil.applyColoredLabelRenderer(table, "품절상태", new Color(25, 118, 210));
-		TableUtil.applyColoredLabelRenderer(table, "수정", new Color(25, 118, 210));
-		TableUtil.applyColoredLabelRenderer(table, "삭제", new Color(211, 47, 47));
+		// 테이블 컬럼 스타일 적용 (품절 상태 , 발주 , 수정 : 파랑 / 삭제 : 빨강)
+		TableUtil.applyColorTextRenderer(table, "발주요청", new Color(25, 118, 210));
+		TableUtil.applyColorTextRenderer(table, "수정", new Color(25, 118, 210));
+		TableUtil.applyColorTextRenderer(table, "삭제", new Color(211, 47, 47));
 
+		// 상세 , 수정 , 삭제 이벤트 연결
 		table.addMouseListener(new MouseAdapter() {
 			public void mouseClicked(MouseEvent e) {
+
 				int row = table.rowAtPoint(e.getPoint());
 				int col = table.columnAtPoint(e.getPoint());
-				if (col == table.getColumn("수정").getModelIndex()) {
-					System.out.println("수정 클릭: " + row);
+
+				int productId = (int) model.getValueAt(row, 0);
+
+				if (col == table.getColumn("발주요청").getModelIndex()) {
+					// 발주 로직
+					purchaseOrder(productId);
+				} else if (col == table.getColumn("수정").getModelIndex()) {
+					// 상품 수정 로직
+					mainFrame.productUpdatePage.setProduct(productId);
+					mainFrame.showContent("PRODUCT_UPDATE");
 				} else if (col == table.getColumn("삭제").getModelIndex()) {
-					System.out.println("삭제 클릭: " + row);
-				} else if(col == table.getColumn("상품번호").getModelIndex()) {
-				    System.out.println("상세 클릭" + row);
-				    productId = (Integer) table.getValueAt(row, 0); 
-				    productDetailpage.setProduct(productId);
-				    productDetailpage.selectedId = productId;
-				    mainFrame.showContent("PRODUCT_DETAIL");             
+					// 상품 삭제 로직 (삭제 시 , db delete가 아닌 , product 의 status 를 전환 (0 : 활성 , 1 : 비활성)
+					deleteProduct(productId);
+				} else {
+					// 상품 상세 로직
+					mainFrame.productDetailPage.setProduct(productId);
+					mainFrame.showContent("PRODUCT_DETAIL");
 				}
-			}  
+			}
+		});
+
+		// 마우스가 발주/수정/삭제 셀 위에 있을 때 손 모양 커서로 변경
+
+		table.addMouseMotionListener(new MouseMotionAdapter() {
+			@Override
+			public void mouseMoved(MouseEvent e) {
+				int row = table.rowAtPoint(e.getPoint());
+				int col = table.columnAtPoint(e.getPoint());
+
+				String columnName = table.getColumnName(col);
+				if ("발주요청".equals(columnName) || "삭제".equals(columnName) || "수정".equals(columnName)) {
+					table.setCursor(new Cursor(Cursor.HAND_CURSOR));
+				} else {
+					table.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+				}
+			}
 		});
 	}
 
-	//
+	// 테이블 데이터 새로고침
 	public void refresh() {
+		productList = productDAO.getProductList();
+		model.setDataVector(toTableData(productList), cols);
 
+		TableUtil.applyDefaultTableStyle(table);
+
+		TableUtil.applyColorTextRenderer(table, "발주요청", new Color(25, 118, 210));
+		TableUtil.applyColorTextRenderer(table, "수정", new Color(25, 118, 210));
+		TableUtil.applyColorTextRenderer(table, "삭제", new Color(211, 47, 47));
+	}
+
+	// 테이블용 데이터로 변환
+	private Object[][] toTableData(List<Product> productList) {
+		Object[][] data = new Object[productList.size()][cols.length];
+
+		for (int i = 0; i < productList.size(); i++) {
+			Product product = productList.get(i);
+
+			data[i] = new Object[] { product.getProduct_id(), product.getSub_category().getTop_category().getName(),
+					product.getBrand_name(), product.getName(), product.getPrice(), product.getStock_quantity(),
+					(product.getStock_quantity()) == 0 ? "품절" : "판매중", (product.getStatus() == 0) ? "활성" : "비활성",
+					"발주요청", "수정", "삭제" };
+		}
+
+		return data;
+	}
+
+	//상품 삭제 로직
+	public void deleteProduct(int ProductId) {
+		int result = JOptionPane.showConfirmDialog(this, "정말 삭제하시겠습니까?\n(삭제 시 상태가 비활성으로 전환됩니다.)", "삭제 확인",
+				JOptionPane.YES_NO_OPTION);
+
+		if (result == JOptionPane.YES_OPTION) {
+			productDAO.deleteProduct(ProductId);
+			JOptionPane.showMessageDialog(this, "상품이 삭제(비활성) 처리되었습니다.");
+			refresh();
+		}
+	}
+
+	//발주 처리 로직
+	private void purchaseOrder(int ProductId) {
+		JTextField quantityField = new JTextField();
+		Object[] message = { "발주 수량:", quantityField };
+
+		int option = JOptionPane.showConfirmDialog(this, message, "발주 요청", JOptionPane.YES_NO_OPTION);
+
+		if (option == JOptionPane.YES_OPTION) {
+			String input = quantityField.getText().trim();
+			if (!input.matches("\\d+")) {
+				JOptionPane.showMessageDialog(this, "수량은 0 이상의 정수를 입력해야 합니다.");
+				return;
+			}
+			
+			int quantity = Integer.parseInt(input);
+
+			try {
+				//productDAO에서 발주 테이블에 purchaseOrder() 로 insert문 완성 필요
+				Product product = productDAO.getProduct(ProductId);
+				productDAO.updateStock_quantity(product, quantity);
+				purchaseOrderDAO.insertOrder(ProductId, quantity);
+				JOptionPane.showMessageDialog(this, "발주가 요청되었습니다. 수량: " + quantity);
+				refresh();
+			} catch (ProductException e) {
+				JOptionPane.showMessageDialog(this, "발주 요청 중 오류 발생: " + e.getMessage());
+			}
+			
+		}
 	}
 }
