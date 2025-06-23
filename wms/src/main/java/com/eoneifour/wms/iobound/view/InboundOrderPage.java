@@ -31,7 +31,7 @@ public class InboundOrderPage extends AbstractTablePage implements Refreshable {
 
 	private List<InBoundOrder> orderList;
 	private InBoundOrderDAO inBoundOrderDAO;
-	private String[] cols = { "상품명", "입고위치", "작업" };
+	private String[] cols = { "ID", "상품명", "입고위치", "작업" };
 
 	public InboundOrderPage(MainFrame mainFrame) {
 		super(mainFrame);
@@ -54,7 +54,7 @@ public class InboundOrderPage extends AbstractTablePage implements Refreshable {
 		topPanel.add(title, BorderLayout.WEST);
 
 		// 검색 키워드
-		JTextField searchField = new JTextField();
+		JTextField searchField = new JTextField("");
 		searchField.setPreferredSize(new Dimension(200, 30));
 
 		// 등록 버튼
@@ -112,15 +112,24 @@ public class InboundOrderPage extends AbstractTablePage implements Refreshable {
 		table = new JTable(model);
 		table.setRowHeight(36); // cell 높이 설정
 		
+		// ID는 숨김
+		table.getColumn("ID").setMinWidth(0);
+		table.getColumn("ID").setMaxWidth(0);
+		table.getColumn("ID").setPreferredWidth(0);
+
+
 		table.addMouseListener(new MouseAdapter() {
 			public void mouseClicked(MouseEvent e) {
 				int row = table.rowAtPoint(e.getPoint());
 				int col = table.columnAtPoint(e.getPoint());
+				int orderId = (int) model.getValueAt(row, 0);
 
 				if (col == table.getColumn("작업").getModelIndex()) {
 					// 입고 처리 로직
+					inBoundOrderDAO.inBound(orderId);
 					String msg = "입고처리가 완료되었습니다.";
 					JOptionPane.showMessageDialog(null, msg, "Info", JOptionPane.INFORMATION_MESSAGE);
+					refresh();
 				}
 			}
 		});
@@ -130,8 +139,10 @@ public class InboundOrderPage extends AbstractTablePage implements Refreshable {
 	private Object[][] toTableData(List<InBoundOrder> orderList) {
 		Object[][] data = new Object[orderList.size()][cols.length];
 		for (int i = 0; i < orderList.size(); i++) {
-			InBoundOrder order = orderList.get(i); 
-			data[i] = new Object[] { order.getProduct().getName(), "입고 위치 로직은 구현중" + i, "수정" };
+			InBoundOrder order = orderList.get(i);
+			data[i] = new Object[] { 
+				order.getPurchase_order_id(), //ID 숨김
+				order.getProduct().getName(), "입고 위치 로직은 구현중" + i, "입고" };
 		}
 		return data;
 	}
