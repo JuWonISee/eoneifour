@@ -1,4 +1,4 @@
-package com.eoneifour.shopadmin.product.model;
+package com.eoneifour.shopadmin.purchaseOrder.model;
 
 import java.sql.Date;
 

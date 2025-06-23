@@ -73,8 +73,8 @@ public class UserListPage extends AbstractTablePage {
     table = new JTable(model);
 
 
-    TableUtil.applyColoredLabelRenderer(table, "수정", new Color(25, 118, 210));
-    TableUtil.applyColoredLabelRenderer(table, "삭제", new Color(211, 47, 47));
+    TableUtil.applyColorTextRenderer(table, "수정", new Color(25, 118, 210));
+    TableUtil.applyColorTextRenderer(table, "삭제", new Color(211, 47, 47));
 
 
     table.addMouseListener(new MouseAdapter() {

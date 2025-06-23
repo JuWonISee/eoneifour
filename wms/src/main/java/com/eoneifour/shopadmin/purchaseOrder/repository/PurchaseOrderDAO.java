@@ -1,13 +1,12 @@
-package com.eoneifour.shopadmin.product.repository;
+package com.eoneifour.shopadmin.purchaseOrder.repository;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-import com.eoneifour.shopadmin.common.exception.ProductException;
 import com.eoneifour.shopadmin.common.exception.PurchaseOrderException;
 import com.eoneifour.shopadmin.common.util.DBManager;
-import com.eoneifour.shopadmin.product.model.PurchaseOrder;
+import com.eoneifour.shopadmin.purchaseOrder.model.PurchaseOrder;
 
 public class PurchaseOrderDAO {
 	DBManager dbManager = DBManager.getInstance();

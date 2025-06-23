@@ -50,9 +50,7 @@ public class ShopAdminMainFrame extends AbstractMainFrame {
         productDetailPage = new ProductDetailPage(this);
         productUpdatePage = new ProductUpdatePage(this);
     	productListPage = new ProductListPage(this);
-    	
-    	
-    	
+    		
         initPages();
     }
 
