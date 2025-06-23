@@ -29,7 +29,6 @@ public abstract class AbstractTablePage extends JPanel{
 
     // 테이블 및 모델 생성
     public abstract void initTable();
-    
 
     // 테이블 스타일
     public void applyTableStyle() {
