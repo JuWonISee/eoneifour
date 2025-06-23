@@ -6,7 +6,6 @@ import java.sql.SQLException;
 
 import com.eoneifour.common.exception.UserException;
 import com.eoneifour.common.util.DBManager;
-import com.eoneifour.shopadmin.common.exception.PurchaseOrderException;
 import com.eoneifour.shopadmin.purchaseOrder.model.PurchaseOrder;
 
 public class PurchaseOrderDAO {
