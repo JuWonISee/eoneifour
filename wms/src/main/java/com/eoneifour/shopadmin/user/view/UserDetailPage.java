@@ -108,13 +108,11 @@ public class UserDetailPage extends JPanel {
         
         // 수정 버튼 이벤트
         updateBtn.addActionListener(e -> {
-        	// 수정 화면 이동 로직
+        	mainFrame.userUpdatePage.prepare(userId);
+        	mainFrame.showContent("USER_UPDATE");
         });
         // 목록 버튼 이벤트
-        listBtn.addActionListener(e->{
-        	mainFrame.userListPage.refresh();
-    		mainFrame.showContent("USER_LIST");
-        });
+        listBtn.addActionListener(e-> mainFrame.showContent("USER_LIST"));
         
         // 버튼 패널
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 0));

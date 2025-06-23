@@ -52,7 +52,7 @@ public class UserDAO {
 	
 	// userId 기준으로 사용자 1명 조회
 	public User getUserById(int userId) {
-		String sql = "select * from shop_user where user_id = ?";
+		String sql = "select * from shop_user where user_id = ? and status = 0";
 		
 		Connection conn = db.getConnection();
 		PreparedStatement pstmt = null;
@@ -144,11 +144,28 @@ public class UserDAO {
 		}
 	}
 
-	// 사용자 삭제
+	// userId 기준으로 사용자 상태 변경(active:0 -> delete:1)
+	public void deleteUser(int userId) {
+		String sql = "update shop_user set status = 1 where user_id = ? and status = 0";
+		
+		Connection conn = db.getConnection();
+		PreparedStatement pstmt = null;
+		try {
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1, userId);
+			int result = pstmt.executeUpdate();
+			if(result == 0) throw new UserException("삭제 대상이 존재하지 않습니다.");
+		} catch (SQLException e) {
+			e.printStackTrace();
+	        throw new UserException("회원 삭제 중 오류가 발생했습니다.", e);
+	    } finally {
+	        db.release(pstmt);
+	    }
+	}
 	
 	// 이메일 중복 여부 확인
 	public boolean existByEmail(String email) {
-		String sql = "select 1 from shop_user where email = ?";
+		String sql = "select 1 from shop_user where email = ? and status = 0";
 		
 		Connection conn = db.getConnection();
 		PreparedStatement pstmt = null;
