@@ -23,7 +23,7 @@ import com.eoneifour.common.util.TableUtil;
 import com.eoneifour.shopadmin.product.model.Product;
 import com.eoneifour.shopadmin.purchaseOrder.model.PurchaseOrder;
 import com.eoneifour.shopadmin.purchaseOrder.repository.PurchaseOrderDAO;
-import com.eoneifour.shopadmin.view.frame.ShopAdminMainFrame;
+import com.eoneifour.shopadmin.view.ShopAdminMainFrame;
 
 public class PurchaseOrderListPage extends AbstractTablePage{
 	private ShopAdminMainFrame mainFrame;

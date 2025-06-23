@@ -25,10 +25,9 @@ import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
+import com.eoneifour.common.exception.UserException;
 import com.eoneifour.common.util.ButtonUtil;
-import com.eoneifour.common.util.DBManager;
 import com.eoneifour.common.util.FieldUtil;
-import com.eoneifour.shopadmin.common.exception.ProductException;
 import com.eoneifour.shopadmin.product.model.Product;
 import com.eoneifour.shopadmin.product.model.ProductImg;
 import com.eoneifour.shopadmin.product.model.SubCategory;
@@ -37,7 +36,7 @@ import com.eoneifour.shopadmin.product.repository.ProductDAO;
 import com.eoneifour.shopadmin.product.repository.ProductImgDAO;
 import com.eoneifour.shopadmin.product.repository.SubCategoryDAO;
 import com.eoneifour.shopadmin.product.repository.TopCategoryDAO;
-import com.eoneifour.shopadmin.view.frame.ShopAdminMainFrame;
+import com.eoneifour.shopadmin.view.ShopAdminMainFrame;
 
 public class ProductRegistPage extends JPanel {
 	private ShopAdminMainFrame mainFrame;
@@ -347,7 +346,7 @@ public class ProductRegistPage extends JPanel {
 				productImgDAO.insertProductImg(productImg);
 			}
 
-		} catch (ProductException e) {
+		} catch (UserException e) {
 			JOptionPane.showMessageDialog(this, e.getMessage());
 			e.printStackTrace();
 		}

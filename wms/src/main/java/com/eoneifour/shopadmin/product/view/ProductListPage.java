@@ -19,14 +19,14 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
 
+import com.eoneifour.common.exception.UserException;
 import com.eoneifour.common.frame.AbstractTablePage;
 import com.eoneifour.common.util.ButtonUtil;
 import com.eoneifour.common.util.TableUtil;
-import com.eoneifour.shopadmin.common.exception.ProductException;
 import com.eoneifour.shopadmin.product.model.Product;
 import com.eoneifour.shopadmin.product.repository.ProductDAO;
 import com.eoneifour.shopadmin.purchaseOrder.repository.PurchaseOrderDAO;
-import com.eoneifour.shopadmin.view.frame.ShopAdminMainFrame;
+import com.eoneifour.shopadmin.view.ShopAdminMainFrame;
 
 public class ProductListPage extends AbstractTablePage {
 	private ShopAdminMainFrame mainFrame;
@@ -147,7 +147,7 @@ public class ProductListPage extends AbstractTablePage {
 
 		TableUtil.applyDefaultTableStyle(table);
 
-		TableUtil.applyColorTextRenderer(table, "발주요청", new Color(25, 118, 210));
+		TableUtil.applyColorTextRenderer(table, "발주요청", Color.DARK_GRAY);
 		TableUtil.applyColorTextRenderer(table, "수정", new Color(25, 118, 210));
 		TableUtil.applyColorTextRenderer(table, "삭제", new Color(211, 47, 47));
 	}
@@ -203,7 +203,7 @@ public class ProductListPage extends AbstractTablePage {
 				purchaseOrderDAO.insertOrder(ProductId, quantity);
 				JOptionPane.showMessageDialog(this, "발주가 요청되었습니다. 수량: " + quantity);
 				refresh();
-			} catch (ProductException e) {
+			} catch (UserException e) {
 				JOptionPane.showMessageDialog(this, "발주 요청 중 오류 발생: " + e.getMessage());
 			}
 			

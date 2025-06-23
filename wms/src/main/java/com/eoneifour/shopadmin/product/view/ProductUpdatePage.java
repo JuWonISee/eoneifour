@@ -35,7 +35,7 @@ import com.eoneifour.shopadmin.product.repository.ProductDAO;
 import com.eoneifour.shopadmin.product.repository.ProductImgDAO;
 import com.eoneifour.shopadmin.product.repository.SubCategoryDAO;
 import com.eoneifour.shopadmin.product.repository.TopCategoryDAO;
-import com.eoneifour.shopadmin.view.frame.ShopAdminMainFrame;
+import com.eoneifour.shopadmin.view.ShopAdminMainFrame;
 
 public class ProductUpdatePage extends JPanel {
 	private ShopAdminMainFrame mainFrame;

@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
+import com.eoneifour.common.exception.UserException;
 import com.eoneifour.common.util.DBManager;
 import com.eoneifour.shopadmin.common.exception.PurchaseOrderException;
 import com.eoneifour.shopadmin.purchaseOrder.model.PurchaseOrder;
@@ -11,7 +12,7 @@ import com.eoneifour.shopadmin.purchaseOrder.model.PurchaseOrder;
 public class PurchaseOrderDAO {
 	DBManager dbManager = DBManager.getInstance();
 	
-	public void insertOrder(int productId, int quantity) throws PurchaseOrderException {
+	public void insertOrder(int productId, int quantity) throws UserException {
 	    Connection con = null;
 	    PreparedStatement pstmt = null;
 
@@ -38,11 +39,11 @@ public class PurchaseOrderDAO {
 
 	        int result = pstmt.executeUpdate();
 	        if (result == 0) {
-	            throw new PurchaseOrderException("발주 신청에 실패했습니다");
+	            throw new UserException("발주 신청에 실패했습니다");
 	        }
 	    } catch (SQLException e) {
 	        e.printStackTrace();
-	        throw new PurchaseOrderException("발주 신청 중 오류가 발생하였습니다.", e);
+	        throw new UserException("발주 신청 중 오류가 발생하였습니다.", e);
 	    } finally {
 	        dbManager.release(pstmt);
 	    }

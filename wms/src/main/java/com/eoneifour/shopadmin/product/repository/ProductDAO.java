@@ -7,8 +7,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.eoneifour.common.exception.UserException;
 import com.eoneifour.common.util.DBManager;
-import com.eoneifour.shopadmin.common.exception.ProductException;
 import com.eoneifour.shopadmin.product.model.Product;
 import com.eoneifour.shopadmin.product.model.SubCategory;
 import com.eoneifour.shopadmin.product.model.TopCategory;
@@ -29,7 +29,7 @@ public class ProductDAO {
 		StringBuffer sql = new StringBuffer();
 		sql.append(
 				"select product_id, t.name AS top_category_name, brand_name, p.name AS product_name, price, p.status, stock_quantity ");
-		sql.append(" from top_category t , sub_category s , product p");
+		sql.append(" from shop_top_category t , shop_sub_category s , shop_product p");
 		sql.append(" where t.top_category_id = s.top_category_id and");
 		sql.append(" s.sub_category_id = p.sub_category_id and");
 		sql.append(" p.status = 0");
@@ -60,7 +60,7 @@ public class ProductDAO {
 			return list;
 		} catch (SQLException e) {
 			e.printStackTrace();
-			throw new ProductException("상품 목록 조회 중 오류 발생", e);
+			throw new UserException("상품 목록 조회 중 오류 발생", e);
 		} finally {
 			dbManager.release(pstmt, rs);
 		}
@@ -80,9 +80,9 @@ public class ProductDAO {
 		sql.append(" p.product_id, t.top_category_id, t.name AS top_category_name");
 		sql.append(" , s.sub_category_id, s.name AS sub_category_name, ");
 		sql.append(" p.brand_name, p.name AS product_name, p.price, p.detail, p.stock_quantity");
-		sql.append(" from product p");
-		sql.append(" join sub_category s on p.sub_category_id = s.sub_category_id");
-		sql.append(" join top_category t on s.top_category_id = t.top_category_id");
+		sql.append(" from shop_product p");
+		sql.append(" join shop_sub_category s on p.sub_category_id = s.sub_category_id");
+		sql.append(" join shop_top_category t on s.top_category_id = t.top_category_id");
 		sql.append(" where p.product_id = ?;");
 
 		try {
@@ -112,11 +112,11 @@ public class ProductDAO {
 
 				return product;
 			} else {
-				throw new ProductException("해당 상품이 존재하지 않습니다.");
+				throw new UserException("해당 상품이 존재하지 않습니다.");
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
-			throw new ProductException("상품 조회 중 오류가 발생했습니다.", e);
+			throw new UserException("상품 조회 중 오류가 발생했습니다.", e);
 		} finally {
 			dbManager.release(pstmt, rs);
 		}
@@ -154,7 +154,7 @@ public class ProductDAO {
 	}
 
 	// 1건 등록
-	public void insertProduct(Product product) throws ProductException {
+	public void insertProduct(Product product) throws UserException {
 
 		Connection con = null;
 		PreparedStatement pstmt = null;
@@ -162,7 +162,7 @@ public class ProductDAO {
 		con = dbManager.getConnection();
 
 		StringBuffer sql = new StringBuffer();
-		sql.append("insert into product(name, brand_name, price,detail, stock_quantity, sub_category_id)");
+		sql.append("insert into shop_product(name, brand_name, price,detail, stock_quantity, sub_category_id)");
 		sql.append(" values(?,?,?,?,?,?)");
 
 		try {
@@ -177,25 +177,25 @@ public class ProductDAO {
 
 			int result = pstmt.executeUpdate();
 			if (result == 0) {
-				throw new ProductException("상품 등록에 실패했습니다");
+				throw new UserException("상품 등록에 실패했습니다");
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
-			throw new ProductException("상품 등록 중 오류가 발생하였하였습니다.", e);
+			throw new UserException("상품 등록 중 오류가 발생하였하였습니다.", e);
 		} finally {
 			dbManager.release(pstmt);
 		}
 	}
 
 	// 상품 1건 수정
-	public void updateProduct(Product product) throws ProductException {
+	public void updateProduct(Product product) throws UserException {
 		Connection con = null;
 		PreparedStatement pstmt = null;
 
 		con = dbManager.getConnection();
 
 		StringBuffer sql = new StringBuffer();
-		sql.append("UPDATE product ");
+		sql.append("UPDATE shop_product ");
 		sql.append("SET name = ?, brand_name = ?, price = ?, detail = ?, stock_quantity = ?, sub_category_id = ? ");
 		sql.append("WHERE product_id = ?");
 
@@ -211,12 +211,12 @@ public class ProductDAO {
 
 			int result = pstmt.executeUpdate();
 			if (result == 0) {
-				throw new ProductException("상품 수정에 실패했습니다");
+				throw new UserException("상품 수정에 실패했습니다");
 			}
 
 		} catch (SQLException e) {
 			e.printStackTrace();
-			throw new ProductException("상품 수정 중 오류가 발생했습니다.", e);
+			throw new UserException("상품 수정 중 오류가 발생했습니다.", e);
 		} finally {
 			dbManager.release(pstmt);
 		}
@@ -224,7 +224,7 @@ public class ProductDAO {
 
 	// 상품 등록시 상품명 중복 여부 확인
 	public boolean existByProductName(String productName) {
-		String sql = "select 1 from product where name = ?";
+		String sql = "select 1 from shop_product where name = ?";
 
 		Connection conn = dbManager.getConnection();
 		PreparedStatement pstmt = null;
@@ -237,7 +237,7 @@ public class ProductDAO {
 			return rs.next();
 		} catch (SQLException e) {
 			e.printStackTrace();
-			throw new ProductException("상품명 중복 확인 중 오류 발생했습니다.", e);
+			throw new UserException("상품명 중복 확인 중 오류 발생했습니다.", e);
 		} finally {
 			dbManager.release(pstmt, rs);
 		}
@@ -253,7 +253,7 @@ public class ProductDAO {
 
 		try {
 			con = dbManager.getConnection();
-			String sql = "SELECT COUNT(*) FROM product WHERE name = ? AND product_id != ?";
+			String sql = "SELECT COUNT(*) FROM shop_product WHERE name = ? AND product_id != ?";
 			pstmt = con.prepareStatement(sql);
 			pstmt.setString(1, name);
 			pstmt.setInt(2, productId);
@@ -273,7 +273,7 @@ public class ProductDAO {
 	}
 
 	// 상품 삭제 (DB에서 삭제 X, status 1로 변경)
-	public void deleteProduct(int productId) throws ProductException {
+	public void deleteProduct(int productId) throws UserException {
 		Product product = new Product();
 		Connection con = null;
 		PreparedStatement pstmt = null;
@@ -282,7 +282,7 @@ public class ProductDAO {
 		con = dbManager.getConnection();
 
 		StringBuffer sql = new StringBuffer();
-		sql.append("UPDATE product ");
+		sql.append("UPDATE shop_product ");
 		sql.append("SET status = 1 ");
 		sql.append("WHERE product_id = ?");
 
@@ -292,25 +292,25 @@ public class ProductDAO {
 
 			result = pstmt.executeUpdate();
 			if (result == 0) {
-				throw new ProductException("상품이 삭제 되지 않았습니다");
+				throw new UserException("상품이 삭제 되지 않았습니다");
 			}
 
 		} catch (SQLException e) {
 			e.printStackTrace();
-			throw new ProductException("상품 삭제 중 오류가 발생했습니다.", e);
+			throw new UserException("상품 삭제 중 오류가 발생했습니다.", e);
 		} finally {
 			dbManager.release(pstmt);
 		}
 	}
 	
-	public void updateStock_quantity(Product product , int quantity) throws ProductException{
+	public void updateStock_quantity(Product product , int quantity) throws UserException{
 		Connection con = null;
 		PreparedStatement pstmt = null;
 
 		con = dbManager.getConnection();
 
 		StringBuffer sql = new StringBuffer();
-		sql.append("UPDATE product ");
+		sql.append("UPDATE shop_product ");
 		sql.append("SET stock_quantity = ? ");
 		sql.append(" WHERE product_id = ? ");
 
@@ -321,12 +321,12 @@ public class ProductDAO {
 
 			int result = pstmt.executeUpdate();
 			if (result == 0) {
-				throw new ProductException("재고 수정에 실패했습니다");
+				throw new UserException("재고 수정에 실패했습니다");
 			}
 
 		} catch (SQLException e) {
 			e.printStackTrace();
-			throw new ProductException("재고 수정 중 오류가 발생했습니다.", e);
+			throw new UserException("재고 수정 중 오류가 발생했습니다.", e);
 		} finally {
 			dbManager.release(pstmt);
 		}

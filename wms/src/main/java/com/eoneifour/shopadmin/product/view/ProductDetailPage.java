@@ -5,29 +5,23 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
-import java.io.File;
 import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
-import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 import com.eoneifour.common.util.ButtonUtil;
-import com.eoneifour.common.util.DBManager;
 import com.eoneifour.common.util.FieldUtil;
 import com.eoneifour.shopadmin.product.model.Product;
 import com.eoneifour.shopadmin.product.model.ProductImg;
-import com.eoneifour.shopadmin.product.model.TopCategory;
 import com.eoneifour.shopadmin.product.repository.ProductDAO;
 import com.eoneifour.shopadmin.product.repository.ProductImgDAO;
-import com.eoneifour.shopadmin.product.repository.SubCategoryDAO;
-import com.eoneifour.shopadmin.product.repository.TopCategoryDAO;
-import com.eoneifour.shopadmin.view.frame.ShopAdminMainFrame;
+import com.eoneifour.shopadmin.view.ShopAdminMainFrame;
 
 public class ProductDetailPage extends JPanel{
 	private ShopAdminMainFrame mainFrame;

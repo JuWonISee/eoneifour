@@ -7,8 +7,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.eoneifour.common.exception.UserException;
 import com.eoneifour.common.util.DBManager;
-import com.eoneifour.shopadmin.common.exception.UserException;
 import com.eoneifour.shopadmin.user.model.User;
 
 public class UserDAO {
@@ -16,7 +16,7 @@ public class UserDAO {
 	
 	// 사용자 목록 전체 조회
 	public List<User> getUserList() {
-		String sql = "select * from user where status = 0 order by user_id desc";
+		String sql = "select * from shop_user where status = 0 order by user_id desc";
 		
 		Connection conn = db.getConnection();
 		PreparedStatement pstmt = null; 
@@ -52,7 +52,7 @@ public class UserDAO {
 	
 	// userId 기준으로 사용자 1명 조회
 	public User getUserById(int userId) {
-		String sql = "select * from user where user_id = ?";
+		String sql = "select * from shop_user where user_id = ?";
 		
 		Connection conn = db.getConnection();
 		PreparedStatement pstmt = null;
@@ -88,7 +88,7 @@ public class UserDAO {
 	
 	// 사용자 등록
 	public void insertUser(User user) throws UserException {
-		String sql = "insert into user(email, password, name, address, address_detail, role) values(?,?,?,?,?,?)";
+		String sql = "insert into shop_user(email, password, name, address, address_detail, role) values(?,?,?,?,?,?)";
 		
 		Connection conn = db.getConnection();
 		PreparedStatement pstmt = null; 
@@ -115,7 +115,7 @@ public class UserDAO {
 	// 사용자 수정
 	public void updateUser(User user) throws UserException {
 		StringBuffer sql = new StringBuffer();
-		sql.append("update user ");
+		sql.append("update shop_user ");
 		sql.append("set password = ?, ");
 		sql.append("name = ?, ");
 		sql.append("address = ?, ");
@@ -148,7 +148,7 @@ public class UserDAO {
 	
 	// 이메일 중복 여부 확인
 	public boolean existByEmail(String email) {
-		String sql = "select 1 from user where email = ?";
+		String sql = "select 1 from shop_user where email = ?";
 		
 		Connection conn = db.getConnection();
 		PreparedStatement pstmt = null;
