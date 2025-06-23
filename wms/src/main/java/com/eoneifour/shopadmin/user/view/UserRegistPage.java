@@ -132,13 +132,16 @@ public class UserRegistPage extends JPanel {
         
         // 중복 확인 버튼 이벤트
         checkBtn.addActionListener(e->{
-        	isEmailDuplicate = userDAO.existByEmail(emailField.getText());
-        	if (isEmailDuplicate) {
-        		isEmailChecked = false;
-        		showErrorMessage("이메일이 중복됐습니다. 다른 이메일을 입력해주세요.");
-        	} else {
-        		isEmailChecked = true;
-        		JOptionPane.showMessageDialog(this, "사용 가능한 이메일입니다.");
+        	if (emailField.getText().trim().isEmpty()) showErrorMessage("이메일을 입력해주세요.");
+        	else {
+        		isEmailDuplicate = userDAO.existByEmail(emailField.getText());
+        		if (isEmailDuplicate) {
+        			isEmailChecked = false;
+        			showErrorMessage("이메일이 중복됐습니다. 다른 이메일을 입력해주세요.");
+        		} else {
+        			isEmailChecked = true;
+        			JOptionPane.showMessageDialog(this, "사용 가능한 이메일입니다.");
+        		}
         	}
         });
         
@@ -149,7 +152,6 @@ public class UserRegistPage extends JPanel {
 	        		registerUser();
 	        		clearForm();
 	        		JOptionPane.showMessageDialog(this, "등록이 완료되었습니다.");
-	        		mainFrame.userListPage.refresh();
 	        		mainFrame.showContent("USER_LIST");
 	        	}
 	        });
@@ -157,7 +159,6 @@ public class UserRegistPage extends JPanel {
         
         // 목록 버튼 이벤트
         listBtn.addActionListener(e->{
-    		mainFrame.userListPage.refresh();
     		mainFrame.showContent("USER_LIST");
         });
 

@@ -127,10 +127,7 @@ public class ShopAdminMainFrame extends AbstractMainFrame {
         JButton userBtn = new JButton("회원관리");
         ButtonUtil.styleMenuButton(userBtn);
         // 목록 새로고침 후 화면 이동
-        userBtn.addActionListener(e-> {
-//        	userListPage.refresh();
-        	showContent("USER_LIST");
-        });
+        userBtn.addActionListener(e-> showContent("USER_LIST"));
 
         JButton productBtn = new JButton("상품관리");
         ButtonUtil.styleMenuButton(productBtn);
