@@ -15,12 +15,16 @@ import com.eoneifour.shopadmin.user.model.User;
 public class OrderDAO {
 	DBManager db = DBManager.getInstance();
 	
-	public List<Order> getOrderList() {
+	public List<Order> getOrderList(boolean unreflected) {
 		StringBuffer sql = new StringBuffer();
-		sql.append("select o.orders_id, o.order_date, o.total_price, o.status, u.name as user_name, p.name as product_name, oi.quantity, oi.price");
-		sql.append(" from shop_orders o join shop_user u on o.user_id = u.user_id join shop_order_item oi on o.orders_id = oi.orders_id join shop_product p on oi.product_id = p.product_id");
+		sql.append("select o.orders_id, o.order_date, o.total_price, o.status, u.name as user_name, p.name as product_name, oi.quantity, oi.price ");
+		sql.append("from shop_orders o join shop_user u on o.user_id = u.user_id join shop_order_item oi on o.orders_id = oi.orders_id join shop_product p on oi.product_id = p.product_id ");
+		if (unreflected) { 
+			sql.append("join shop_release_order ro on o.orders_id = ro.order_id ");
+			sql.append("where ro.reflect = 0 ");
+		}
 		sql.append(" order by o.orders_id desc");
-		
+
 		Connection conn = db.getConnection();
 		PreparedStatement pstmt = null; 
 		ResultSet rs = null;
@@ -161,4 +165,35 @@ public class OrderDAO {
 	        db.release(pstmt, rs);
 	    }
 	}
+	
+	// 창고에 상품 출고 요청
+	public void requestRelease(int orderId) {
+		String sql = "insert into shop_release_order(order_id, product_id, quantity, requested_by) "
+				+ "select o.orders_id, oi.product_id, oi.quantity, o.user_id "
+				+ "from shop_orders o "
+				+ "join shop_order_item oi on o.orders_id = oi.orders_id "
+				+ "where o.orders_id = ?";
+		
+		Connection conn = db.getConnection();
+		PreparedStatement pstmt = null;
+		
+		try {
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1, orderId);
+			int result = pstmt.executeUpdate();
+			if (result == 0) throw new UserException("출고 요청 실패했습니다.");
+			
+			// 주문 상태 배송중(2) 변경
+			String updateSql = "update shop_orders set status = 2 where orders_id = ?";
+			pstmt = conn.prepareStatement(updateSql);
+			pstmt.setInt(1, orderId);
+			pstmt.executeUpdate();
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw new UserException("출고 요청 중 오류 발생했습니다.", e);
+		} finally {
+			db.release(pstmt);
+		}
+	}
+	
 }

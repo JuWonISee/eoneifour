@@ -11,6 +11,7 @@ import java.text.SimpleDateFormat;
 import java.util.List;
 
 import javax.swing.BorderFactory;
+import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -30,12 +31,17 @@ public class OrderListPage extends AbstractTablePage implements Refreshable {
 
 	private List<Order> orderList;
 	private OrderDAO orderDAO;
-	private String[] cols = {"주문번호", "주문일시", "고객명", "상품명", "수량", "가격", "총 결제금액", "배송상태", "수정", "취소"};
+	private String[] cols = {"주문번호", "주문일시", "고객명", "상품명", "수량", "총 결제금액", "주문상태", "수정","출고요청", "취소"};
 	
+	private JCheckBox showUnreflect;
+	private boolean unreflected;
 	public OrderListPage(ShopAdminMainFrame mainFrame) {
 		super(mainFrame);
 		this.mainFrame = mainFrame;
 		this.orderDAO = new OrderDAO();
+		
+		showUnreflect = new JCheckBox("미반영 주문만 보기");
+		unreflected = false;
 		
 		initTopPanel();
         initTable();
@@ -48,12 +54,14 @@ public class OrderListPage extends AbstractTablePage implements Refreshable {
         JLabel title = new JLabel("주문 목록");
         title.setFont(new Font("맑은 고딕",Font.BOLD,24));
         topPanel.add(title, BorderLayout.WEST);
+        topPanel.add(showUnreflect, BorderLayout.EAST);
+        showUnreflect.addActionListener(e -> refresh());
         add(topPanel, BorderLayout.NORTH);
 	}
 	
 	// 테이블 초기화 및 클릭 이벤트 연결
 	public void initTable() {
-		orderList = orderDAO.getOrderList();
+		orderList = orderDAO.getOrderList(unreflected);
         
         model = new DefaultTableModel(toTableData(orderList), cols) {
             public boolean isCellEditable(int row, int column) { return false; }
@@ -63,6 +71,7 @@ public class OrderListPage extends AbstractTablePage implements Refreshable {
         table.setRowHeight(36);
         TableUtil.applyDefaultTableStyle(table);
         TableUtil.applyColorTextRenderer(table, "수정", new Color(25, 118, 210));
+        TableUtil.applyColorTextRenderer(table, "출고요청", new Color(121, 190, 45));
         TableUtil.applyColorTextRenderer(table, "취소", new Color(211, 47, 47));
         
         // 상세, 수정, 취소 이벤트
@@ -73,16 +82,16 @@ public class OrderListPage extends AbstractTablePage implements Refreshable {
                 
                 int orderId = (int)model.getValueAt(row, 0);
                 String userName = (String)model.getValueAt(row, 2);
-                String orderStatus = (String)model.getValueAt(row, 7);
+                String orderStatus = (String)model.getValueAt(row, 6);
                 // 주문 수정
                 if (col == table.getColumn("수정").getModelIndex()) {
-                	if(!orderStatus.equals("배송준비")) JOptionPane.showMessageDialog(null,"배송 준비가 아닌 주문은 수정할 수 없습니다.");
+                	if(!orderStatus.equals("주문확인")) JOptionPane.showMessageDialog(null,"주문확인 상태가 아닌 주문은 수정할 수 없습니다.");
                 	else {
                 		mainFrame.orderUpdatePage.prepare(orderId);
                     	mainFrame.showContent("ORDER_UPDATE");
                 	}
                 } else if (col == table.getColumn("취소").getModelIndex()) { // 주문 취소
-                	if(!orderStatus.equals("배송준비")) JOptionPane.showMessageDialog(null,"배송 준비가 아닌 주문은 취소할 수 없습니다.");
+                	if(!orderStatus.equals("주문확인")) JOptionPane.showMessageDialog(null,"주문확인 상태가 아닌 주문은 취소할 수 없습니다.");
                 	else {
                 		int confirm = JOptionPane.showConfirmDialog(null, "정말 " + userName + "님의 주문번호 " + orderId + "를 취소하시겠습니까?", "주문 취소", JOptionPane.WARNING_MESSAGE ,JOptionPane.YES_NO_OPTION);
                 		if (confirm == JOptionPane.YES_OPTION) {
@@ -95,7 +104,22 @@ public class OrderListPage extends AbstractTablePage implements Refreshable {
                 			}
                 		}
                 	}
-                } else { // 주문 상세
+                } else if (col == table.getColumn("출고요청").getModelIndex()) { // 출고 요청
+                	if(!orderStatus.equals("주문확인")) JOptionPane.showMessageDialog(null,"주문확인 상태에서만 출고 요청이 가능합니다.");
+                	else {
+                		int confirm = JOptionPane.showConfirmDialog(null, orderId + "번 주문을 창고에 출고 요청하시겠습니까?", "출고 요청", JOptionPane.YES_NO_OPTION);
+
+                			if (confirm == JOptionPane.YES_OPTION) {
+                				try {
+                					orderDAO.requestRelease(orderId);
+                					JOptionPane.showMessageDialog(null, "출고 요청 완료되었습니다.");
+                					refresh();
+                				} catch (UserException e2) {
+                					JOptionPane.showMessageDialog(null, e2.getMessage(), "오류", JOptionPane.ERROR_MESSAGE);
+                				}
+                			}
+                	}
+            	} else { // 주문 상세
                 	mainFrame.orderDetailPage.setUser(orderId);
                 	mainFrame.showContent("ORDER_DETAIL");
                 }
@@ -104,13 +128,12 @@ public class OrderListPage extends AbstractTablePage implements Refreshable {
         
         // 마우스가 수정/취소 셀 위에 있을 때 손 모양 커서로 변경
         table.addMouseMotionListener(new MouseMotionAdapter() {
-            @Override
             public void mouseMoved(MouseEvent e) {
                 int row = table.rowAtPoint(e.getPoint());
                 int col = table.columnAtPoint(e.getPoint());
 
                 String columnName = table.getColumnName(col);
-                if ("수정".equals(columnName) || "취소".equals(columnName)) {
+                if ("수정".equals(columnName) || "출고요청".equals(columnName) || "취소".equals(columnName)) {
                     table.setCursor(new Cursor(Cursor.HAND_CURSOR));
                 } else {
                     table.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
@@ -121,12 +144,14 @@ public class OrderListPage extends AbstractTablePage implements Refreshable {
 	
 	// 테이블 데이터 새로고침
 	public void refresh() {
-		orderList = orderDAO.getOrderList();
+		boolean unreflected = showUnreflect.isSelected();
+		orderList = orderDAO.getOrderList(unreflected);
 		model.setDataVector(toTableData(orderList), cols);
 
 		TableUtil.applyDefaultTableStyle(table);
 		
 		TableUtil.applyColorTextRenderer(table, "수정", new Color(25, 118, 210));
+		TableUtil.applyColorTextRenderer(table, "출고요청", new Color(121, 190, 45));
 		TableUtil.applyColorTextRenderer(table, "취소", new Color(211, 47, 47));
 	}
 	
@@ -138,7 +163,7 @@ public class OrderListPage extends AbstractTablePage implements Refreshable {
 			Order order = orderList.get(i);
 			data[i] = new Object[] {
 				order.getOrderId(), sdf.format(order.getOrderDate()), order.getUserName(), order.getProductName(), order.getQuantity(),
-				order.getPrice(), order.getTotalPrice(), order.getStatusName(), "수정", "취소"
+				order.getTotalPrice(), order.getStatusName(), "수정", "출고요청", "취소"
 			};
 		}
 		
