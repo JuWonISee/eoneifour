@@ -13,13 +13,15 @@ public class PurchaseOrder {
 	private Date complete_date;
 	private int requested_by;
 	private int product_id;
+	private int reflect;
 	private Product product;
 	private User user;
 	
 	public PurchaseOrder() {}
 	
 	public PurchaseOrder(int purchase_order_id, int quantity, String status, Date request_date,
-						Date complete_date, int requested_by, int product_id, Product product, User user) {
+						Date complete_date, int requested_by, int product_id, Product product, User user 
+						, int reflect) {
 		this.purchase_order_id = purchase_order_id;
 		this.quantity = quantity;
 		this.status = status;
@@ -29,6 +31,7 @@ public class PurchaseOrder {
 		this.product_id = product_id;
 		this.product = product;
 		this.user = user;
+		this.reflect = reflect;
 	}
 
 	public int getPurchase_order_id() {
@@ -85,6 +88,14 @@ public class PurchaseOrder {
 
 	public void setProduct_id(int product_id) {
 		this.product_id = product_id;
+	}
+
+	public int getReflect() {
+		return reflect;
+	}
+
+	public void setReflect(int reflect) {
+		this.reflect = reflect;
 	}
 
 	public Product getProduct() {

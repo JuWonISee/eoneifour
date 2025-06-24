@@ -10,8 +10,7 @@ import java.util.List;
 import com.eoneifour.common.exception.UserException;
 import com.eoneifour.common.util.DBManager;
 import com.eoneifour.shopadmin.product.model.Product;
-import com.eoneifour.shopadmin.product.model.SubCategory;
-import com.eoneifour.shopadmin.product.model.TopCategory;
+import com.eoneifour.shopadmin.product.repository.ProductDAO;
 import com.eoneifour.shopadmin.purchaseOrder.model.PurchaseOrder;
 import com.eoneifour.shopadmin.user.model.User;
 
@@ -31,7 +30,7 @@ public class PurchaseOrderDAO {
 		StringBuffer sql = new StringBuffer();
 		sql.append("select po.purchase_order_id, p.name AS product_name, po.quantity, ");
 		sql.append(" po.request_date, u.name AS requested_by_name, po.status, ");
-		sql.append(" po.complete_date, po.requested_by, po.product_id ");
+		sql.append(" po.complete_date, po.requested_by, po.product_id , po.reflect");
 		sql.append(" FROM shop_purchase_order po ");
 		sql.append(" JOIN shop_user u ON po.requested_by = u.user_id ");
 		sql.append(" JOIN shop_product p ON po.product_id = p.product_id");
@@ -52,6 +51,7 @@ public class PurchaseOrderDAO {
 				user.setName(rs.getString("requested_by_name"));
 				purchaseOrder.setStatus(rs.getString("status"));
 				purchaseOrder.setComplete_date(rs.getDate("complete_date"));
+				purchaseOrder.setReflect(rs.getInt("reflect"));
 				purchaseOrder.setProduct(product);
 				purchaseOrder.setUser(user);
 				
@@ -159,7 +159,54 @@ public class PurchaseOrderDAO {
 	    }
 	}
 	
-	
+	//재고최신화 버튼을 눌렀을 때 ,  재고에 반영 (reflect가 0인것만 골라서 1로 바꾸고 재고 반영)
+	public void reflectAll() throws UserException {
+	    Connection con = null;
+	    PreparedStatement pstmt = null;
+	    ResultSet rs = null;
+	    con = dbManager.getConnection();
+	    
+        // status가 '입고완료'이고 reflect = 0인 발주만 조회
+        StringBuffer sql = new StringBuffer();
+        sql.append("SELECT purchase_order_id, product_id, quantity FROM shop_purchase_order ");
+        sql.append("WHERE status = '입고완료' AND reflect = 0");
+
+	    try {
+	        
+	        pstmt = con.prepareStatement(sql.toString());
+	        rs = pstmt.executeQuery();
+
+	        while (rs.next()) {
+	            int purchaseOrderId = rs.getInt("purchase_order_id");
+	            int productId = rs.getInt("product_id");
+	            int quantity = rs.getInt("quantity");
+
+	            // 1. 상품 조회
+	            Product product = new ProductDAO().getProduct(productId);
+
+	            // 2. 재고 수량 증가
+	            new ProductDAO().updateStock_quantity(product, quantity);
+
+	            // 3. reflect = 1로 반영 상태 업데이트
+	            StringBuffer sql2 = new StringBuffer();
+	            sql2.append("UPDATE shop_purchase_order ");
+	            sql2.append("SET reflect = 1 ");
+	            sql2.append("WHERE purchase_order_id = ?");
+	            
+	            PreparedStatement updateStmt = con.prepareStatement(sql2.toString());
+	            updateStmt.setInt(1, purchaseOrderId);
+	            updateStmt.executeUpdate();
+	            updateStmt.close();
+	            
+	        }
+
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	        throw new UserException("재고 반영 중 오류 발생", e);
+	    } finally {
+	        dbManager.release(pstmt, rs);
+	    }
+	}
 	
 	
 }

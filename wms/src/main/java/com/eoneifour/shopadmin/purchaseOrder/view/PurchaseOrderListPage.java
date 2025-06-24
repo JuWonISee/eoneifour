@@ -1,38 +1,37 @@
 package com.eoneifour.shopadmin.purchaseOrder.view;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Cursor;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionAdapter;
 import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
+import com.eoneifour.common.exception.UserException;
 import com.eoneifour.common.frame.AbstractTablePage;
 import com.eoneifour.common.util.ButtonUtil;
+import com.eoneifour.common.util.Refreshable;
 import com.eoneifour.common.util.TableUtil;
-import com.eoneifour.shopadmin.product.model.Product;
 import com.eoneifour.shopadmin.purchaseOrder.model.PurchaseOrder;
 import com.eoneifour.shopadmin.purchaseOrder.repository.PurchaseOrderDAO;
 import com.eoneifour.shopadmin.view.ShopAdminMainFrame;
 
-public class PurchaseOrderListPage extends AbstractTablePage {
+public class PurchaseOrderListPage extends AbstractTablePage implements Refreshable {
 	private ShopAdminMainFrame mainFrame;
 	private int purchaseId = 0; // purchase 상세 보기를 위해 purchase Id를 담기 위한 변수
 	private PurchaseOrderDetailPage purchaseOrderDetailPage;
 
 	private PurchaseOrderDAO purchaseOrderDAO;
 	private List<PurchaseOrder> purchaseOrderList;
-	private String[] cols = { "발주번호", "상품명", "요청수량", "요청일자", "요청자", "처리상태 ", "처리일자" };
+	private String[] cols = { "발주번호", "상품명", "요청수량", "요청일자", "요청자", "처리상태 ", "처리일자", "재고반영여부"};
 
 	public PurchaseOrderListPage(ShopAdminMainFrame mainFrame) {
 		super(mainFrame);
@@ -55,6 +54,17 @@ public class PurchaseOrderListPage extends AbstractTablePage {
 		title.setFont(new Font("맑은 고딕", Font.BOLD, 24));
 		topPanel.add(title, BorderLayout.WEST);
 
+		// 재고 최신화 버튼
+		JButton reflectBtn = ButtonUtil.createPrimaryButton("재고 최신화", 14, 120, 40);
+		reflectBtn.addActionListener(e -> {
+			reflectAll();
+		});
+		JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+
+		rightPanel.setOpaque(false);
+		rightPanel.add(reflectBtn);
+		topPanel.add(rightPanel, BorderLayout.EAST);
+		
 		add(topPanel, BorderLayout.NORTH);
 	}
 
@@ -80,12 +90,12 @@ public class PurchaseOrderListPage extends AbstractTablePage {
 
 				int purchaseId = (int) model.getValueAt(row, 0);
 
+				mainFrame.purchaseOrderDetailPage.setPurchase(purchaseId);
+				mainFrame.showContent("PURCHASE_DETAIL");
 
-					mainFrame.purchaseOrderDetailPage.setPurchase(purchaseId);
-					mainFrame.showContent("PURCHASE_DETAIL");
-				
 			}
 		});
+	}
 
 	// 테이블 데이터 새로고침
 	public void refresh() {
@@ -103,10 +113,22 @@ public class PurchaseOrderListPage extends AbstractTablePage {
 			PurchaseOrder purchaseOrder = purchaseOrderList.get(i);
 			data[i] = new Object[] { purchaseOrder.getPurchase_order_id(), purchaseOrder.getProduct().getName(),
 					purchaseOrder.getQuantity(), purchaseOrder.getRequest_date(), purchaseOrder.getUser().getName(),
-					purchaseOrder.getStatus(), purchaseOrder.getComplete_date() 
-			};
+					purchaseOrder.getStatus(), purchaseOrder.getComplete_date(),
+					(purchaseOrder.getReflect()) == 0 ? "미반영" : "반영됨"};
 		}
 
 		return data;
 	}
+	
+	public void reflectAll() {
+	    try {
+	        purchaseOrderDAO.reflectAll();
+	        JOptionPane.showMessageDialog(this, "재고가 반영되었습니다.");
+	        refresh(); // 테이블 갱신
+	    } catch (UserException e) {
+	        JOptionPane.showMessageDialog(this, "재고 반영 중 오류 발생: " + e.getMessage());
+	    }
+	}
+	
+	
 }

@@ -94,8 +94,8 @@ public class ShopAdminMainFrame extends AbstractMainFrame {
         contentCardPanel.add(productDetailPage, "PRODUCT_DETAIL"); // 상품상세 페이지
         
         //발주관리
-        contentCardPanel.add(purchaseOrderListPage, "PURCHASE_LIST"); // 상품상세 페이지
-        contentCardPanel.add(purchaseOrderDetailPage, "PURCHASE_DETAIL"); // 상품상세 페이지
+        contentCardPanel.add(purchaseOrderListPage, "PURCHASE_LIST"); // 발주관리 페이지
+        contentCardPanel.add(purchaseOrderDetailPage, "PURCHASE_DETAIL"); // 발주상세 페이지
         // 주문관리
         contentCardPanel.add(orderListPage, "ORDER_LIST"); // 주문관리 페이지
         contentCardPanel.add(orderDetailPage, "ORDER_DETAIL"); // 주문상세 페이지
@@ -103,21 +103,6 @@ public class ShopAdminMainFrame extends AbstractMainFrame {
 
 		// 회원 목록을 초기화면으로
 		showContent("USER_LIST");
-	}
-
-	// 페이지 등록
-	private void initPages() {
-		// 회원관리
-		contentCardPanel.add(userListPage, "USER_LIST"); // 회원관리 페이지
-		contentCardPanel.add(userRegistPage, "USER_REGIST"); // 회원등록
-		contentCardPanel.add(userDetailPage, "USER_DETAIL"); // 회원상세
-		contentCardPanel.add(userUpdatePage, "USER_UPDATE"); // 회원수정
-
-		// 상품관리
-		contentCardPanel.add(productListPage, "PRODUCT_LIST"); // 상품관리 페이지
-		contentCardPanel.add(productRegistPage, "PRODUCT_REGIST"); // 상품등록 페이지
-		contentCardPanel.add(productUpdatePage, "PRODUCT_UPDATE"); // 상품수정 페이지
-		contentCardPanel.add(productDetailPage, "PRODUCT_DETAIL"); // 상품상세 페이지
 	}
 
 	// 상단 정보 바 + 메뉴 바 구성
