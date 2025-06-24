@@ -2,17 +2,72 @@ package com.eoneifour.shopadmin.purchaseOrder.repository;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.eoneifour.common.exception.UserException;
 import com.eoneifour.common.util.DBManager;
+import com.eoneifour.shopadmin.product.model.Product;
+import com.eoneifour.shopadmin.product.model.SubCategory;
+import com.eoneifour.shopadmin.product.model.TopCategory;
 import com.eoneifour.shopadmin.purchaseOrder.model.PurchaseOrder;
 
 public class PurchaseOrderDAO {
 	DBManager dbManager = DBManager.getInstance();
 	
-	//ProductListPage에서 발주요청 시 발주테이블 Insert
-	//발주상태 하드코딩
+	public List getPurchaseList() {
+		Connection con = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+
+		List<PurchaseOrder> list = new ArrayList<>();
+
+		con = dbManager.getConnection();
+
+		StringBuffer sql = new StringBuffer();
+		sql.append("select po.purchase_order_id, p.name AS product_name, po.quantity, ");
+		sql.append(" po.request_date, u.name AS requested_by_name, po.status,");
+		sql.append(" from shop_top_category t , shop_sub_category s , shop_product p");
+		sql.append(" where t.top_category_id = s.top_category_id and");
+		sql.append(" s.sub_category_id = p.sub_category_id ");
+		sql.append(" order by product_id desc");
+
+		try {
+			pstmt = con.prepareStatement(sql.toString());
+			rs = pstmt.executeQuery();
+
+			while (rs.next()) {
+				Product product = new Product();
+				product.setProduct_id(rs.getInt("product_id"));
+
+				SubCategory subCategory = new SubCategory();
+				TopCategory topCategory = new TopCategory();
+				topCategory.setName(rs.getString("top_category_name"));
+				subCategory.setTop_category(topCategory);
+				product.setSub_category(subCategory);
+
+				product.setBrand_name(rs.getString("brand_name"));
+				product.setName(rs.getString("product_name"));
+				product.setPrice(rs.getInt("price"));
+				product.setStatus(rs.getInt("p.status"));
+				product.setStock_quantity(rs.getInt("stock_quantity"));
+
+				list.add(product);
+			}
+			return list;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw new UserException("상품 목록 조회 중 오류 발생", e);
+		} finally {
+			dbManager.release(pstmt, rs);
+		}
+
+	}
+	
+	
+	
 	public void insertOrder(int productId, int quantity) throws UserException {
 	    Connection con = null;
 	    PreparedStatement pstmt = null;

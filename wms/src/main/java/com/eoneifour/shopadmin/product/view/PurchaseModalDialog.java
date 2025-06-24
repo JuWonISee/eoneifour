@@ -13,14 +13,14 @@ import com.eoneifour.common.frame.AbstractModalDialog;
 import com.eoneifour.common.util.ButtonUtil;
 import com.eoneifour.shopadmin.product.model.Product;
 
-public class OrderModalDialog extends AbstractModalDialog{
+public class PurchaseModalDialog extends AbstractModalDialog{
 	private JTextField productNameField;
     private JTextField stockField;
     private JTextField quantityField;
     private int quantity;
     private Product product;
 
-    public OrderModalDialog(JFrame parent, Product product) {
+    public PurchaseModalDialog(JFrame parent, Product product) {
         super(parent, "발주 요청"); //parent는 나중에 mainframe으로 지정.
         this.product = product;
         initComponents();
