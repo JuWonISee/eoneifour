@@ -197,7 +197,7 @@ public class ProductListPage extends AbstractTablePage implements Refreshable{
 
 	        try {
 	            productDAO.updateStock_quantity(product, quantity);
-	            purchaseOrderDAO.insertOrder(productId, quantity);
+	            purchaseOrderDAO.insertPurchase(productId, quantity);
 	            JOptionPane.showMessageDialog(this, "발주가 요청되었습니다. 수량: " + quantity);
 	            refresh();
 	        } catch (UserException e) {

@@ -27,8 +27,7 @@ public class ProductDAO {
 		con = dbManager.getConnection();
 
 		StringBuffer sql = new StringBuffer();
-		sql.append(
-				"select product_id, t.name AS top_category_name, brand_name, p.name AS product_name, price, p.status, stock_quantity ");
+		sql.append("select product_id, t.name AS top_category_name, brand_name, p.name AS product_name, price, p.status, stock_quantity ");
 		sql.append(" from shop_top_category t , shop_sub_category s , shop_product p");
 		sql.append(" where t.top_category_id = s.top_category_id and");
 		sql.append(" s.sub_category_id = p.sub_category_id ");
