@@ -185,9 +185,6 @@ public class ProductListPage extends AbstractTablePage implements Refreshable{
 	private void purchaseOrder(int productId) {
 	    Product product = productDAO.getProduct(productId);
 
-	    // 예시: 기본 수량을 30으로 설정 (또는 로직에 따라 동적으로 계산)
-	    
-
 	    dialog = new OrderModalDialog (mainFrame, product);
 	    dialog.setVisible(true);
 
