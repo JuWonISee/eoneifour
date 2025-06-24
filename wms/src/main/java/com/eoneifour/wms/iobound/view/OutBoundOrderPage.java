@@ -26,14 +26,14 @@ import com.eoneifour.wms.home.view.MainFrame;
 import com.eoneifour.wms.iobound.model.InBoundOrder;
 import com.eoneifour.wms.iobound.repository.InBoundOrderDAO;
 
-public class InboundOrderPage extends AbstractTablePage implements Refreshable {
+public class OutBoundOrderPage extends AbstractTablePage implements Refreshable {
 	private MainFrame mainFrame;
 
 	private List<InBoundOrder> orderList;
 	private InBoundOrderDAO inBoundOrderDAO;
 	private String[] cols = { "ID", "상품명", "입고위치", "작업" };
 
-	public InboundOrderPage(MainFrame mainFrame) {
+	public OutBoundOrderPage(MainFrame mainFrame) {
 		super(mainFrame);
 		this.mainFrame = mainFrame;
 		this.inBoundOrderDAO = new InBoundOrderDAO();
