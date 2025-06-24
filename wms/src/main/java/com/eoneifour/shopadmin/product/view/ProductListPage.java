@@ -16,24 +16,25 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTable;
-import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
 
 import com.eoneifour.common.exception.UserException;
 import com.eoneifour.common.frame.AbstractTablePage;
 import com.eoneifour.common.util.ButtonUtil;
+import com.eoneifour.common.util.Refreshable;
 import com.eoneifour.common.util.TableUtil;
 import com.eoneifour.shopadmin.product.model.Product;
 import com.eoneifour.shopadmin.product.repository.ProductDAO;
 import com.eoneifour.shopadmin.purchaseOrder.repository.PurchaseOrderDAO;
 import com.eoneifour.shopadmin.view.ShopAdminMainFrame;
 
-public class ProductListPage extends AbstractTablePage {
+public class ProductListPage extends AbstractTablePage implements Refreshable{
 	private ShopAdminMainFrame mainFrame;
 	int productId = 0; // product 상세 보기를 위해 product ID 를 담기 위한 변수
 	private ProductRegistPage productRegistPage;
 	private ProductDetailPage productDetailPage;
 	private ProductUpdatePage productUpdatePage;
+	private OrderModalDialog  dialog;
 
 	private ProductDAO productDAO;
 	private PurchaseOrderDAO purchaseOrderDAO;
@@ -90,8 +91,8 @@ public class ProductListPage extends AbstractTablePage {
 		table = new JTable(model);
 		table.setRowHeight(36); // cell 높이 설정
 
-		// 테이블 컬럼 스타일 적용 (품절 상태 , 발주 : 노랑 , 수정 : 파랑 / 삭제 : 빨강)
-		TableUtil.applyColorTextRenderer(table, "발주요청", Color.YELLOW);
+		// 테이블 컬럼 스타일 적용 (품절 상태 , 발주 : 회색 , 수정 : 파랑 / 삭제 : 빨강)
+		TableUtil.applyColorTextRenderer(table, "발주요청", Color.DARK_GRAY);
 		TableUtil.applyColorTextRenderer(table, "수정", new Color(25, 118, 210));
 		TableUtil.applyColorTextRenderer(table, "삭제", new Color(211, 47, 47));
 
@@ -181,32 +182,26 @@ public class ProductListPage extends AbstractTablePage {
 	}
 
 	//발주 처리 로직
-	private void purchaseOrder(int ProductId) {
-		JTextField quantityField = new JTextField();
-		Object[] message = { "발주 수량:", quantityField };
+	private void purchaseOrder(int productId) {
+	    Product product = productDAO.getProduct(productId);
 
-		int option = JOptionPane.showConfirmDialog(this, message, "발주 요청", JOptionPane.YES_NO_OPTION);
+	    // 예시: 기본 수량을 30으로 설정 (또는 로직에 따라 동적으로 계산)
+	    
 
-		if (option == JOptionPane.YES_OPTION) {
-			String input = quantityField.getText().trim();
-			if (!input.matches("\\d+")) {
-				JOptionPane.showMessageDialog(this, "수량은 0 이상의 정수를 입력해야 합니다.");
-				return;
-			}
-			
-			int quantity = Integer.parseInt(input);
+	    dialog = new OrderModalDialog (mainFrame, product);
+	    dialog.setVisible(true);
 
-			try {
-				//productDAO에서 발주 테이블에 purchaseOrder() 로 insert문 완성 필요
-				Product product = productDAO.getProduct(ProductId);
-				productDAO.updateStock_quantity(product, quantity);
-				purchaseOrderDAO.insertOrder(ProductId, quantity);
-				JOptionPane.showMessageDialog(this, "발주가 요청되었습니다. 수량: " + quantity);
-				refresh();
-			} catch (UserException e) {
-				JOptionPane.showMessageDialog(this, "발주 요청 중 오류 발생: " + e.getMessage());
-			}
-			
-		}
+	    if (dialog.isConfirmed()) {
+	        int quantity = dialog.getQuantity();
+
+	        try {
+	            productDAO.updateStock_quantity(product, quantity);
+	            purchaseOrderDAO.insertOrder(productId, quantity);
+	            JOptionPane.showMessageDialog(this, "발주가 요청되었습니다. 수량: " + quantity);
+	            refresh();
+	        } catch (UserException e) {
+	            JOptionPane.showMessageDialog(this, "발주 요청 중 오류 발생: " + e.getMessage());
+	        }
+	    }
 	}
 }
