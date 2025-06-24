@@ -201,7 +201,6 @@ public class ProductRegistPage extends JPanel {
 	        			registerProduct();
 	        			clearForm();
 	        			JOptionPane.showMessageDialog(this, "등록이 완료되었습니다.");
-	        			mainFrame.productListPage.refresh();
 	        			mainFrame.showContent("PRODUCT_LIST");
 	        		}
 	        	}
@@ -210,7 +209,6 @@ public class ProductRegistPage extends JPanel {
 		
 		//목록 버튼 이벤트
 		listBtn.addActionListener(e -> {
-			mainFrame.productListPage.refresh();
 			mainFrame.showContent("PRODUCT_LIST");
 		});
 

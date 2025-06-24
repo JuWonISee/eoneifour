@@ -27,7 +27,7 @@ public class LoginPage extends JFrame {
     private JTextField emailField;
     private JPasswordField passwordField;
     private JButton loginButton;
-    private JButton signupButton;
+    private JButton joinButton;
 
     LoginDAO loginDAO;
     User user;
@@ -61,12 +61,12 @@ public class LoginPage extends JFrame {
         loginPanel.add(Box.createVerticalStrut(30));
 
         loginButton = ButtonUtil.createPrimaryButton("로그인", 14, 170, 40);
-        signupButton = ButtonUtil.createDefaultButton("회원가입", 14, 170, 40);
+        joinButton = ButtonUtil.createDefaultButton("회원가입", 14, 170, 40);
 
         loginButton.addActionListener(e-> loginUser());
-        
-        signupButton.addActionListener(e->{
-        	//회원가입 이동
+        joinButton.addActionListener(e-> {
+        	dispose();
+        	new JoinPage().setVisible(true);
         });
         
         JPanel buttonPanel = new JPanel();
@@ -74,7 +74,7 @@ public class LoginPage extends JFrame {
         buttonPanel.setOpaque(false);
         buttonPanel.add(loginButton);
         buttonPanel.add(Box.createHorizontalStrut(20));
-        buttonPanel.add(signupButton);
+        buttonPanel.add(joinButton);
 
         loginPanel.add(buttonPanel);
         add(loginPanel);
@@ -89,12 +89,10 @@ public class LoginPage extends JFrame {
     		try {
     			user = loginDAO.findByEmailAndPwd(email, pwd);
     			SessionUtil.setLoginUser(user);
-    			if(user.getRole() == 1) {
-    				new ShopAdminMainFrame();
-    				dispose(); // 로그인 창 닫기
-    			} else {
-    				JOptionPane.showMessageDialog(this, "유저페이지");
-    			}
+    			if(user.getRole() == 1) new ShopAdminMainFrame();
+    			else JOptionPane.showMessageDialog(this, "유저페이지");
+    			
+    			dispose(); // 로그인 창 닫기
 			} catch (UserException e) {
     			JOptionPane.showMessageDialog(this, e.getMessage());
     			e.printStackTrace();
