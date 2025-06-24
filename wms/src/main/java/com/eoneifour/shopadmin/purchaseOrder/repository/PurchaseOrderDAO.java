@@ -24,14 +24,14 @@ public class PurchaseOrderDAO {
 
 	        PurchaseOrder purchaseOrder = new PurchaseOrder();
 	        purchaseOrder.setQuantity(quantity);
-	        purchaseOrder.setStatus(2); // 발주 상태는 즉시 2 하드코딩 (0:발주완료 , 1:창고도착 , 2:입고완료)
+	        purchaseOrder.setStatus("창고도착"); // 발주 상태는 "창고도착" 하드코딩 (발주완료 , 창고도착 , 입고완료)
 	        purchaseOrder.setComplete_date(new java.sql.Date(System.currentTimeMillis()));
 	        purchaseOrder.setRequested_by(1); //주문자는 로그인 정보에서 얻어올 로직 필요. 현재 1로 하드코딩
 	        purchaseOrder.setProduct_id(productId);
 
 	        pstmt = con.prepareStatement(sql.toString());
 	        pstmt.setInt(1, purchaseOrder.getQuantity());
-	        pstmt.setInt(2, purchaseOrder.getStatus());
+	        pstmt.setString(2, purchaseOrder.getStatus());
 	        pstmt.setDate(3, purchaseOrder.getComplete_date());
 	        pstmt.setInt(4, purchaseOrder.getRequested_by());
 	        pstmt.setInt(5, purchaseOrder.getProduct_id());
