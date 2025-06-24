@@ -30,7 +30,7 @@ import com.eoneifour.shopadmin.view.ShopAdminMainFrame;
 
 public class ProductListPage extends AbstractTablePage implements Refreshable{
 	private ShopAdminMainFrame mainFrame;
-	int productId = 0; // product 상세 보기를 위해 product ID 를 담기 위한 변수
+	private int productId = 0; // product 상세 보기를 위해 product ID 를 담기 위한 변수
 	private ProductRegistPage productRegistPage;
 	private ProductDetailPage productDetailPage;
 	private ProductUpdatePage productUpdatePage;
@@ -91,7 +91,7 @@ public class ProductListPage extends AbstractTablePage implements Refreshable{
 		table = new JTable(model);
 		table.setRowHeight(36); // cell 높이 설정
 
-		// 테이블 컬럼 스타일 적용 (품절 상태 , 발주 : 회색 , 수정 : 파랑 / 삭제 : 빨강)
+		// 테이블 컬럼 스타일 적용 (품절, 비활성 : 빨강 / 발주요청 : 회색 / 수정 : 파랑)
 		TableUtil.applyConditionalTextRenderer(table, "품절상태", "품절", Color.RED);
 		TableUtil.applyConditionalTextRenderer(table, "상태", "비활성", Color.RED);
 		TableUtil.applyColorTextRenderer(table, "발주요청", Color.DARK_GRAY);

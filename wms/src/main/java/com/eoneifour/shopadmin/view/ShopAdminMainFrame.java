@@ -20,6 +20,8 @@ import com.eoneifour.shopadmin.product.view.ProductDetailPage;
 import com.eoneifour.shopadmin.product.view.ProductListPage;
 import com.eoneifour.shopadmin.product.view.ProductRegistPage;
 import com.eoneifour.shopadmin.product.view.ProductUpdatePage;
+import com.eoneifour.shopadmin.purchaseOrder.view.PurchaseOrderDetailPage;
+import com.eoneifour.shopadmin.purchaseOrder.view.PurchaseOrderListPage;
 import com.eoneifour.shopadmin.user.model.User;
 import com.eoneifour.shopadmin.user.view.UserDetailPage;
 import com.eoneifour.shopadmin.user.view.UserListPage;
@@ -47,6 +49,9 @@ public class ShopAdminMainFrame extends AbstractMainFrame {
 	public ProductDetailPage productDetailPage;
 	public ProductUpdatePage productUpdatePage;
 	public ProductListPage productListPage;
+	
+	public PurchaseOrderListPage purchaseOrderListPage;
+	public PurchaseOrderDetailPage purchaseOrderDetailPage;
 
 	public OrderListPage orderListPage;
 	public OrderDetailPage orderDetailPage;
@@ -64,6 +69,9 @@ public class ShopAdminMainFrame extends AbstractMainFrame {
         productDetailPage = new ProductDetailPage(this);
         productUpdatePage = new ProductUpdatePage(this);
     	productListPage = new ProductListPage(this);
+    	
+    	purchaseOrderListPage = new PurchaseOrderListPage(this);
+    	purchaseOrderDetailPage = new PurchaseOrderDetailPage(this);
     	
     	orderListPage = new OrderListPage(this);
     	orderDetailPage = new OrderDetailPage(this);
@@ -87,6 +95,9 @@ public class ShopAdminMainFrame extends AbstractMainFrame {
         contentCardPanel.add(productUpdatePage, "PRODUCT_UPDATE"); // 상품수정 페이지
         contentCardPanel.add(productDetailPage, "PRODUCT_DETAIL"); // 상품상세 페이지
         
+        //발주관리
+        contentCardPanel.add(purchaseOrderListPage, "PURCHASE_LIST"); // 상품상세 페이지
+        contentCardPanel.add(purchaseOrderDetailPage, "PURCHASE_DETAIL"); // 상품상세 페이지
         // 주문관리
         contentCardPanel.add(orderListPage, "ORDER_LIST"); // 주문관리 페이지
         contentCardPanel.add(orderDetailPage, "ORDER_DETAIL"); // 주문상세 페이지

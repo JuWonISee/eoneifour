@@ -25,52 +25,44 @@ import com.eoneifour.shopadmin.purchaseOrder.model.PurchaseOrder;
 import com.eoneifour.shopadmin.purchaseOrder.repository.PurchaseOrderDAO;
 import com.eoneifour.shopadmin.view.ShopAdminMainFrame;
 
-public class PurchaseOrderListPage extends AbstractTablePage{
+public class PurchaseOrderListPage extends AbstractTablePage {
 	private ShopAdminMainFrame mainFrame;
-	
+	private int purchaseId = 0; // purchase 상세 보기를 위해 purchase Id를 담기 위한 변수
+	private PurchaseOrderDetailPage purchaseOrderDetailPage;
+
 	private PurchaseOrderDAO purchaseOrderDAO;
 	private List<PurchaseOrder> purchaseOrderList;
-	private String[] cols = { "발주번호", "상품명", "요청수량", "요청일자", "요청자", "처리상태 ", "처리일자", "발주취소" };
-	
+	private String[] cols = { "발주번호", "상품명", "요청수량", "요청일자", "요청자", "처리상태 ", "처리일자" };
+
 	public PurchaseOrderListPage(ShopAdminMainFrame mainFrame) {
 		super(mainFrame);
 		this.mainFrame = mainFrame;
+		this.purchaseOrderDetailPage = mainFrame.purchaseOrderDetailPage;
 		this.purchaseOrderDAO = new PurchaseOrderDAO();
-		
+
 		initTopPanel();
 		initTable();
 		applyTableStyle();
-		
+
 	}
-	
+
 	public void initTopPanel() {
 		JPanel topPanel = new JPanel(new BorderLayout());
 		// 패널 안쪽 여백 설정 (시계반대방향)
 		topPanel.setBorder(BorderFactory.createEmptyBorder(20, 50, 10, 50));
 		// 제목 라벨
-		JLabel title = new JLabel("상품 목록");
+		JLabel title = new JLabel("발주 목록");
 		title.setFont(new Font("맑은 고딕", Font.BOLD, 24));
 		topPanel.add(title, BorderLayout.WEST);
-		// 등록 버튼
-		JButton registBtn = ButtonUtil.createPrimaryButton("상품 등록", 14, 120, 40);
-		registBtn.addActionListener(e -> {
-			productRegistPage.prepare();
-			mainFrame.showContent("PRODUCT_REGIST");
-		});
-		JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-
-		rightPanel.setOpaque(false);
-		rightPanel.add(registBtn);
-		topPanel.add(rightPanel, BorderLayout.EAST);
 
 		add(topPanel, BorderLayout.NORTH);
 	}
 
 	// 테이블 초기화 및 클릭 이벤트 연결
 	public void initTable() {
-		productList = productDAO.getProductList();
+		purchaseOrderList = purchaseOrderDAO.getPurchaseList();
 
-		model = new DefaultTableModel(toTableData(productList), cols) {
+		model = new DefaultTableModel(toTableData(purchaseOrderList), cols) {
 			public boolean isCellEditable(int row, int column) {
 				return false;
 			}
@@ -79,11 +71,6 @@ public class PurchaseOrderListPage extends AbstractTablePage{
 		table = new JTable(model);
 		table.setRowHeight(36); // cell 높이 설정
 
-		// 테이블 컬럼 스타일 적용 (품절 상태 , 발주 , 수정 : 파랑 / 삭제 : 빨강)
-		TableUtil.applyColorTextRenderer(table, "발주요청", new Color(25, 118, 210));
-		TableUtil.applyColorTextRenderer(table, "수정", new Color(25, 118, 210));
-		TableUtil.applyColorTextRenderer(table, "삭제", new Color(211, 47, 47));
-
 		// 상세 , 수정 , 삭제 이벤트 연결
 		table.addMouseListener(new MouseAdapter() {
 			public void mouseClicked(MouseEvent e) {
@@ -91,70 +78,35 @@ public class PurchaseOrderListPage extends AbstractTablePage{
 				int row = table.rowAtPoint(e.getPoint());
 				int col = table.columnAtPoint(e.getPoint());
 
-				int productId = (int) model.getValueAt(row, 0);
+				int purchaseId = (int) model.getValueAt(row, 0);
 
-				if (col == table.getColumn("발주요청").getModelIndex()) {
-					// 발주 로직
-					purchaseOrder(productId);
-				} else if (col == table.getColumn("수정").getModelIndex()) {
-					// 상품 수정 로직
-					mainFrame.productUpdatePage.setProduct(productId);
-					mainFrame.showContent("PRODUCT_UPDATE");
-				} else if (col == table.getColumn("삭제").getModelIndex()) {
-					// 상품 삭제 로직 (삭제 시 , db delete가 아닌 , product 의 status 를 전환 (0 : 활성 , 1 : 비활성)
-					deleteProduct(productId);
-				} else {
-					// 상품 상세 로직
-					mainFrame.productDetailPage.setProduct(productId);
-					mainFrame.showContent("PRODUCT_DETAIL");
-				}
+
+					mainFrame.purchaseOrderDetailPage.setPurchase(purchaseId);
+					mainFrame.showContent("PURCHASE_DETAIL");
+				
 			}
 		});
-
-		// 마우스가 발주/수정/삭제 셀 위에 있을 때 손 모양 커서로 변경
-
-		table.addMouseMotionListener(new MouseMotionAdapter() {
-			@Override
-			public void mouseMoved(MouseEvent e) {
-				int row = table.rowAtPoint(e.getPoint());
-				int col = table.columnAtPoint(e.getPoint());
-
-				String columnName = table.getColumnName(col);
-				if ("발주요청".equals(columnName) || "삭제".equals(columnName) || "수정".equals(columnName)) {
-					table.setCursor(new Cursor(Cursor.HAND_CURSOR));
-				} else {
-					table.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
-				}
-			}
-		});
-	}
 
 	// 테이블 데이터 새로고침
 	public void refresh() {
-		productList = productDAO.getProductList();
-		model.setDataVector(toTableData(productList), cols);
+		purchaseOrderList = purchaseOrderDAO.getPurchaseList();
+		model.setDataVector(toTableData(purchaseOrderList), cols);
 
 		TableUtil.applyDefaultTableStyle(table);
-
-		TableUtil.applyColorTextRenderer(table, "발주요청", new Color(25, 118, 210));
-		TableUtil.applyColorTextRenderer(table, "수정", new Color(25, 118, 210));
-		TableUtil.applyColorTextRenderer(table, "삭제", new Color(211, 47, 47));
 	}
 
 	// 테이블용 데이터로 변환
-	private Object[][] toTableData(List<Product> productList) {
-		Object[][] data = new Object[productList.size()][cols.length];
+	private Object[][] toTableData(List<PurchaseOrder> purchaseOrderList) {
+		Object[][] data = new Object[purchaseOrderList.size()][cols.length];
 
-		for (int i = 0; i < productList.size(); i++) {
-			Product product = productList.get(i);
-
-			data[i] = new Object[] { product.getProduct_id(), product.getSub_category().getTop_category().getName(),
-					product.getBrand_name(), product.getName(), product.getPrice(), product.getStock_quantity(),
-					(product.getStock_quantity()) == 0 ? "품절" : "판매중", (product.getStatus() == 0) ? "활성" : "비활성",
-					"발주요청", "수정", "삭제" };
+		for (int i = 0; i < purchaseOrderList.size(); i++) {
+			PurchaseOrder purchaseOrder = purchaseOrderList.get(i);
+			data[i] = new Object[] { purchaseOrder.getPurchase_order_id(), purchaseOrder.getProduct().getName(),
+					purchaseOrder.getQuantity(), purchaseOrder.getRequest_date(), purchaseOrder.getUser().getName(),
+					purchaseOrder.getStatus(), purchaseOrder.getComplete_date() 
+			};
 		}
 
 		return data;
 	}
 }
- 
