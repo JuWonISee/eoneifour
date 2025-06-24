@@ -18,6 +18,7 @@ public class InBoundOrderDAO {
 	DBManager db = DBManager.getInstance();
 	Connection conn = db.getConnection();
 
+	// 발주 리스트 조회
 	public List<InBoundOrder> getOrderList() {
 		String sql = "SELECT po.purchase_order_id, p.name " + "FROM shop_product p "
 				+ "JOIN shop_purchase_order po ON p.product_id = po.product_id " + "WHERE po.status = ?";
@@ -47,12 +48,13 @@ public class InBoundOrderDAO {
 
 		} catch (SQLException e) {
 			e.printStackTrace();
-			throw new UserException("입고 목록 조회 중 오류 발생", e);
+			throw new UserException(Integer.toString(e.getErrorCode()));
 		} finally {
 			db.release(pstmt, rs);
 		}
 	}
 
+	// 발주 리스트 중 키워드 검색
 	public List<InBoundOrder> searchByProductName(String keyword) {
 		String sql = "SELECT p.name FROM shop_product p "
 				+ "JOIN shop_purchase_order po ON p.product_id = po.product_id "
@@ -81,13 +83,13 @@ public class InBoundOrderDAO {
 			return list;
 		} catch (SQLException e) {
 			e.printStackTrace();
-			throw new UserException("상품 검색 중 오류 발생", e);
+			throw new UserException(Integer.toString(e.getErrorCode()));
 		} finally {
 			db.release(pstmt, rs);
 		}
 	}
 
-	
+	//
 	public int processInbound(int orderId) throws UserException {
 		PreparedStatement pstmtUpdate = null;
 		PreparedStatement pstmtSelect = null;
@@ -95,34 +97,24 @@ public class InBoundOrderDAO {
 		ResultSet rs = null;
 
 		try {
-			// 트랜잭션 시작 - 자동 커밋 비활성화
+			// 1. 트랙잭션 시작
 			conn.setAutoCommit(false);
-			
-			String updateSql = "UPDATE shop_purchase_order SET status = ?, complete_date = ? WHERE purchase_order_id = ?";
-			pstmtUpdate = conn.prepareStatement(updateSql);
-			pstmtUpdate.setString(1, "입고완료");
-			pstmtUpdate.setTimestamp(2, new Timestamp(System.currentTimeMillis()));
-			pstmtUpdate.setInt(3, orderId);
-			
-			int updateResult = pstmtUpdate.executeUpdate();
-			if (updateResult == 0) {
-				throw new UserException("발주 주문 상태 업데이트에 실패했습니다");
-			}
 
-			// 2단계: 상품 정보 조회
+			// 2. 상품정보 조회 Query
 			String selectSql = "SELECT p.product_id, p.name, p.brand_name, p.detail, po.quantity";
 			selectSql += " FROM shop_product p JOIN shop_purchase_order po";
 			selectSql += " ON p.product_id = po.product_id WHERE po.purchase_order_id = ?";
-			
+
 			pstmtSelect = conn.prepareStatement(selectSql);
 			pstmtSelect.setInt(1, orderId);
 			rs = pstmtSelect.executeQuery();
 
-			// 3단계: stock_product 테이블에 삽입
+			// 3. 입고 테이블에 INSERT Query
 			String insertSql = "INSERT INTO stock_product(product_id, product_name, product_brand, detail, s, z, x, y, stock_status)";
 			insertSql += " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)";
 			pstmtInsert = conn.prepareStatement(insertSql);
-                              
+
+			// 4. 모델 객체에 set 및 INSERT Query에 바인딩
 			while (rs.next()) {
 				StockProduct stockProduct = new StockProduct();
 				stockProduct.setProductId(rs.getInt("product_id"));
@@ -145,15 +137,21 @@ public class InBoundOrderDAO {
 				pstmtInsert.setInt(8, stockProduct.getY());
 				pstmtInsert.setInt(9, stockProduct.getStockStatus());
 
-				int insertResult = pstmtInsert.executeUpdate();
-				if (insertResult == 0) {
-					throw new UserException("재고 상품 등록에 실패했습니다");
-				}
+				pstmtInsert.executeUpdate();
 			}
+
+			// 5 . 발주 테이블 UPDATE (창고도착 -> 입고완료)
+			String updateSql = "UPDATE shop_purchase_order SET status = ?, complete_date = ? WHERE purchase_order_id = ?";
+			pstmtUpdate = conn.prepareStatement(updateSql);
+			pstmtUpdate.setString(1, "입고완료");
+			pstmtUpdate.setTimestamp(2, new Timestamp(System.currentTimeMillis()));
+			pstmtUpdate.setInt(3, orderId);
+
+			int updateResult = pstmtUpdate.executeUpdate();
 
 			// 모든 작업이 성공하면 커밋
 			conn.commit();
-			
+
 			return updateResult; // 업데이트된 행 수 반환
 
 		} catch (SQLException e) {
@@ -166,15 +164,17 @@ public class InBoundOrderDAO {
 				rollbackEx.printStackTrace();
 			}
 			e.printStackTrace();
-			throw new UserException("입고 처리 중 오류가 발생했습니다", e);
+			throw new UserException(Integer.toString(e.getErrorCode()));
 		} finally {
 			// 자동 커밋 다시 활성화
 			try {
-				if (conn != null) {
+				if (conn != null)
 					conn.setAutoCommit(true);
-				}
+				db.release(pstmtSelect, rs);
+				db.release(pstmtInsert);
+				db.release(pstmtUpdate);
 			} catch (SQLException e) {
-				e.printStackTrace();
+				throw new UserException(Integer.toString(e.getErrorCode()));
 			}
 			db.release(pstmtUpdate);
 			db.release(pstmtSelect);

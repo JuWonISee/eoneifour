@@ -18,6 +18,7 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
 
+import com.eoneifour.common.exception.UserException;
 import com.eoneifour.common.frame.AbstractTablePage;
 import com.eoneifour.common.util.ButtonUtil;
 import com.eoneifour.common.util.Refreshable;
@@ -49,7 +50,7 @@ public class InboundOrderPage extends AbstractTablePage implements Refreshable {
 		topPanel.setBorder(BorderFactory.createEmptyBorder(10, 50, 0, 50));
 
 		// 제목 라벨
-		JLabel title = new JLabel("제품 목록");
+		JLabel title = new JLabel("입고 대기 물품");
 		title.setFont(new Font("맑은 고딕", Font.BOLD, 20));
 		topPanel.add(title, BorderLayout.WEST);
 
@@ -111,11 +112,12 @@ public class InboundOrderPage extends AbstractTablePage implements Refreshable {
 
 		table = new JTable(model);
 		table.setRowHeight(36); // cell 높이 설정
-		
+
 		// ID는 숨김
 		table.getColumn("ID").setMinWidth(0);
 		table.getColumn("ID").setMaxWidth(0);
 		table.getColumn("ID").setPreferredWidth(0);
+		
 
 
 		table.addMouseListener(new MouseAdapter() {
@@ -124,11 +126,17 @@ public class InboundOrderPage extends AbstractTablePage implements Refreshable {
 				int col = table.columnAtPoint(e.getPoint());
 				int orderId = (int) model.getValueAt(row, 0);
 
+				// 작업 버튼 클릭시 입고 프로세스 진행
 				if (col == table.getColumn("작업").getModelIndex()) {
 					// 입고 처리 로직
-					inBoundOrderDAO.processInbound(orderId);
-					String msg = "입고처리가 완료되었습니다.";
-					JOptionPane.showMessageDialog(null, msg, "Info", JOptionPane.INFORMATION_MESSAGE);
+					try {
+						inBoundOrderDAO.processInbound(orderId);
+						JOptionPane.showMessageDialog(mainFrame, "입고처리가 완료되었습니다", "Success!", JOptionPane.INFORMATION_MESSAGE);
+					} catch (UserException ex) {
+						String msg = "Error : " + ex + "\n 관리자에게 문의해주세요";
+						JOptionPane.showMessageDialog(mainFrame, msg, "Error", JOptionPane.ERROR_MESSAGE);
+					}
+
 					refresh();
 				}
 			}
@@ -140,9 +148,8 @@ public class InboundOrderPage extends AbstractTablePage implements Refreshable {
 		Object[][] data = new Object[orderList.size()][cols.length];
 		for (int i = 0; i < orderList.size(); i++) {
 			InBoundOrder order = orderList.get(i);
-			data[i] = new Object[] { 
-				order.getPurchase_order_id(), //ID 숨김
-				order.getProduct().getName(), "입고 위치 로직은 구현중" + i, "입고" };
+			data[i] = new Object[] { order.getPurchase_order_id(), // ID 숨김
+					order.getProduct().getName(), "로직 구현중", "입고" };
 		}
 		return data;
 	}
@@ -160,7 +167,10 @@ public class InboundOrderPage extends AbstractTablePage implements Refreshable {
 		orderList = inBoundOrderDAO.getOrderList();
 		model.setDataVector(toTableData(orderList), cols);
 		applyStyle();
-
+		
+		if(model.getRowCount() <1) {
+			JOptionPane.showMessageDialog(mainFrame, "입고 대기중인 물품이 없습니다.", "Info", JOptionPane.INFORMATION_MESSAGE);
+		}
 
 	}
 }
