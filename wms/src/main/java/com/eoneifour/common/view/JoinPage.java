@@ -1,16 +1,14 @@
-package com.eoneifour.shopadmin.user.view;
+package com.eoneifour.common.view;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.Font;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
-import javax.swing.JComboBox;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -24,22 +22,17 @@ import com.eoneifour.common.util.ButtonUtil;
 import com.eoneifour.common.util.FieldUtil;
 import com.eoneifour.shopadmin.user.model.User;
 import com.eoneifour.shopadmin.user.repository.UserDAO;
-import com.eoneifour.shopadmin.view.ShopAdminMainFrame;
 
-
-public class UserRegistPage extends JPanel {
-	private ShopAdminMainFrame mainFrame;
-	
+public class JoinPage extends JFrame {
 	private JTextField emailField;
     private JPasswordField passwordField;
     private JPasswordField confirmPasswordField;
     private JTextField nameField;
     private JTextField addressField;
     private JTextField addressDetailField;
-    private JComboBox<String> roleCombo;
     
-    private JButton registBtn;
-    private JButton listBtn;
+    private JButton joinButton;
+    private JButton loginButton;
     private JButton checkBtn;
     
     private UserDAO userDAO;
@@ -47,36 +40,26 @@ public class UserRegistPage extends JPanel {
     private boolean isEmailChecked = false; // 중복체크 클릭 유무
     private boolean isEmailDuplicate = false; // 이메일 중복 유무
     
-    public UserRegistPage(ShopAdminMainFrame mainFrame) {
-    	this.mainFrame = mainFrame;
+    public JoinPage() {
     	userDAO = new UserDAO();
     	
-        setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-        setBackground(new Color(245, 247, 250)); 
-
-        JPanel formPanel = initFormPanel();
+        setTitle("회원가입");
+        setSize(550, 610);
+        setLocationRelativeTo(null);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setResizable(false);
         
-        add(Box.createVerticalGlue());
-    	add(formPanel);
-    	add(Box.createVerticalGlue());
-    }
-    
-    // 폼 전체 초기화
-    private JPanel initFormPanel() {
-    	JPanel formPanel = new JPanel();
-        formPanel.setLayout(new BoxLayout(formPanel, BoxLayout.Y_AXIS));
+        JPanel formPanel = new JPanel();
+        
         formPanel.setBackground(Color.WHITE);
-        formPanel.setBorder(BorderFactory.createEmptyBorder(30, 40, 30, 40));
-        formPanel.setMaximumSize(new Dimension(500, 610));
-        formPanel.setMinimumSize(new Dimension(500, 610));
-        formPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        
-        // 타이틀 생성
-        JLabel title = new JLabel("회원 등록");
-        title.setFont(new Font("맑은 고딕", Font.BOLD, 24));
+        formPanel.setLayout(new BoxLayout(formPanel, BoxLayout.Y_AXIS));
+        formPanel.setBorder(BorderFactory.createEmptyBorder(40, 50, 40, 50));
+
+        JLabel title = new JLabel("회원가입");
         title.setAlignmentX(Component.CENTER_ALIGNMENT);
+        title.setFont(new Font("맑은 고딕", Font.BOLD, 28));
         formPanel.add(title);
-        formPanel.add(Box.createVerticalStrut(20));
+        formPanel.add(Box.createVerticalStrut(40));
 
         // 이메일 필드 + 중복확인 버튼
         emailField = new JTextField(16);
@@ -112,23 +95,15 @@ public class UserRegistPage extends JPanel {
         addressDetailField = new JTextField(16);
         formPanel.add(FieldUtil.createField("상세 주소", addressDetailField));
         formPanel.add(Box.createVerticalStrut(18));
-        
-        // 권한 필드 + 콤보박스
-        roleCombo = new JComboBox<>(new String[]{"user", "admin"});
-        formPanel.add(FieldUtil.createComboField("권한", roleCombo));
-        formPanel.add(Box.createVerticalStrut(32));
-        
-        // 버튼 패널 붙이기
-        formPanel.add(createButtonPanel());
-        
-        return formPanel;
-    }
 
-    // 하단 버튼 패널 초기화
-    private JPanel createButtonPanel() {
-    	// 버튼 생성
-        registBtn = ButtonUtil.createPrimaryButton("저장", 15, 120, 40);
-        listBtn = ButtonUtil.createDefaultButton("목록", 15, 120, 40);
+        joinButton = ButtonUtil.createPrimaryButton("회원가입", 14, 170, 40);
+        loginButton = ButtonUtil.createDefaultButton("로그인", 14, 170, 40);
+
+        joinButton.addActionListener(e-> joinUser());
+        loginButton.addActionListener(e-> {
+        	dispose();
+        	new LoginPage().setVisible(true);
+        });
         
         // 중복 확인 버튼 이벤트
         checkBtn.addActionListener(e->{
@@ -144,49 +119,40 @@ public class UserRegistPage extends JPanel {
         		}
         	}
         });
-        
-        // 등록 버튼 이벤트 (등록 이벤트 중복 방지)
-        if (registBtn.getActionListeners().length == 0) {
-	        registBtn.addActionListener(e->{
-	        	if(validateForm()) {
-	        		registerUser();
-	        		clearForm();
-	        		JOptionPane.showMessageDialog(this, "등록이 완료되었습니다.");
-	        		mainFrame.showContent("USER_LIST");
-	        	}
-	        });
-        }
-        
-        // 목록 버튼 이벤트
-        listBtn.addActionListener(e-> mainFrame.showContent("USER_LIST"));
-
-        // 버튼 패널
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 0));
+               
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.X_AXIS));
         buttonPanel.setOpaque(false);
-        buttonPanel.add(registBtn);
-        buttonPanel.add(listBtn);
-        buttonPanel.setMaximumSize(new Dimension(300, 50));
-        buttonPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        
-        return buttonPanel;
-    }
+        buttonPanel.add(joinButton);
+        buttonPanel.add(Box.createHorizontalStrut(20));
+        buttonPanel.add(loginButton);
+
+        formPanel.add(buttonPanel);
+        add(formPanel);
+	}
     
     // 등록 요청 처리
-    public void registerUser() {
-    	try {
-			User user = new User();
-			user.setEmail(emailField.getText());
-			user.setPassword(new String(passwordField.getPassword()));
-			user.setName(nameField.getText());
-			user.setAddress(addressField.getText());
-			user.setAddressDetail(addressDetailField.getText());
-			user.setRole(roleCombo.getSelectedIndex());
-			
-			userDAO.insertUser(user);
-    	} catch (UserException e) {
-    		JOptionPane.showMessageDialog(this, e.getMessage());
-    		e.printStackTrace();
-		}
+    private void joinUser() {
+    	if(validateForm()) {
+    		try {
+    			User user = new User();
+    			user.setEmail(emailField.getText());
+    			user.setPassword(new String(passwordField.getPassword()));
+    			user.setName(nameField.getText());
+    			user.setAddress(addressField.getText());
+    			user.setAddressDetail(addressDetailField.getText());
+    			user.setRole(0); // 회원가입은 사용자 고정
+    			userDAO.insertUser(user);
+        	} catch (UserException e) {
+        		JOptionPane.showMessageDialog(this, e.getMessage());
+        		e.printStackTrace();
+    		}
+    		
+    		JOptionPane.showMessageDialog(this, "회원가입이 완료되었습니다.");
+    		dispose();
+    		new LoginPage().setVisible(true);
+    	}
+    	
     }
     
     // 폼 유효성 검사
@@ -213,22 +179,7 @@ public class UserRegistPage extends JPanel {
         return false;
     }
     
-    // 등록 폼 초기화
-    private void clearForm() {
-    	emailField.setText("");
-    	passwordField.setText("");
-    	confirmPasswordField.setText("");
-    	nameField.setText("");
-    	addressField.setText("");
-    	addressDetailField.setText("");
-    	roleCombo.setSelectedIndex(0);
-    	isEmailChecked = false;
-    	isEmailDuplicate = false;
+    public static void main(String[] args) {
+        new JoinPage().setVisible(true);
     }
-    
-    // 진입 전 필수 함수 호출
-    public void prepare() {
-    	clearForm();
-    }
-
 }

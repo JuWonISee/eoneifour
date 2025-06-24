@@ -25,7 +25,7 @@ import com.eoneifour.shopadmin.user.repository.UserDAO;
 import com.eoneifour.shopadmin.view.ShopAdminMainFrame;
 
 public class UserUpdatePage extends JPanel{
-private ShopAdminMainFrame mainFrame;
+	private ShopAdminMainFrame mainFrame;
 	
 	private JTextField emailField;
     private JPasswordField passwordField;

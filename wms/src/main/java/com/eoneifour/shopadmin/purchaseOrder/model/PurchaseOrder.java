@@ -5,7 +5,7 @@ import java.sql.Date;
 public class PurchaseOrder {
 	private int purchase_order_id;
 	private int quantity;
-	private int status;
+	private String status;
 	private Date request_date;
 	private Date complete_date;
 	private int requested_by;
@@ -13,7 +13,7 @@ public class PurchaseOrder {
 	
 	public PurchaseOrder() {}
 	
-	public PurchaseOrder(int purchase_order_id, int quantity, int status, Date request_date,
+	public PurchaseOrder(int purchase_order_id, int quantity, String status, Date request_date,
 						Date complete_date, int requested_by, int product_id) {
 		this.purchase_order_id = purchase_order_id;
 		this.quantity = quantity;
@@ -36,10 +36,10 @@ public class PurchaseOrder {
 	public void setQuantity(int quantity) {
 		this.quantity = quantity;
 	}
-	public int getStatus() {
+	public String getStatus() {
 		return status;
 	}
-	public void setStatus(int status) {
+	public void setStatus(String status) {
 		this.status = status;
 	}
 	public Date getRequest_date() {
