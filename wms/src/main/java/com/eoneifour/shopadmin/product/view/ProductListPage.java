@@ -28,18 +28,18 @@ import com.eoneifour.shopadmin.product.repository.ProductDAO;
 import com.eoneifour.shopadmin.purchaseOrder.repository.PurchaseOrderDAO;
 import com.eoneifour.shopadmin.view.ShopAdminMainFrame;
 
-public class ProductListPage extends AbstractTablePage implements Refreshable{
+public class ProductListPage extends AbstractTablePage implements Refreshable {
 	private ShopAdminMainFrame mainFrame;
 	private int productId = 0; // product 상세 보기를 위해 product ID 를 담기 위한 변수
 	private ProductRegistPage productRegistPage;
 	private ProductDetailPage productDetailPage;
 	private ProductUpdatePage productUpdatePage;
-	private PurchaseModalDialog  dialog;
+	private PurchaseModalDialog dialog;
 
 	private ProductDAO productDAO;
 	private PurchaseOrderDAO purchaseOrderDAO;
 	private List<Product> productList;
-	private String[] cols = { "상품번호", "카테고리", "브랜드", "상품명", "가격", "재고수량", "품절상태", "상태", "발주요청", "수정"};
+	private String[] cols = { "상품번호", "카테고리", "브랜드", "상품명", "가격", "재고수량", "품절상태", "상태", "발주요청", "수정" };
 
 	public ProductListPage(ShopAdminMainFrame mainFrame) {
 		super(mainFrame);
@@ -164,16 +164,15 @@ public class ProductListPage extends AbstractTablePage implements Refreshable{
 			data[i] = new Object[] { product.getProduct_id(), product.getSub_category().getTop_category().getName(),
 					product.getBrand_name(), product.getName(), product.getPrice(), product.getStock_quantity(),
 					(product.getStock_quantity()) == 0 ? "품절" : "판매중", (product.getStatus() == 0) ? "활성" : "비활성",
-					"발주요청", "수정"};
+					"발주요청", "수정" };
 		}
 
 		return data;
 	}
 
-	//상품 삭제 로직
+	// 상품 삭제 로직
 	public void switchProductStatus(int ProductId) {
-		int result = JOptionPane.showConfirmDialog(this, "상품 상태를 변경하시겠습니까?", "확인",
-				JOptionPane.YES_NO_OPTION);
+		int result = JOptionPane.showConfirmDialog(this, "상품 상태를 변경하시겠습니까?", "확인", JOptionPane.YES_NO_OPTION);
 
 		if (result == JOptionPane.YES_OPTION) {
 			productDAO.switchProductStatus(ProductId);
@@ -182,18 +181,15 @@ public class ProductListPage extends AbstractTablePage implements Refreshable{
 		}
 	}
 
-	//발주 처리 로직
+	// 발주 처리 로직
 	private void purchaseOrder(int productId) {
-	    Product product = productDAO.getProduct(productId);
+		Product product = productDAO.getProduct(productId);
 
-	    // 예시: 기본 수량을 30으로 설정 (또는 로직에 따라 동적으로 계산)
-	    
+		dialog = new PurchaseModalDialog(mainFrame, product);
+		dialog.setVisible(true);
 
-	    dialog = new PurchaseModalDialog (mainFrame, product);
-	    dialog.setVisible(true);
-
-	    if (dialog.isConfirmed()) {
-	        int quantity = dialog.getQuantity();
+		if (dialog.isConfirmed()) {
+			int quantity = dialog.getQuantity();
 
 	        try {
 	            productDAO.updateStock_quantity(product, quantity);
@@ -204,5 +200,6 @@ public class ProductListPage extends AbstractTablePage implements Refreshable{
 	            JOptionPane.showMessageDialog(this, "발주 요청 중 오류 발생: " + e.getMessage());
 	        }
 	    }
+
 	}
 }
