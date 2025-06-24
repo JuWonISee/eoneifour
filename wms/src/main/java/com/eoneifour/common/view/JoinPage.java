@@ -44,7 +44,7 @@ public class JoinPage extends JFrame {
     	userDAO = new UserDAO();
     	
         setTitle("회원가입");
-        setSize(500, 610);
+        setSize(550, 610);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setResizable(false);
