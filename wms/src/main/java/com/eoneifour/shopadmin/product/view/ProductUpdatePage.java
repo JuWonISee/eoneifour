@@ -156,6 +156,7 @@ public class ProductUpdatePage extends JPanel {
 		stockQuantityField = new JTextField(16);
 		formPanel.add(FieldUtil.createField("수량", stockQuantityField));
 		formPanel.add(Box.createVerticalStrut(12));
+		stockQuantityField.setEditable(false);
 
 		// 이미지 필드 + 이미지 업로드 버튼 (imageField는 편집 불가)
 		imageField = new JTextField(16);
@@ -363,7 +364,6 @@ public class ProductUpdatePage extends JPanel {
 		product.setBrand_name(brandField.getText());
 		product.setPrice(Integer.parseInt(priceField.getText()));
 		product.setDetail(detailField.getText());
-		product.setStock_quantity(Integer.parseInt(stockQuantityField .getText()));
 		
 		productDAO.updateProduct(product);
 		if(files != null && files.length >0) {
