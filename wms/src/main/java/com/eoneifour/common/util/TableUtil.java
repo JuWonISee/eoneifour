@@ -1,6 +1,7 @@
 package com.eoneifour.common.util;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Font;
 
 import javax.swing.JLabel;
@@ -57,6 +58,38 @@ public class TableUtil {
                 label.setForeground(fontColor);
                 label.setFont(new Font("맑은 고딕", Font.BOLD, 13));
                 label.setHorizontalAlignment(SwingConstants.CENTER);
+
+                return label;
+            }
+        });
+    }
+    
+    /**
+     * 특정 컬럼에서 특정 셀 값에만 원하는 색상 적용
+     * @param table JTable 객체
+     * @param columnName 적용할 컬럼명
+     * @param targetValue 특정 셀 값
+     * @param fontColor 해당 값일 때 적용할 폰트 색상
+     */
+    public static void applyConditionalTextRenderer(JTable table, String columnName, String targetValue, Color fontColor) {
+        table.getColumn(columnName).setCellRenderer(new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(
+                JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+                
+                JLabel label = (JLabel) super.getTableCellRendererComponent(
+                    table, value, isSelected, hasFocus, row, column
+                );
+
+                label.setHorizontalAlignment(SwingConstants.CENTER);
+                label.setFont(new Font("맑은 고딕", Font.BOLD, 13));
+
+                // 값이 일치하면 지정된 색상 적용, 아니면 기본색
+                if (targetValue.equals(value)) {
+                    label.setForeground(fontColor);
+                } else {
+                    label.setForeground(Color.BLACK); // 기본 색상
+                }
 
                 return label;
             }
