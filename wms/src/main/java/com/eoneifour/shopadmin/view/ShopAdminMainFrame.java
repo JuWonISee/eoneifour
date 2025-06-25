@@ -76,7 +76,6 @@ public class ShopAdminMainFrame extends AbstractMainFrame {
     	orderUpdatePage = new OrderUpdatePage(this);
     	
         initPages();
-        showContent("USER_LIST");
     }
 
     // 페이지 등록
@@ -191,7 +190,7 @@ public class ShopAdminMainFrame extends AbstractMainFrame {
 		if (SessionUtil.getLoginUser() == null) {
 			new LoginPage().setVisible(true);
 		} else {
-			new ShopAdminMainFrame().setVisible(true);
+			new ShopAdminMainFrame();
 		}
 
 	}
