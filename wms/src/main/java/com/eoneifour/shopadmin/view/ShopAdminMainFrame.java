@@ -11,16 +11,10 @@ import javax.swing.JPanel;
 
 import com.eoneifour.common.frame.AbstractMainFrame;
 import com.eoneifour.common.util.ButtonUtil;
-import com.eoneifour.common.util.SessionUtil;
-import com.eoneifour.common.view.LoginPage;
-import com.eoneifour.shopadmin.order.view.OrderDetailPage;
-import com.eoneifour.shopadmin.order.view.OrderListPage;
-import com.eoneifour.shopadmin.order.view.OrderUpdatePage;
 import com.eoneifour.shopadmin.product.view.ProductDetailPage;
 import com.eoneifour.shopadmin.product.view.ProductListPage;
 import com.eoneifour.shopadmin.product.view.ProductRegistPage;
 import com.eoneifour.shopadmin.product.view.ProductUpdatePage;
-import com.eoneifour.shopadmin.user.model.User;
 import com.eoneifour.shopadmin.user.view.UserDetailPage;
 import com.eoneifour.shopadmin.user.view.UserListPage;
 import com.eoneifour.shopadmin.user.view.UserRegistPage;
@@ -48,49 +42,42 @@ public class ShopAdminMainFrame extends AbstractMainFrame {
 	public ProductUpdatePage productUpdatePage;
 	public ProductListPage productListPage;
 
-	public OrderListPage orderListPage;
-	public OrderDetailPage orderDetailPage;
-	public OrderUpdatePage orderUpdatePage;
+	
 
     public ShopAdminMainFrame() {
         super("쇼핑몰 메인 (관리자)"); // 타이틀 설정
         
+        // 페이지 생성
         userRegistPage = new UserRegistPage(this);
         userDetailPage = new UserDetailPage(this);
         userUpdatePage = new UserUpdatePage(this);
         userListPage = new UserListPage(this);
+        
 
         productRegistPage = new ProductRegistPage(this);
         productDetailPage = new ProductDetailPage(this);
         productUpdatePage = new ProductUpdatePage(this);
     	productListPage = new ProductListPage(this);
-    	
-    	orderListPage = new OrderListPage(this);
-    	orderDetailPage = new OrderDetailPage(this);
-    	orderUpdatePage = new OrderUpdatePage(this);
-    	
+    		
         initPages();
+        
+        // 회원 목록을 초기화면으로
         showContent("USER_LIST");
     }
 
     // 페이지 등록
     private void initPages() {
     	// 회원관리
-    	contentCardPanel.add(userListPage, "USER_LIST"); 		// 회원관리 페이지
+    	contentCardPanel.add(userListPage, "USER_LIST"); 				// 회원관리 페이지
     	contentCardPanel.add(userRegistPage, "USER_REGIST"); 	// 회원등록
     	contentCardPanel.add(userDetailPage, "USER_DETAIL"); 	// 회원상세
-    	contentCardPanel.add(userUpdatePage, "USER_UPDATE"); 	// 회원수정
+    	contentCardPanel.add(userUpdatePage, "USER_UPDATE"); 		// 회원수정
     	
     	// 상품관리
         contentCardPanel.add(productListPage, "PRODUCT_LIST"); // 상품관리 페이지
         contentCardPanel.add(productRegistPage, "PRODUCT_REGIST"); // 상품등록 페이지
         contentCardPanel.add(productUpdatePage, "PRODUCT_UPDATE"); // 상품수정 페이지
         contentCardPanel.add(productDetailPage, "PRODUCT_DETAIL"); // 상품상세 페이지
-        
-        // 주문관리
-        contentCardPanel.add(orderListPage, "ORDER_LIST"); // 주문관리 페이지
-        contentCardPanel.add(orderDetailPage, "ORDER_DETAIL"); // 주문상세 페이지
-        contentCardPanel.add(orderUpdatePage, "ORDER_UPDATE"); // 주문수정 페이지
     }
 
     // 상단 정보 바 + 메뉴 바 구성
@@ -111,10 +98,9 @@ public class ShopAdminMainFrame extends AbstractMainFrame {
         JPanel infoBar = new JPanel(new BorderLayout());
         infoBar.setBackground(Color.BLACK);
         infoBar.setPreferredSize(new Dimension(1280, 50));
-        // 로그인 사용자
-        User loginUser = SessionUtil.getLoginUser();
+
         // Left Panel: 사용자 이름 포함한 인삿말
-        JLabel userInfoLabel = new JLabel(loginUser.getName() +"님, 안녕하세요.");
+        JLabel userInfoLabel = new JLabel("운영자님, 안녕하세요");
         userInfoLabel.setForeground(Color.WHITE);
         // 왼쪽 정렬 + 좌우 15pt,위아래 10px 여백을 위한 Panel
         JPanel leftWrapper = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 10));
@@ -125,13 +111,6 @@ public class ShopAdminMainFrame extends AbstractMainFrame {
         // Right Panel: 버튼 area
         JButton logoutButton = new JButton("로그아웃");
         ButtonUtil.styleHeaderButton(logoutButton);
-
-        logoutButton.addActionListener(e->{
-        	SessionUtil.clear();
-            dispose();
-            new LoginPage().setVisible(true);
-        });
-        
         // 오른쪽 정렬 + 좌우 15pt,위아래 10px 여백을 위한 Panel
         JPanel rightWrapper = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 10));
         rightWrapper.setOpaque(false);
@@ -147,6 +126,7 @@ public class ShopAdminMainFrame extends AbstractMainFrame {
 
         JButton userBtn = new JButton("회원관리");
         ButtonUtil.styleMenuButton(userBtn);
+        // 목록 새로고침 후 화면 이동
         userBtn.addActionListener(e-> showContent("USER_LIST"));
 
         JButton productBtn = new JButton("상품관리");
@@ -161,10 +141,15 @@ public class ShopAdminMainFrame extends AbstractMainFrame {
         ButtonUtil.styleMenuButton(purchaseBtn);
         purchaseBtn.addActionListener(e->showContent("PURCHASE_LIST"));
 
+        JButton settingBtn = new JButton("설정");
+        ButtonUtil.styleMenuButton(settingBtn);
+        settingBtn.addActionListener(e->showContent("SETTING"));
+
         menuBar.add(userBtn);
         menuBar.add(productBtn);
         menuBar.add(orderBtn);
         menuBar.add(purchaseBtn);
+        menuBar.add(settingBtn);
 
         return menuBar;
     }
@@ -176,11 +161,6 @@ public class ShopAdminMainFrame extends AbstractMainFrame {
     }
 
     public static void main(String[] args) {
-    	// 세션 없으면 로그인 창으로 강제 리디렉션
-    	if (SessionUtil.getLoginUser() == null) {
-            new LoginPage().setVisible(true);
-        } else {
-            new ShopAdminMainFrame().setVisible(true);
-        }
+        new ShopAdminMainFrame();
     }
 }

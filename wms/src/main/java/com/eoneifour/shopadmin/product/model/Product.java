@@ -11,18 +11,6 @@ public class Product {
 	private SubCategory sub_category; //ERD상에서는 자식이 부모의 pk숫자를 보유하지만 , java에서는 부모를 객체형으로 보유해야함.
 	private TopCategory top_category;
 	
-	public Product() {}
-	
-	public Product(int productId, String name, String brand_name, int price, String detail, int stock_quantity, int status, SubCategory sub_category) {
-		this.product_id = productId;
-		this.name = name;
-		this.brand_name = brand_name;
-		this.price = price;
-		this.detail = detail;
-		this.stock_quantity = stock_quantity;
-		this.status = status;
-		this.sub_category = sub_category;
-	}
 	public int getProduct_id() {
 		return product_id;
 	}

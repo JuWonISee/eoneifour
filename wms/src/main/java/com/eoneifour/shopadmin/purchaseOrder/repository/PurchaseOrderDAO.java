@@ -41,6 +41,7 @@ public class PurchaseOrderDAO {
 			while (rs.next()) {
 				Product product = new Product();
 				product.setProduct_id(rs.getInt("product_id"));
+				
 
 				SubCategory subCategory = new SubCategory();
 				TopCategory topCategory = new TopCategory();

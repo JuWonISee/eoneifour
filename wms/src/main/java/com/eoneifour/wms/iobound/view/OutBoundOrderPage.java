@@ -18,25 +18,27 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
 
+import com.eoneifour.common.exception.UserException;
 import com.eoneifour.common.frame.AbstractTablePage;
 import com.eoneifour.common.util.ButtonUtil;
 import com.eoneifour.common.util.Refreshable;
 import com.eoneifour.common.util.TableUtil;
 import com.eoneifour.wms.home.view.MainFrame;
 import com.eoneifour.wms.iobound.model.InBoundOrder;
-import com.eoneifour.wms.iobound.repository.InBoundOrderDAO;
+import com.eoneifour.wms.iobound.model.OutBoundOrder;
+import com.eoneifour.wms.iobound.repository.OutBoundOrderDAO;
 
 public class OutBoundOrderPage extends AbstractTablePage implements Refreshable {
 	private MainFrame mainFrame;
 
-	private List<InBoundOrder> orderList;
-	private InBoundOrderDAO inBoundOrderDAO;
-	private String[] cols = { "ID", "상품명", "입고위치", "작업" };
+	private List<OutBoundOrder> orderList;
+	private OutBoundOrderDAO outBoundOrderDAO;
+	private String[] cols = { "ID", "상품명", "수량", "출고위치", "작업" };
 
 	public OutBoundOrderPage(MainFrame mainFrame) {
 		super(mainFrame);
 		this.mainFrame = mainFrame;
-		this.inBoundOrderDAO = new InBoundOrderDAO();
+		this.outBoundOrderDAO = new OutBoundOrderDAO();
 
 		initTopPanel();
 		initTable();
@@ -49,7 +51,7 @@ public class OutBoundOrderPage extends AbstractTablePage implements Refreshable 
 		topPanel.setBorder(BorderFactory.createEmptyBorder(10, 50, 0, 50));
 
 		// 제목 라벨
-		JLabel title = new JLabel("제품 목록");
+		JLabel title = new JLabel("출고 대기 물품");
 		title.setFont(new Font("맑은 고딕", Font.BOLD, 20));
 		topPanel.add(title, BorderLayout.WEST);
 
@@ -63,20 +65,20 @@ public class OutBoundOrderPage extends AbstractTablePage implements Refreshable 
 		searchBtn.setBorderPainted(false);
 		searchBtn.addActionListener(e -> {
 			String keyword = searchField.getText().trim();
-			List<InBoundOrder> searchResults;
+			List<OutBoundOrder> searchResults;
 
 			if (!keyword.isEmpty()) {
-				searchResults = inBoundOrderDAO.searchByProductName(keyword);
+				searchResults = outBoundOrderDAO.searchByProductName(keyword);
 				searchField.setText(null);
 			} else {
 				// keyword가 비어있을 경우 전체 목록 다시 조회
-				searchResults = inBoundOrderDAO.getOrderList();
+				searchResults = outBoundOrderDAO.getOrderList();
 				searchField.setText(null);
 			}
 
 			if (searchResults.isEmpty()) {
 				JOptionPane.showMessageDialog(null, "해당 제품이 없습니다.", "Info", JOptionPane.INFORMATION_MESSAGE);
-				searchResults = inBoundOrderDAO.getOrderList();
+				searchResults = outBoundOrderDAO.getOrderList();
 				searchField.setText(null);
 			}
 
@@ -101,7 +103,9 @@ public class OutBoundOrderPage extends AbstractTablePage implements Refreshable 
 
 	@Override
 	public void initTable() {
-		orderList = inBoundOrderDAO.getOrderList();
+		orderList = outBoundOrderDAO.getOrderList();
+		
+		
 
 		model = new DefaultTableModel(toTableData(orderList), cols) {
 			public boolean isCellEditable(int row, int column) {
@@ -111,12 +115,11 @@ public class OutBoundOrderPage extends AbstractTablePage implements Refreshable 
 
 		table = new JTable(model);
 		table.setRowHeight(36); // cell 높이 설정
-		
+
 		// ID는 숨김
 		table.getColumn("ID").setMinWidth(0);
 		table.getColumn("ID").setMaxWidth(0);
 		table.getColumn("ID").setPreferredWidth(0);
-
 
 		table.addMouseListener(new MouseAdapter() {
 			public void mouseClicked(MouseEvent e) {
@@ -124,11 +127,17 @@ public class OutBoundOrderPage extends AbstractTablePage implements Refreshable 
 				int col = table.columnAtPoint(e.getPoint());
 				int orderId = (int) model.getValueAt(row, 0);
 
+				// 작업 버튼 클릭시 입고 프로세스 진행
 				if (col == table.getColumn("작업").getModelIndex()) {
 					// 입고 처리 로직
-					inBoundOrderDAO.processInbound(orderId);
-					String msg = "입고처리가 완료되었습니다.";
-					JOptionPane.showMessageDialog(null, msg, "Info", JOptionPane.INFORMATION_MESSAGE);
+					try {
+						outBoundOrderDAO.processOutBound(orderId);
+						JOptionPane.showMessageDialog(mainFrame, "입고처리가 완료되었습니다", "Success!", JOptionPane.INFORMATION_MESSAGE);
+					} catch (UserException ex) {
+						String msg = "Error : " + ex + "\n 관리자에게 문의해주세요";
+						JOptionPane.showMessageDialog(mainFrame, msg, "Error", JOptionPane.ERROR_MESSAGE);
+					}
+
 					refresh();
 				}
 			}
@@ -136,13 +145,19 @@ public class OutBoundOrderPage extends AbstractTablePage implements Refreshable 
 	}
 
 	// 테이블로 데이터로 변환
-	private Object[][] toTableData(List<InBoundOrder> orderList) {
-		Object[][] data = new Object[orderList.size()][cols.length];
-		for (int i = 0; i < orderList.size(); i++) {
-			InBoundOrder order = orderList.get(i);
+	private Object[][] toTableData(List<OutBoundOrder> searchResults) {
+		
+		
+		Object[][] data = new Object[searchResults.size()][cols.length];
+		for (int i = 0; i < searchResults.size(); i++) {
+			OutBoundOrder order = searchResults.get(i);
+			
+			
 			data[i] = new Object[] { 
-				order.getPurchase_order_id(), //ID 숨김
-				order.getProduct().getName(), "입고 위치 로직은 구현중" + i, "입고" };
+					order.getStock_product_id(), // ID 숨김
+					order.getProduct_name(),
+					order.getS() + "-" + order.getZ() + "-" + order.getX() + "-" + order.getY(),
+					"입고" };
 		}
 		return data;
 	}
@@ -157,10 +172,13 @@ public class OutBoundOrderPage extends AbstractTablePage implements Refreshable 
 
 	// 테이블 데이터 새로고침
 	public void refresh() {
-		orderList = inBoundOrderDAO.getOrderList();
+		orderList = outBoundOrderDAO.getOrderList();
 		model.setDataVector(toTableData(orderList), cols);
 		applyStyle();
-
+		
+		if(model.getRowCount() <1) {
+			JOptionPane.showMessageDialog(mainFrame, "입고 대기중인 물품이 없습니다.", "Info", JOptionPane.INFORMATION_MESSAGE);
+		}
 
 	}
 }

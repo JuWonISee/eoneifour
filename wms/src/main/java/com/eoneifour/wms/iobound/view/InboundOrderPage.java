@@ -7,6 +7,8 @@ import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.swing.BorderFactory;
@@ -24,13 +26,15 @@ import com.eoneifour.common.util.ButtonUtil;
 import com.eoneifour.common.util.Refreshable;
 import com.eoneifour.common.util.TableUtil;
 import com.eoneifour.wms.home.view.MainFrame;
-import com.eoneifour.wms.iobound.model.InBoundOrder;
+import com.eoneifour.wms.iobound.model.ShopPurchaseOrder;
 import com.eoneifour.wms.iobound.repository.InBoundOrderDAO;
 
 public class InboundOrderPage extends AbstractTablePage implements Refreshable {
 	private MainFrame mainFrame;
 
-	private List<InBoundOrder> orderList;
+	private List<ShopPurchaseOrder> orderList;
+
+
 	private InBoundOrderDAO inBoundOrderDAO;
 	private String[] cols = { "ID", "상품명", "입고위치", "작업" };
 
@@ -64,24 +68,24 @@ public class InboundOrderPage extends AbstractTablePage implements Refreshable {
 		searchBtn.setBorderPainted(false);
 		searchBtn.addActionListener(e -> {
 			String keyword = searchField.getText().trim();
-			List<InBoundOrder> searchResults;
+			List<ShopPurchaseOrder> orderList;
 
 			if (!keyword.isEmpty()) {
-				searchResults = inBoundOrderDAO.searchByProductName(keyword);
+				orderList = inBoundOrderDAO.searchByProductName(keyword);
 				searchField.setText(null);
 			} else {
 				// keyword가 비어있을 경우 전체 목록 다시 조회
-				searchResults = inBoundOrderDAO.getOrderList();
+				orderList = inBoundOrderDAO.getOrderList();
 				searchField.setText(null);
 			}
 
-			if (searchResults.isEmpty()) {
+			if (orderList.isEmpty()) {
 				JOptionPane.showMessageDialog(null, "해당 제품이 없습니다.", "Info", JOptionPane.INFORMATION_MESSAGE);
-				searchResults = inBoundOrderDAO.getOrderList();
+				orderList = inBoundOrderDAO.getOrderList();
 				searchField.setText(null);
 			}
 
-			model.setDataVector(toTableData(searchResults), cols);
+			model.setDataVector(toTableData(orderList), cols);
 			applyStyle();
 		});
 
@@ -117,40 +121,63 @@ public class InboundOrderPage extends AbstractTablePage implements Refreshable {
 		table.getColumn("ID").setMinWidth(0);
 		table.getColumn("ID").setMaxWidth(0);
 		table.getColumn("ID").setPreferredWidth(0);
-		
-
 
 		table.addMouseListener(new MouseAdapter() {
 			public void mouseClicked(MouseEvent e) {
 				int row = table.rowAtPoint(e.getPoint());
 				int col = table.columnAtPoint(e.getPoint());
-				int orderId = (int) model.getValueAt(row, 0);
+				String orderIdStr = (String) model.getValueAt(row, 0);
+				int orderId = Integer.parseInt(orderIdStr);
+
+
+//				String posionStr = (String) model.getValueAt(row, );
+				String posionStr = (String) model.getValueAt(row, 2);
 
 				// 작업 버튼 클릭시 입고 프로세스 진행
 				if (col == table.getColumn("작업").getModelIndex()) {
 					// 입고 처리 로직
 					try {
-						inBoundOrderDAO.processInbound(orderId);
-						JOptionPane.showMessageDialog(mainFrame, "입고처리가 완료되었습니다", "Success!", JOptionPane.INFORMATION_MESSAGE);
+						// -문자로 구분된 문자열 자르기
+						int[] position = Arrays.stream(posionStr.split("-")).map(String::trim)
+								.mapToInt(Integer::parseInt).toArray();
+
+						inBoundOrderDAO.processInbound(orderId, position);
+						JOptionPane.showMessageDialog(mainFrame, "입고처리가 완료되었습니다", "Success!",
+								JOptionPane.INFORMATION_MESSAGE);
+						model.removeRow(row);
+
 					} catch (UserException ex) {
 						String msg = "Error : " + ex + "\n 관리자에게 문의해주세요";
 						JOptionPane.showMessageDialog(mainFrame, msg, "Error", JOptionPane.ERROR_MESSAGE);
 					}
 
-					refresh();
+//					refresh();
 				}
 			}
 		});
 	}
-
+	
 	// 테이블로 데이터로 변환
-	private Object[][] toTableData(List<InBoundOrder> orderList) {
-		Object[][] data = new Object[orderList.size()][cols.length];
-		for (int i = 0; i < orderList.size(); i++) {
-			InBoundOrder order = orderList.get(i);
-			data[i] = new Object[] { order.getPurchase_order_id(), // ID 숨김
-					order.getProduct().getName(), "로직 구현중", "입고" };
+	private Object[][] toTableData(List<ShopPurchaseOrder> orderList) {
+		int totalRows = orderList.stream().mapToInt(ShopPurchaseOrder::getQuantity).sum();
+		Object[][] data = new Object[totalRows][cols.length];
+
+		int rowIndex = 0;
+
+		for (ShopPurchaseOrder order : orderList) {
+			int quantity = order.getQuantity();
+
+			for (int j = 0; j < quantity; j++) {
+				List<String> dataList = new ArrayList<>(4);
+				dataList.add(String.valueOf(order.getPurchaseOrderId()));
+				dataList.add(order.getProduct().getName());
+				dataList.add("1-2-3-4");
+				dataList.add("입고");
+
+				data[rowIndex++] = dataList.toArray(new Object[0]);
+			}
 		}
+
 		return data;
 	}
 
@@ -159,7 +186,7 @@ public class InboundOrderPage extends AbstractTablePage implements Refreshable {
 		TableUtil.applyColorTextRenderer(table, "작업", new Color(25, 118, 210));
 		table.getColumn("ID").setMinWidth(0);
 		table.getColumn("ID").setMaxWidth(0);
-		table.getColumn("ID").setPreferredWidth(0);
+		table.getColumn("ID").setPreferredWidth(0);                                                                                                                                                                        
 	}
 
 	// 테이블 데이터 새로고침
@@ -167,10 +194,14 @@ public class InboundOrderPage extends AbstractTablePage implements Refreshable {
 		orderList = inBoundOrderDAO.getOrderList();
 		model.setDataVector(toTableData(orderList), cols);
 		applyStyle();
-		
-		if(model.getRowCount() <1) {
+
+		if (model.getRowCount() < 1) {
 			JOptionPane.showMessageDialog(mainFrame, "입고 대기중인 물품이 없습니다.", "Info", JOptionPane.INFORMATION_MESSAGE);
 		}
+
+	}
+
+	public void checkQuantity() {
 
 	}
 }
