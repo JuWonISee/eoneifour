@@ -145,7 +145,7 @@ public class PurchaseOrderListPage extends AbstractTablePage implements Refresha
 		purchaseOrderList = purchaseOrderDAO.getPurchaseList();
 		model.setDataVector(toTableData(purchaseOrderList), cols);
 
-		TableUtil.applyDefaultTableStyle(table);
+		applyStyle();
 	}
 
 	// 테이블용 데이터로 변환
