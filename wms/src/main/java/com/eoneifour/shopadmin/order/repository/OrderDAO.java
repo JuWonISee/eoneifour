@@ -200,4 +200,47 @@ public class OrderDAO {
 		}
 	}
 	
+	public List<Order> serchByKeyword(String keyword) {
+		StringBuffer sql = new StringBuffer();
+		sql.append("select o.orders_id, o.order_date, o.total_price, o.status, u.name as user_name, p.name as product_name, oi.quantity, oi.price ");
+		sql.append("from shop_orders o join shop_user u on o.user_id = u.user_id join shop_order_item oi on o.orders_id = oi.orders_id join shop_product p on oi.product_id = p.product_id ");
+		sql.append(" where (u.name like ? or p.name like ?) ");
+
+		Connection conn = db.getConnection();
+		PreparedStatement pstmt = null; 
+		ResultSet rs = null;
+		
+		try {
+			List<Order> list = new ArrayList<>();
+			pstmt = conn.prepareStatement(sql.toString());
+			
+	        String likeKeyword = "%" + keyword + "%";
+	        pstmt.setString(1, likeKeyword);
+	        pstmt.setString(2, likeKeyword);
+	        
+			rs = pstmt.executeQuery();
+			
+			while(rs.next()) {
+				Order order = new Order();
+				order.setOrderId(rs.getInt("orders_id"));
+				order.setOrderDate(rs.getDate("order_date"));
+				order.setUserName(rs.getString("user_name"));
+				order.setProductName(rs.getString("product_name"));
+				order.setQuantity(rs.getInt("quantity"));
+				order.setPrice(rs.getInt("price"));
+				order.setTotalPrice(rs.getInt("total_price"));
+				order.setStatus(rs.getInt("status"));
+				list.add(order);
+			}
+
+			return list;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw new UserException("주문 목록 조회 중 오류 발생", e);
+		} finally {
+			db.release(pstmt, rs);
+		}
+	}
+	
+	
 }

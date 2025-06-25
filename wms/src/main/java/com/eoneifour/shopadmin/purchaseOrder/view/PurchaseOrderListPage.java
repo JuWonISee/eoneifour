@@ -63,8 +63,7 @@ public class PurchaseOrderListPage extends AbstractTablePage implements Refresha
 		searchField = new JTextField("발주번호 또는 상품명을 입력하세요");
 		searchField.setForeground(Color.GRAY);
 		searchField.setPreferredSize(new Dimension(250, 30));
-		JButton searchBtn = ButtonUtil.createPrimaryButton("검색", 15, 100, 30);
-		searchBtn.setBorderPainted(false);
+		JButton searchBtn = ButtonUtil.createDefaultButton("검색", 14, 100, 30);
 		
 		placeholder();
 		
@@ -74,7 +73,7 @@ public class PurchaseOrderListPage extends AbstractTablePage implements Refresha
 			String keyword = searchField.getText().trim();
 			List<PurchaseOrder> searchResults;
 			
-			if (!keyword.isEmpty() || keyword == "회원명 또는 이메일을 입력하세요") {
+			if (!keyword.isEmpty() || keyword == "발주번호 또는 상품명을 입력하세요") {
 				searchResults = purchaseOrderDAO.serchByKeyword(keyword);
 				searchField.setText(null);
 				placeholder();
@@ -87,11 +86,14 @@ public class PurchaseOrderListPage extends AbstractTablePage implements Refresha
 
 			if (searchResults.isEmpty()) {
 				JOptionPane.showMessageDialog(null, "해당 제품이 없습니다.", "Info", JOptionPane.INFORMATION_MESSAGE);
-				//searchResults = PurchaseOrderDAO.getPurchaseList();
+				searchResults = purchaseOrderDAO.getPurchaseList();
 				searchField.setText(null);
 				placeholder();
 				searchField.setForeground(Color.BLACK);
 			}
+			
+			model.setDataVector(toTableData(searchResults), cols);
+			applyStyle();
 		});
 
 		// 검색 영역 엔터 이벤트 (검색버튼 클릭과 동일한 효과)
@@ -158,6 +160,10 @@ public class PurchaseOrderListPage extends AbstractTablePage implements Refresha
 		}
 
 		return data;
+	}
+	
+	public void applyStyle() {
+		TableUtil.applyDefaultTableStyle(table);
 	}
 	
 	//검색 TextField에 placeholder 효과 주기 (forcus 이벤트 활용)

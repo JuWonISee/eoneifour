@@ -349,7 +349,6 @@ public class ProductDAO {
 		try {
 			pstmt = con.prepareStatement(sql.toString());
 
-			
 	        String likeKeyword = "%" + keyword + "%";
 	        pstmt.setString(1, likeKeyword);
 	        pstmt.setString(2, likeKeyword);
