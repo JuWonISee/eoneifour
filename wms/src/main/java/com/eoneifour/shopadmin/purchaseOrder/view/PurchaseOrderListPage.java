@@ -12,7 +12,6 @@ import java.awt.event.MouseEvent;
 import java.util.List;
 
 import javax.swing.BorderFactory;
-import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -21,14 +20,12 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
 
-import com.eoneifour.common.exception.UserException;
 import com.eoneifour.common.frame.AbstractTablePage;
 import com.eoneifour.common.util.ButtonUtil;
 import com.eoneifour.common.util.Refreshable;
 import com.eoneifour.common.util.TableUtil;
 import com.eoneifour.shopadmin.purchaseOrder.model.PurchaseOrder;
 import com.eoneifour.shopadmin.purchaseOrder.repository.PurchaseOrderDAO;
-import com.eoneifour.shopadmin.user.model.User;
 import com.eoneifour.shopadmin.view.ShopAdminMainFrame;
 
 public class PurchaseOrderListPage extends AbstractTablePage implements Refreshable {
@@ -78,23 +75,23 @@ public class PurchaseOrderListPage extends AbstractTablePage implements Refresha
 			List<PurchaseOrder> searchResults;
 			
 			if (!keyword.isEmpty() || keyword == "회원명 또는 이메일을 입력하세요") {
-				//searchResults = productDAO.serchByKeyword(keyword);
+				searchResults = purchaseOrderDAO.serchByKeyword(keyword);
 				searchField.setText(null);
 				placeholder();
 			} else {
 				// keyword가 비어있을 경우 전체 목록 다시 조회
-				//searchResults = productDAO.getProductList();
+				searchResults = purchaseOrderDAO.getPurchaseList();
 				searchField.setText(null);
 				placeholder();
 			}
 
-//			if (searchResults.isEmpty()) {
-//				JOptionPane.showMessageDialog(null, "해당 제품이 없습니다.", "Info", JOptionPane.INFORMATION_MESSAGE);
-//				//searchResults = productDAO.getProductList();
-//				searchField.setText(null);
-//				placeholder();
-//				searchField.setForeground(Color.BLACK);
-//			}
+			if (searchResults.isEmpty()) {
+				JOptionPane.showMessageDialog(null, "해당 제품이 없습니다.", "Info", JOptionPane.INFORMATION_MESSAGE);
+				//searchResults = PurchaseOrderDAO.getPurchaseList();
+				searchField.setText(null);
+				placeholder();
+				searchField.setForeground(Color.BLACK);
+			}
 		});
 
 		// 검색 영역 엔터 이벤트 (검색버튼 클릭과 동일한 효과)

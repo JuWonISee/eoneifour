@@ -158,6 +158,57 @@ public class PurchaseOrderDAO {
 	    }
 	}
 	
-	
+	public List<PurchaseOrder> serchByKeyword(String keyword){
+		Connection con = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+
+		List<PurchaseOrder> list = new ArrayList<>();
+
+		con = dbManager.getConnection();
+
+		StringBuffer sql = new StringBuffer();
+		sql.append("select po.purchase_order_id, p.name AS product_name, po.quantity, ");
+		sql.append(" po.request_date, u.name AS requested_by_name, po.status, ");
+		sql.append(" po.complete_date, po.requested_by, po.product_id ");
+		sql.append(" FROM shop_purchase_order po ");
+		sql.append(" JOIN shop_user u ON po.requested_by = u.user_id ");
+		sql.append(" JOIN shop_product p ON po.product_id = p.product_id");
+		sql.append(" WHERE (po.purchase_order_id LIKE ? or p.name LIKE ?)");
+
+		try {
+			pstmt = con.prepareStatement(sql.toString());
+			
+	        String likeKeyword = "%" + keyword + "%";
+	        pstmt.setString(1, likeKeyword);
+	        pstmt.setString(2, likeKeyword);
+			
+			rs = pstmt.executeQuery();
+
+			while (rs.next()) {
+				PurchaseOrder purchaseOrder = new PurchaseOrder();
+				User user = new User();
+				Product product = new Product();
+				
+				purchaseOrder.setPurchase_order_id(rs.getInt("purchase_order_id"));
+				product.setName(rs.getString("product_name"));
+				purchaseOrder.setQuantity(rs.getInt("quantity"));
+				purchaseOrder.setRequest_date(rs.getDate("request_date"));
+				user.setName(rs.getString("requested_by_name"));
+				purchaseOrder.setStatus(rs.getString("status"));
+				purchaseOrder.setComplete_date(rs.getDate("complete_date"));
+				purchaseOrder.setProduct(product);
+				purchaseOrder.setUser(user);
+				
+				list.add(purchaseOrder);
+			}
+			return list;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw new UserException("발주 목록 조회 중 오류 발생", e);
+		} finally {
+			dbManager.release(pstmt, rs);
+		}
+	}
 	
 }

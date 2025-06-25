@@ -153,7 +153,7 @@ public class ProductListPage extends AbstractTablePage implements Refreshable {
 		TableUtil.applyColorTextRenderer(table, "발주요청", Color.DARK_GRAY);
 		TableUtil.applyColorTextRenderer(table, "수정", new Color(25, 118, 210));
 
-		// 상세 , 수정 , 삭제 이벤트 연결
+		// 발주요청, 상세 , 수정 , 활성화 이벤트 연결
 		table.addMouseListener(new MouseAdapter() {
 			public void mouseClicked(MouseEvent e) {
 
