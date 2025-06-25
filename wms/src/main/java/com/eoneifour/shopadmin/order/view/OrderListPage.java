@@ -62,11 +62,10 @@ public class OrderListPage extends AbstractTablePage implements Refreshable {
         topPanel.add(title, BorderLayout.WEST);
         
 		//검색 영역
-		searchField = new JTextField("고객명을 입력하세요");
+		searchField = new JTextField("고객명 또는 상품명을 입력하세요");
 		searchField.setForeground(Color.GRAY);
 		searchField.setPreferredSize(new Dimension(250, 30));
-		JButton searchBtn = ButtonUtil.createPrimaryButton("검색", 15, 100, 30);
-		searchBtn.setBorderPainted(false);
+		JButton searchBtn = ButtonUtil.createDefaultButton("검색", 14, 100, 30);
 
 		placeholder();
 		
@@ -75,24 +74,27 @@ public class OrderListPage extends AbstractTablePage implements Refreshable {
 			String keyword = searchField.getText().trim();
 			List<Order> searchResults;
 			
-			if (!keyword.isEmpty() || keyword == "회원명 또는 이메일을 입력하세요") {
-				//searchResults = productDAO.serchByKeyword(keyword);
+			if (!keyword.isEmpty() || keyword == "고객명 또는 상품명을 입력하세요") {
+				searchResults = orderDAO.serchByKeyword(keyword);
 				searchField.setText(null);
 				placeholder();
 			} else {
 				// keyword가 비어있을 경우 전체 목록 다시 조회
-				//searchResults = productDAO.getProductList();
+				searchResults = orderDAO.getOrderList();
 				searchField.setText(null);
 				placeholder();
 			}
 
-//			if (searchResults.isEmpty()) {
-//				JOptionPane.showMessageDialog(null, "해당 제품이 없습니다.", "Info", JOptionPane.INFORMATION_MESSAGE);
-//				//searchResults = productDAO.getProductList();
-//				searchField.setText(null);
-//				placeholder();
-//				searchField.setForeground(Color.BLACK);
-//			}
+			if (searchResults.isEmpty()) {
+				JOptionPane.showMessageDialog(null, "해당 제품이 없습니다.", "Info", JOptionPane.INFORMATION_MESSAGE);
+				searchResults = orderDAO.getOrderList();
+				searchField.setText(null);
+				placeholder();
+				searchField.setForeground(Color.BLACK);
+			}
+			
+			model.setDataVector(toTableData(searchResults), cols);
+			applyStyle();
 		});
 		
 		// 검색 영역 엔터 이벤트 (검색버튼 클릭과 동일한 효과)
@@ -119,11 +121,6 @@ public class OrderListPage extends AbstractTablePage implements Refreshable {
         };
         
         table = new JTable(model);
-        table.setRowHeight(36);
-        TableUtil.applyDefaultTableStyle(table);
-        applyOrderStatusRenderer(table);
-        TableUtil.applyConditionalTextRenderer(table, "주문상태", "주문확인중", new Color(194, 192, 72));
-		TableUtil.applyConditionalTextRenderer(table, "주문상태", "배송준비", new Color(129, 193, 71));
         
         // 상세, 수정, 취소 이벤트
         table.addMouseListener(new MouseAdapter() {
@@ -195,13 +192,16 @@ public class OrderListPage extends AbstractTablePage implements Refreshable {
 	public void refresh() {
 		orderList = orderDAO.getOrderList();
 		model.setDataVector(toTableData(orderList), cols);
-
+		applyStyle();
+	}
+	
+	public void applyStyle() {
 		TableUtil.applyDefaultTableStyle(table);
-		
-		applyOrderStatusRenderer(table);
+        applyOrderStatusRenderer(table);
 		TableUtil.applyColorTextRenderer(table, "수정", new Color(25, 118, 210));
 		TableUtil.applyColorTextRenderer(table, "취소", new Color(211, 47, 47));
 	}
+	
 	
 	// 주문 상태에 맞는 컬럼 색상 출력
 	private void applyOrderStatusRenderer(JTable table) {
@@ -253,7 +253,7 @@ public class OrderListPage extends AbstractTablePage implements Refreshable {
 	public void placeholder() {
 		searchField.addFocusListener(new FocusAdapter() {
 		    public void focusGained(FocusEvent e) {
-		        if (searchField.getText().equals("고객명을 입력하세요")) {
+		        if (searchField.getText().equals("고객명 또는 상품명을 입력하세요")) {
 		            searchField.setText("");
 		            searchField.setForeground(Color.BLACK);
 		        }
@@ -262,7 +262,7 @@ public class OrderListPage extends AbstractTablePage implements Refreshable {
 		    public void focusLost(FocusEvent e) {
 		        if (searchField.getText().isEmpty()) {
 		            searchField.setForeground(Color.GRAY);
-		            searchField.setText("고객명을 입력하세요");
+		            searchField.setText("고객명 또는 상품명을 입력하세요");
 		        }
 		    }
 		});

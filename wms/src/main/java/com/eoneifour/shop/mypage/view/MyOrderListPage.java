@@ -96,8 +96,8 @@ public class MyOrderListPage extends AbstractTablePage implements Refreshable{
                 		}
                 	}
             	} else { // 주문 상세
-                	mainFrame.orderDetailPage.setUser(orderId);
-                	mainFrame.showContent("ORDER_DETAIL");
+//                	mainFrame.orderDetailPage.setUser(orderId);
+//                	mainFrame.showContent("ORDER_DETAIL");
                 }
             }
         });

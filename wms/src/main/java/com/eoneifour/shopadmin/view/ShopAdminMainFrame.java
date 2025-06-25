@@ -76,7 +76,6 @@ public class ShopAdminMainFrame extends AbstractMainFrame {
     	orderUpdatePage = new OrderUpdatePage(this);
     	
         initPages();
-        showContent("USER_LIST");
     }
 
     // 페이지 등록
@@ -172,15 +171,10 @@ public class ShopAdminMainFrame extends AbstractMainFrame {
 		ButtonUtil.styleMenuButton(purchaseBtn);
 		purchaseBtn.addActionListener(e -> showContent("PURCHASE_LIST"));
 
-		JButton settingBtn = new JButton("설정");
-		ButtonUtil.styleMenuButton(settingBtn);
-		settingBtn.addActionListener(e -> showContent("SETTING"));
-
 		menuBar.add(userBtn);
 		menuBar.add(productBtn);
 		menuBar.add(orderBtn);
 		menuBar.add(purchaseBtn);
-		menuBar.add(settingBtn);
 
 		return menuBar;
 	}
@@ -196,7 +190,7 @@ public class ShopAdminMainFrame extends AbstractMainFrame {
 		if (SessionUtil.getLoginUser() == null) {
 			new LoginPage().setVisible(true);
 		} else {
-			new ShopAdminMainFrame().setVisible(true);
+			new ShopAdminMainFrame();
 		}
 
 	}

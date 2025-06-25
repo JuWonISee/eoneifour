@@ -18,6 +18,7 @@ import com.eoneifour.shop.mypage.view.MyOrderListPage;
 import com.eoneifour.shop.mypage.view.MyUserDeletePage;
 import com.eoneifour.shop.mypage.view.MyUserDetailPage;
 import com.eoneifour.shop.mypage.view.MyUserUpdatePage;
+import com.eoneifour.shop.product.view.sh_ProductListPage;
 import com.eoneifour.shopadmin.user.model.User;
 
 /**
@@ -48,7 +49,7 @@ public class ShopMainFrame extends AbstractMainFrame {
         myOrderListPage = new MyOrderListPage(this);
         myUserDeletePage = new MyUserDeletePage(this);
         
-//        sh_productListPage = new sh_ProductListPage(this);
+        sh_productListPage = new sh_ProductListPage(this);
         
         initPages();
     }
@@ -61,11 +62,11 @@ public class ShopMainFrame extends AbstractMainFrame {
     	contentCardPanel.add(myUserUpdatePage, "MY_USER_UPD"); // 마이페이지 회원수정
     	contentCardPanel.add(myUserDeletePage, "MY_USER_DEL"); // 마이페이지 회원탈퇴
     	
-//    	contentCardPanel.add(sh_productListPage, "SH_PRODUCT_LISTPAGE"); // 마이페이지 주문내역
+    	contentCardPanel.add(sh_productListPage, "SH_PRODUCT_LISTPAGE"); // 마이페이지 주문내역
     	
     	// 메뉴 등록
     	menuCardPanel.add(new MypageMenuPanel(this), "MYPAGE_MENU");
-//    	menuCardPanel.add(new ProductMenuPanel(this), "PRODUCT_MENU");
+    	menuCardPanel.add(new ProductMenuPanel(this), "PRODUCT_MENU");
     	
     	// 초기 화면
     	showPage("SH_PRODUCT_LISTPAGE", "PRODUCT_MENU");
@@ -98,10 +99,14 @@ public class ShopMainFrame extends AbstractMainFrame {
 		infoBar.add(leftWrapper, BorderLayout.WEST);
 
 		// Right Panel: 버튼 area
-		rightWrapper = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 10));
-		
+		JButton homeBtn = new JButton("HOME");
+		ButtonUtil.styleHeaderButton(homeBtn);
 		JButton logoutButton = new JButton("로그아웃");
 		ButtonUtil.styleHeaderButton(logoutButton);
+		homeBtn.addActionListener(e -> {
+			// 상품리스트로 이동
+		});
+		
 		logoutButton.addActionListener(e -> {
 			SessionUtil.clear();
 			dispose();
