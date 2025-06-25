@@ -1,29 +1,32 @@
-package com.eoneifour.shopadmin.purchaseOrder.model;
+package com.eoneifour.wms.iobound.model;
 
 import java.sql.Date;
 
-public class PurchaseOrder {
+import com.eoneifour.shopadmin.product.model.Product;
+
+/*
+발주 테이블
+테이블명 : purchase_order
+컬럼종류 : 수량, 상태, 요청일, 완료일, 발주상태?, 상품 ID
+*/ 
+
+public class OutBoundOrder {
+	
 	private int purchase_order_id;
 	private int quantity;
-	private String status;
+	private int status;
 	private Date request_date;
 	private Date complete_date;
-	private int requested_by;
+	private int  requested_by;
 	private int product_id;
+	private Product product;
 	
-	public PurchaseOrder() {}
-	
-	public PurchaseOrder(int purchase_order_id, int quantity, String status, Date request_date,
-						Date complete_date, int requested_by, int product_id) {
-		this.purchase_order_id = purchase_order_id;
-		this.quantity = quantity;
-		this.status = status;
-		this.request_date = request_date;
-		this.complete_date = complete_date;
-		this.requested_by = requested_by;
-		this.product_id = product_id;
+	public Product getProduct() {
+		return product;
 	}
-	
+	public void setProduct(Product product) {
+		this.product = product;
+	}
 	public int getPurchase_order_id() {
 		return purchase_order_id;
 	}
@@ -36,10 +39,10 @@ public class PurchaseOrder {
 	public void setQuantity(int quantity) {
 		this.quantity = quantity;
 	}
-	public String getStatus() {
+	public int getStatus() {
 		return status;
 	}
-	public void setStatus(String status) {
+	public void setStatus(int status) {
 		this.status = status;
 	}
 	public Date getRequest_date() {
@@ -66,5 +69,5 @@ public class PurchaseOrder {
 	public void setProduct_id(int product_id) {
 		this.product_id = product_id;
 	}
-	
 }
+

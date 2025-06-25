@@ -20,13 +20,12 @@ import javax.swing.Timer;
 import com.eoneifour.common.frame.AbstractMainFrame;
 import com.eoneifour.common.util.ButtonUtil;
 import com.eoneifour.common.util.DBManager;
-import com.eoneifour.wms.admin.view.UserListPage;
 import com.eoneifour.wms.common.config.Config;
 import com.eoneifour.wms.inbound.view.RackInboundStatusPage;
 import com.eoneifour.wms.inboundrate.view.AllInboundRatePage;
 import com.eoneifour.wms.inboundrate.view.StackerInboundRate;
 import com.eoneifour.wms.iobound.view.InboundOrderPage;
-import com.eoneifour.wms.iobound.view.OutBoundOrder;
+import com.eoneifour.wms.iobound.view.OutBoundOrderPage;
 import com.eoneifour.wms.iobound.view.lookupProduct;
 
 /**
@@ -73,9 +72,14 @@ public class MainFrame extends AbstractMainFrame {
 		contentCardPanel.repaint();
 
 		// 세부 페이지 부착
+
 		contentCardPanel.add(new UserListPage(this), "ADMIN_REGISTER"); // 더미 페이지
 //		contentCardPanel.add(new InboundOrderPage(this), "INBOUND_ORDER");
 		contentCardPanel.add(new OutBoundOrder(this), "OUTBOUND_ORDER");
+
+		contentCardPanel.add(new InboundOrderPage(this), "INBOUND_ORDER");
+		contentCardPanel.add(new OutBoundOrderPage(this), "OUTBOUND_ORDER");
+
 		contentCardPanel.add(new lookupProduct(this), "PRODUCT_LOOKUP");
 		contentCardPanel.add(new AllInboundRatePage(this), "ALL_INBOUND_RATE");
 		contentCardPanel.add(new StackerInboundRate(this), "STACKER_INBOUND_RATE");

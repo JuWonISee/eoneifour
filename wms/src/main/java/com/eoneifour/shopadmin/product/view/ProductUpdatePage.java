@@ -156,6 +156,7 @@ public class ProductUpdatePage extends JPanel {
 		stockQuantityField = new JTextField(16);
 		formPanel.add(FieldUtil.createField("수량", stockQuantityField));
 		formPanel.add(Box.createVerticalStrut(12));
+		stockQuantityField.setEditable(false);
 
 		// 이미지 필드 + 이미지 업로드 버튼 (imageField는 편집 불가)
 		imageField = new JTextField(16);
@@ -210,7 +211,6 @@ public class ProductUpdatePage extends JPanel {
 					if (result == JOptionPane.YES_OPTION) {
 						updateProduct();
 						JOptionPane.showMessageDialog(this, "수정이 완료되었습니다.");
-						mainFrame.productListPage.refresh();
 						mainFrame.showContent("PRODUCT_LIST");
 					}
 				}
@@ -364,24 +364,25 @@ public class ProductUpdatePage extends JPanel {
 		product.setBrand_name(brandField.getText());
 		product.setPrice(Integer.parseInt(priceField.getText()));
 		product.setDetail(detailField.getText());
-		product.setStock_quantity(Integer.parseInt(stockQuantityField .getText()));
 		
 		productDAO.updateProduct(product);
-
-		for (int i = 0; i < files.length; i++) {
-			File file = files[i]; 
-			productImg.setProduct(product); 
-			productImg.setFilename(file.getAbsolutePath()); 
-			
-			//update만 계속 돌게 되면 맨 마지막 파일만 남으므로
-			//0번째 index만 update , 그 이후는 insert
-			if(i==0) {
-				productImgDAO.updateProductImg(productImg);
-			}else {
-				productImgDAO.insertProductImg(productImg);
+		if(files != null && files.length >0) {
+			for (int i = 0; i < files.length; i++) {
+				File file = files[i]; 
+				productImg.setProduct(product); 
+				productImg.setFilename(file.getAbsolutePath()); 
+				
+				//update만 계속 돌게 되면 맨 마지막 파일만 남으므로
+				//0번째 index만 update , 그 이후는 insert
+				if(i==0) {
+					productImgDAO.updateProductImg(productImg);
+				}else {
+					productImgDAO.insertProductImg(productImg);
+				}
+				
 			}
-			
 		}
+
 	}
 	
 	//오류 메세지 출력

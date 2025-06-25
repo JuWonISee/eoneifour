@@ -16,7 +16,6 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 import com.eoneifour.common.util.ButtonUtil;
-import com.eoneifour.common.util.DBManager;
 import com.eoneifour.common.util.FieldUtil;
 import com.eoneifour.shopadmin.product.model.Product;
 import com.eoneifour.shopadmin.product.model.ProductImg;
@@ -24,7 +23,7 @@ import com.eoneifour.shopadmin.product.repository.ProductDAO;
 import com.eoneifour.shopadmin.product.repository.ProductImgDAO;
 import com.eoneifour.shopadmin.view.ShopAdminMainFrame;
 
-public class ProductDetailPage extends JPanel{
+public class ProductDetailPage extends JPanel {
 	private ShopAdminMainFrame mainFrame;
 	
 	private JPanel formPanel;
@@ -127,7 +126,6 @@ public class ProductDetailPage extends JPanel{
 	        });
 	        // 목록 버튼 이벤트
 	        listBtn.addActionListener(e->{
-	        	mainFrame.userListPage.refresh();
 	    		mainFrame.showContent("PRODUCT_LIST");
 	        });
 	        
