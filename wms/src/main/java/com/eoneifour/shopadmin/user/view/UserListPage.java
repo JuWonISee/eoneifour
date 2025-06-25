@@ -3,8 +3,11 @@ package com.eoneifour.shopadmin.user.view;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Cursor;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
@@ -12,11 +15,13 @@ import java.text.SimpleDateFormat;
 import java.util.List;
 
 import javax.swing.BorderFactory;
+import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTable;
+import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
 
 import com.eoneifour.common.exception.UserException;
@@ -25,6 +30,7 @@ import com.eoneifour.common.util.ButtonUtil;
 import com.eoneifour.common.util.Refreshable;
 import com.eoneifour.common.util.SessionUtil;
 import com.eoneifour.common.util.TableUtil;
+import com.eoneifour.shopadmin.product.model.Product;
 import com.eoneifour.shopadmin.user.model.User;
 import com.eoneifour.shopadmin.user.repository.UserDAO;
 import com.eoneifour.shopadmin.view.ShopAdminMainFrame;
@@ -32,6 +38,8 @@ import com.eoneifour.shopadmin.view.ShopAdminMainFrame;
 public class UserListPage extends AbstractTablePage implements Refreshable {
 	private ShopAdminMainFrame mainFrame;
 	private UserRegistPage userRegistPage;
+	
+	private JTextField searchField;
 	
 	private List<User> userList;
 	private UserDAO userDAO;
@@ -57,6 +65,47 @@ public class UserListPage extends AbstractTablePage implements Refreshable {
         JLabel title = new JLabel("회원 목록");
         title.setFont(new Font("맑은 고딕",Font.BOLD,24));
         topPanel.add(title, BorderLayout.WEST);
+        
+		//검색 영역
+		searchField = new JTextField("회원명 또는 이메일을 입력하세요");
+		searchField.setForeground(Color.GRAY);
+		searchField.setPreferredSize(new Dimension(250, 30));
+		JButton searchBtn = ButtonUtil.createPrimaryButton("검색", 15, 100, 30);
+		searchBtn.setBorderPainted(false);
+		
+		placeholder();
+		
+		//검색 기능
+		searchBtn.addActionListener(e->{
+			String keyword = searchField.getText().trim();
+			List<User> searchResults;
+			
+			if (!keyword.isEmpty() || keyword == "회원명 또는 이메일을 입력하세요") {
+				//searchResults = productDAO.serchByKeyword(keyword);
+				searchField.setText(null);
+				placeholder();
+			} else {
+				// keyword가 비어있을 경우 전체 목록 다시 조회
+				//searchResults = productDAO.getProductList();
+				searchField.setText(null);
+				placeholder();
+			}
+
+//			if (searchResults.isEmpty()) {
+//				JOptionPane.showMessageDialog(null, "해당 제품이 없습니다.", "Info", JOptionPane.INFORMATION_MESSAGE);
+//				//searchResults = productDAO.getProductList();
+//				searchField.setText(null);
+//				placeholder();
+//				searchField.setForeground(Color.BLACK);
+//			}
+		});
+
+		
+		// 검색 영역 엔터 이벤트 (검색버튼 클릭과 동일한 효과)
+		searchField.addActionListener(e -> {
+			searchBtn.doClick(); //
+		});
+		
         // 등록 버튼
         JButton registBtn = ButtonUtil.createPrimaryButton("회원 등록", 14, 120, 40);
         registBtn.addActionListener(e -> {
@@ -66,6 +115,9 @@ public class UserListPage extends AbstractTablePage implements Refreshable {
         JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         
         rightPanel.setOpaque(false);
+		rightPanel.add(searchField);
+		rightPanel.add(searchBtn);
+		rightPanel.add(Box.createHorizontalStrut(40));
         rightPanel.add(registBtn);
         topPanel.add(rightPanel, BorderLayout.EAST);
 
@@ -171,5 +223,24 @@ public class UserListPage extends AbstractTablePage implements Refreshable {
 		}
 		
 		return data;
+	}
+	
+	//검색 TextField에 placeholder 효과 주기 (forcus 이벤트 활용)
+	public void placeholder() {
+		searchField.addFocusListener(new FocusAdapter() {
+		    public void focusGained(FocusEvent e) {
+		        if (searchField.getText().equals("회원명 또는 이메일을 입력하세요")) {
+		            searchField.setText("");
+		            searchField.setForeground(Color.BLACK);
+		        }
+		    }
+
+		    public void focusLost(FocusEvent e) {
+		        if (searchField.getText().isEmpty()) {
+		            searchField.setForeground(Color.GRAY);
+		            searchField.setText("회원명 또는 이메일을 입력하세요");
+		        }
+		    }
+		});
 	}
 }
