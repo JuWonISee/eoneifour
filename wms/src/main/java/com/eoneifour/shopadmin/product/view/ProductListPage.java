@@ -3,43 +3,52 @@ package com.eoneifour.shopadmin.product.view;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Cursor;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.util.List;
 
 import javax.swing.BorderFactory;
+import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTable;
+import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
 
 import com.eoneifour.common.exception.UserException;
 import com.eoneifour.common.frame.AbstractTablePage;
 import com.eoneifour.common.util.ButtonUtil;
 import com.eoneifour.common.util.Refreshable;
+import com.eoneifour.common.util.SessionUtil;
 import com.eoneifour.common.util.TableUtil;
 import com.eoneifour.shopadmin.product.model.Product;
 import com.eoneifour.shopadmin.product.repository.ProductDAO;
 import com.eoneifour.shopadmin.purchaseOrder.repository.PurchaseOrderDAO;
+import com.eoneifour.shopadmin.user.model.User;
 import com.eoneifour.shopadmin.view.ShopAdminMainFrame;
 
-public class ProductListPage extends AbstractTablePage implements Refreshable{
+public class ProductListPage extends AbstractTablePage implements Refreshable {
 	private ShopAdminMainFrame mainFrame;
-	int productId = 0; // product 상세 보기를 위해 product ID 를 담기 위한 변수
+	private int productId = 0; // product 상세 보기를 위해 product ID 를 담기 위한 변수
+	private int userId = 0; //purchase_order 할 때 , 주문자의 userId를 담기 위한 변수
 	private ProductRegistPage productRegistPage;
 	private ProductDetailPage productDetailPage;
 	private ProductUpdatePage productUpdatePage;
-	private PurchaseModalDialog  dialog;
+	private PurchaseModalDialog dialog;
+	private JTextField searchField;
 
 	private ProductDAO productDAO;
 	private PurchaseOrderDAO purchaseOrderDAO;
 	private List<Product> productList;
-	private String[] cols = { "상품번호", "카테고리", "브랜드", "상품명", "가격", "재고수량", "품절상태", "상태", "발주요청", "수정"};
+	private String[] cols = { "상품번호", "카테고리", "브랜드", "상품명", "가격", "재고수량", "품절상태", "상태", "발주요청", "수정" };
 
 	public ProductListPage(ShopAdminMainFrame mainFrame) {
 		super(mainFrame);
@@ -63,6 +72,50 @@ public class ProductListPage extends AbstractTablePage implements Refreshable{
 		JLabel title = new JLabel("상품 목록");
 		title.setFont(new Font("맑은 고딕", Font.BOLD, 24));
 		topPanel.add(title, BorderLayout.WEST);
+		
+		//검색 영역
+		searchField = new JTextField("카테고리명 또는 상품명을 입력하세요");
+		searchField.setForeground(Color.GRAY);
+		searchField.setPreferredSize(new Dimension(250, 30));
+		JButton searchBtn = ButtonUtil.createPrimaryButton("검색", 15, 100, 30);
+		searchBtn.setBorderPainted(false);
+		
+		placeholder();
+		
+		//검색 기능
+		searchBtn.addActionListener(e ->{
+			String keyword = searchField.getText().trim();
+			List<Product> searchResults;
+			
+			if (!keyword.isEmpty() || keyword == "카테고리명 또는 상품명을 입력하세요") {
+				searchResults = productDAO.serchByKeyword(keyword);
+				searchField.setText(null);
+				placeholder();
+			} else {
+				// keyword가 비어있을 경우 전체 목록 다시 조회
+				searchResults = productDAO.getProductList();
+				searchField.setText(null);
+				placeholder();
+			}
+
+			if (searchResults.isEmpty()) {
+				JOptionPane.showMessageDialog(null, "해당 제품이 없습니다.", "Info", JOptionPane.INFORMATION_MESSAGE);
+				searchResults = productDAO.getProductList();
+				searchField.setText(null);
+				placeholder();
+				searchField.setForeground(Color.BLACK);
+			}
+			
+			model.setDataVector(toTableData(searchResults), cols);
+			applyStyle();
+		});
+
+
+		// 검색 영역 엔터 이벤트 (검색버튼 클릭과 동일한 효과)
+		searchField.addActionListener(e -> {
+			searchBtn.doClick(); //
+		});
+		
 		// 등록 버튼
 		JButton registBtn = ButtonUtil.createPrimaryButton("상품 등록", 14, 120, 40);
 		registBtn.addActionListener(e -> {
@@ -72,6 +125,9 @@ public class ProductListPage extends AbstractTablePage implements Refreshable{
 		JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 
 		rightPanel.setOpaque(false);
+		rightPanel.add(searchField);
+		rightPanel.add(searchBtn);
+		rightPanel.add(Box.createHorizontalStrut(40));
 		rightPanel.add(registBtn);
 		topPanel.add(rightPanel, BorderLayout.EAST);
 
@@ -91,7 +147,7 @@ public class ProductListPage extends AbstractTablePage implements Refreshable{
 		table = new JTable(model);
 		table.setRowHeight(36); // cell 높이 설정
 
-		// 테이블 컬럼 스타일 적용 (품절 상태 , 발주 : 회색 , 수정 : 파랑 / 삭제 : 빨강)
+		// 테이블 컬럼 스타일 적용 (품절, 비활성 : 빨강 / 발주요청 : 회색 / 수정 : 파랑)
 		TableUtil.applyConditionalTextRenderer(table, "품절상태", "품절", Color.RED);
 		TableUtil.applyConditionalTextRenderer(table, "상태", "비활성", Color.RED);
 		TableUtil.applyColorTextRenderer(table, "발주요청", Color.DARK_GRAY);
@@ -153,6 +209,14 @@ public class ProductListPage extends AbstractTablePage implements Refreshable{
 		TableUtil.applyColorTextRenderer(table, "발주요청", Color.DARK_GRAY);
 		TableUtil.applyColorTextRenderer(table, "수정", new Color(25, 118, 210));
 	}
+	
+	public void applyStyle() {
+		TableUtil.applyDefaultTableStyle(table);
+		TableUtil.applyConditionalTextRenderer(table, "품절상태", "품절", Color.RED);
+		TableUtil.applyConditionalTextRenderer(table, "상태", "비활성", Color.RED);
+		TableUtil.applyColorTextRenderer(table, "발주요청", Color.DARK_GRAY);
+		TableUtil.applyColorTextRenderer(table, "수정", new Color(25, 118, 210));
+	}
 
 	// 테이블용 데이터로 변환
 	private Object[][] toTableData(List<Product> productList) {
@@ -164,16 +228,15 @@ public class ProductListPage extends AbstractTablePage implements Refreshable{
 			data[i] = new Object[] { product.getProduct_id(), product.getSub_category().getTop_category().getName(),
 					product.getBrand_name(), product.getName(), product.getPrice(), product.getStock_quantity(),
 					(product.getStock_quantity()) == 0 ? "품절" : "판매중", (product.getStatus() == 0) ? "활성" : "비활성",
-					"발주요청", "수정"};
+					"발주요청", "수정" };
 		}
 
 		return data;
 	}
 
-	//상품 삭제 로직
+	// 상품 삭제 로직
 	public void switchProductStatus(int ProductId) {
-		int result = JOptionPane.showConfirmDialog(this, "상품 상태를 변경하시겠습니까?", "확인",
-				JOptionPane.YES_NO_OPTION);
+		int result = JOptionPane.showConfirmDialog(this, "상품 상태를 변경하시겠습니까?", "확인", JOptionPane.YES_NO_OPTION);
 
 		if (result == JOptionPane.YES_OPTION) {
 			productDAO.switchProductStatus(ProductId);
@@ -182,27 +245,43 @@ public class ProductListPage extends AbstractTablePage implements Refreshable{
 		}
 	}
 
-	//발주 처리 로직
+	// 발주 처리 로직
 	private void purchaseOrder(int productId) {
-	    Product product = productDAO.getProduct(productId);
+		Product product = productDAO.getProduct(productId);
+		User loginUser = SessionUtil.getLoginUser();
+		userId = loginUser.getUserId();
+		dialog = new PurchaseModalDialog(mainFrame, product);
+		dialog.setVisible(true);
 
-	    // 예시: 기본 수량을 30으로 설정 (또는 로직에 따라 동적으로 계산)
-	    
-
-	    dialog = new PurchaseModalDialog (mainFrame, product);
-	    dialog.setVisible(true);
-
-	    if (dialog.isConfirmed()) {
-	        int quantity = dialog.getQuantity();
-
+		if (dialog.isConfirmed()) {
+			int quantity = dialog.getQuantity();
 	        try {
 	            productDAO.updateStock_quantity(product, quantity);
-	            purchaseOrderDAO.insertOrder(productId, quantity);
+	            purchaseOrderDAO.insertPurchase(productId, quantity, userId );
 	            JOptionPane.showMessageDialog(this, "발주가 요청되었습니다. 수량: " + quantity);
 	            refresh();
 	        } catch (UserException e) {
 	            JOptionPane.showMessageDialog(this, "발주 요청 중 오류 발생: " + e.getMessage());
 	        }
 	    }
+
+	}
+	//검색 TextField에 placeholder 효과 주기 (forcus 이벤트 활용)
+	public void placeholder() {
+		searchField.addFocusListener(new FocusAdapter() {
+		    public void focusGained(FocusEvent e) {
+		        if (searchField.getText().equals("카테고리명 또는 상품명을 입력하세요")) {
+		            searchField.setText("");
+		            searchField.setForeground(Color.BLACK);
+		        }
+		    }
+
+		    public void focusLost(FocusEvent e) {
+		        if (searchField.getText().isEmpty()) {
+		            searchField.setForeground(Color.GRAY);
+		            searchField.setText("카테고리명 또는 상품명을 입력하세요");
+		        }
+		    }
+		});
 	}
 }
