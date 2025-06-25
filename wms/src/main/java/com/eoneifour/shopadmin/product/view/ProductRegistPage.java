@@ -288,10 +288,9 @@ public class ProductRegistPage extends JPanel {
 	        StringBuilder sb = new StringBuilder();
 	        for (int i = 0; i < files.length; i++) {
 	            String fileName = files[i].getName();
-	            String dbPath = "images/" + fileName;
-	            imageFileNames.add(dbPath);
+	            imageFileNames.add(fileName);
 
-	            sb.append(dbPath);
+	            sb.append(fileName);
 	            if (i < files.length - 1) {
 	                sb.append(", ");
 	            }

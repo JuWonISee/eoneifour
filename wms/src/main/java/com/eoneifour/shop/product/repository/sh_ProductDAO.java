@@ -31,6 +31,7 @@ public class sh_ProductDAO {
 		sql.append(" from shop_top_category t , shop_sub_category s , shop_product p");
 		sql.append(" where t.top_category_id = s.top_category_id and");
 		sql.append(" s.sub_category_id = p.sub_category_id ");
+		sql.append(" order by product_id desc");
 
 		try {
 			pstmt = con.prepareStatement(sql.toString());
