@@ -96,10 +96,10 @@ public class Order {
 
 	public String getStatusName() {
 	    switch(status) {
-	        case 0: return "배송준비";
-	        case 1: return "배송 중";
+	        case 0: return "주문확인중";
+	        case 1: return "배송준비";
 	        case 2: return "배송완료";
-	        case 3: return "주문 취소";
+	        case 3: return "주문취소";
 	        default: return "알수없음";
 	    }
 	}
