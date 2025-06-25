@@ -10,19 +10,14 @@ import java.util.List;
 import com.eoneifour.common.exception.UserException;
 import com.eoneifour.common.util.DBManager;
 import com.eoneifour.shopadmin.order.model.Order;
-import com.eoneifour.shopadmin.user.model.User;
 
 public class OrderDAO {
 	DBManager db = DBManager.getInstance();
 	
-	public List<Order> getOrderList(boolean unreflected) {
+	public List<Order> getOrderList() {
 		StringBuffer sql = new StringBuffer();
 		sql.append("select o.orders_id, o.order_date, o.total_price, o.status, u.name as user_name, p.name as product_name, oi.quantity, oi.price ");
 		sql.append("from shop_orders o join shop_user u on o.user_id = u.user_id join shop_order_item oi on o.orders_id = oi.orders_id join shop_product p on oi.product_id = p.product_id ");
-		if (unreflected) { 
-			sql.append("join shop_release_order ro on o.orders_id = ro.order_id ");
-			sql.append("where ro.reflect = 0 ");
-		}
 		sql.append(" order by o.orders_id desc");
 
 		Connection conn = db.getConnection();
@@ -139,8 +134,6 @@ public class OrderDAO {
 	        rs = pstmt.executeQuery();
 
 	        if (!rs.next()) throw new UserException("주문상품 정보가 존재하지 않습니다.");
-	        int productId = rs.getInt("product_id");
-	        int quantity = rs.getInt("quantity");
 	        pstmt.close(); rs.close();
 			
 	        // 주문 상태 변경(취소)
@@ -149,15 +142,7 @@ public class OrderDAO {
 			pstmt.setInt(1, orderId);
 			int updated = pstmt.executeUpdate();
 			pstmt.close();
-			if(updated == 0) throw new UserException("주문 취소 변경 실패했습니다.");
-			
-			// 상품 재고 복구
-	        String updateStockSql = "update shop_product set stock_quantity = stock_quantity + ? WHERE product_id = ?";
-	        pstmt = conn.prepareStatement(updateStockSql);
-	        pstmt.setInt(1, quantity);
-	        pstmt.setInt(2, productId);
-	        pstmt.executeUpdate();
-	        pstmt.close();
+			if(updated == 0) throw new UserException("주문 취소 변경 실패했습니다.");			
 		} catch (SQLException e) {
 			e.printStackTrace();
 	        throw new UserException("주문 취소 중 오류가 발생했습니다.", e);
@@ -166,33 +151,52 @@ public class OrderDAO {
 	    }
 	}
 	
-	// 창고에 상품 출고 요청
-	public void requestRelease(int orderId) {
-		String sql = "insert into shop_release_order(order_id, product_id, quantity, requested_by) "
-				+ "select o.orders_id, oi.product_id, oi.quantity, o.user_id "
-				+ "from shop_orders o "
-				+ "join shop_order_item oi on o.orders_id = oi.orders_id "
-				+ "where o.orders_id = ?";
-		
+	// 주문 관리에서 주문 확인/배송 준비 처리 로직 (0: 주문확인중 / 1: 배송준비)
+	public void changeStatus(int orderId, int status, int orderQuantity) {
+		String str = (status == 0) ? "배송 준비" : "배송 완료";  
 		Connection conn = db.getConnection();
 		PreparedStatement pstmt = null;
+		ResultSet rs = null;
 		
 		try {
-			pstmt = conn.prepareStatement(sql);
-			pstmt.setInt(1, orderId);
-			int result = pstmt.executeUpdate();
-			if (result == 0) throw new UserException("출고 요청 실패했습니다.");
+			// 주문상품 조회
+			String selectSql = "select product_id, quantity from shop_order_item where orders_id = ?";
+	        pstmt = conn.prepareStatement(selectSql);
+	        pstmt.setInt(1, orderId);
+	        rs = pstmt.executeQuery();
+
+	        if (!rs.next()) throw new UserException("주문상품 정보가 존재하지 않습니다.");
+	        int productId = rs.getInt("product_id");
+	        int prdQuantity = rs.getInt("quantity");
+	        pstmt.close(); rs.close();
+	        
+	        // 재고 확인
+	        if (prdQuantity < orderQuantity) throw new UserException("재고가 부족합니다.");
 			
-			// 주문 상태 배송중(2) 변경
-			String updateSql = "update shop_orders set status = 2 where orders_id = ?";
+	        // 주문 상태 변경
+	        String updateSql = (status == 0) ? "update shop_orders set status = 1 where orders_id = ?" 
+											: "update shop_orders set status = 2 where orders_id = ?";
 			pstmt = conn.prepareStatement(updateSql);
 			pstmt.setInt(1, orderId);
-			pstmt.executeUpdate();
+			int updated = pstmt.executeUpdate();
+			pstmt.close();
+			if(updated == 0) throw new UserException(str+ " 처리 실패했습니다.");
+			
+			// 배송준비 완료 후 상품 재고 차감
+			if(status != 0) {
+				String updateStockSql = "update shop_product set stock_quantity = stock_quantity - ? WHERE product_id = ?";
+				pstmt = conn.prepareStatement(updateStockSql);
+				pstmt.setInt(1, orderQuantity);
+				pstmt.setInt(2, productId);
+				int stockUpdated = pstmt.executeUpdate();
+				pstmt.close();
+				if(stockUpdated == 0) throw new UserException(str +" 요청 실패했습니다.");
+			}
 		} catch (SQLException e) {
 			e.printStackTrace();
-			throw new UserException("출고 요청 중 오류 발생했습니다.", e);
+			throw new UserException(str + " 요청 중 오류 발생했습니다.", e);
 		} finally {
-			db.release(pstmt);
+			db.release(pstmt, rs);
 		}
 	}
 	
