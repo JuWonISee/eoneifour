@@ -9,6 +9,7 @@ public class Order {
 	private int status;
 	private String userName;
 	private String productName;
+	private String brand;
 	private int quantity;
 	private int price;
 	private String deliveryAddress;
@@ -62,6 +63,14 @@ public class Order {
 		this.productName = productName;
 	}
 
+	public String getBrand() {
+		return brand;
+	}
+
+	public void setBrand(String brand) {
+		this.brand = brand;
+	}
+
 	public int getQuantity() {
 		return quantity;
 	}
@@ -77,7 +86,7 @@ public class Order {
 	public void setPrice(int price) {
 		this.price = price;
 	}
-	
+
 	public String getDeliveryAddress() {
 		return deliveryAddress;
 	}

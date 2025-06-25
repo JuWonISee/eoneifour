@@ -1,6 +1,7 @@
 package com.eoneifour.shop.view;
 
 import java.awt.BorderLayout;
+import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -13,8 +14,8 @@ import com.eoneifour.common.frame.AbstractMainFrame;
 import com.eoneifour.common.util.ButtonUtil;
 import com.eoneifour.common.util.SessionUtil;
 import com.eoneifour.common.view.LoginPage;
+import com.eoneifour.shop.mypage.view.MyOrderListPage;
 import com.eoneifour.shopadmin.user.model.User;
-import com.eoneifour.shopadmin.user.view.UserRegistPage;
 
 /**
  * 쇼핑몰 메인 프레임
@@ -23,17 +24,23 @@ import com.eoneifour.shopadmin.user.view.UserRegistPage;
  */
 
 public class ShopMainFrame extends AbstractMainFrame {
-	public UserRegistPage userRegistPage;
+	public MyOrderListPage myOrderListPage;
 
     public ShopMainFrame() {
         super("쇼핑몰 메인");
+        // 페이지 생성
+        myOrderListPage = new MyOrderListPage(this);
         initPages();
     }
 
-    // 페이지 등록
+    // 메뉴/페이지 등록
     private void initPages() {
-		// 회원 목록을 초기화면으로
-		showContent("ORDER_LIST");
+    	// 페이지 등록
+    	contentCardPanel.add(myOrderListPage, "MY_ORDER_LIST"); // 마이페이지 주문내역
+    	// 메뉴 등록
+    	menuCardPanel.add(new MypageMenuPanel(this), "MYPAGE_MENU");
+    	// 초기 화면
+    	showPage("MY_ORDER_LIST", "MYPAGE_MENU");
 	}
 
 	// 상단 정보 바 + 메뉴 바 구성
@@ -87,10 +94,16 @@ public class ShopMainFrame extends AbstractMainFrame {
 
 		return infoBar;
 	}
+	
+	// 메뉴와 콘텐츠를 동시에 전환하는 메서드
+    public void showPage(String contentKey, String menuKey) {
+        showContent(contentKey);
+        ((CardLayout) menuCardPanel.getLayout()).show(menuCardPanel, menuKey);
+    }
 
 	@Override
 	public JPanel createLeftPanel() {
-		return null;
+		return null; 
 	}
 
 	public static void main(String[] args) {

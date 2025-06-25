@@ -136,10 +136,6 @@ public class UserListPage extends AbstractTablePage implements Refreshable {
         
         table = new JTable(model);
         table.setRowHeight(36); // cell 높이 설정
-        TableUtil.applyDefaultTableStyle(table);
-        // 테이블 컬럼 스타일 적용 (수정: 파랑, 삭제: 빨강)
-        TableUtil.applyColorTextRenderer(table, "수정", new Color(25, 118, 210));  // 파랑
-        TableUtil.applyColorTextRenderer(table, "삭제", new Color(211, 47, 47));  // 빨강
         
         // 상세, 수정, 삭제 이벤트
         table.addMouseListener(new MouseAdapter() {
