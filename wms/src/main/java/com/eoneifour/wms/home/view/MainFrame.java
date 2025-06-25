@@ -73,9 +73,7 @@ public class MainFrame extends AbstractMainFrame {
 
 		// 세부 페이지 부착
 
-		contentCardPanel.add(new UserListPage(this), "ADMIN_REGISTER"); // 더미 페이지
-//		contentCardPanel.add(new InboundOrderPage(this), "INBOUND_ORDER");
-		contentCardPanel.add(new OutBoundOrder(this), "OUTBOUND_ORDER");
+		contentCardPanel.add(new InboundOrderPage(this), "INBOUND_ORDER");
 
 		contentCardPanel.add(new InboundOrderPage(this), "INBOUND_ORDER");
 		contentCardPanel.add(new OutBoundOrderPage(this), "OUTBOUND_ORDER");

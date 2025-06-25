@@ -1,6 +1,9 @@
 package com.eoneifour.wms.inboundrate.view;
 
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.swing.*;
 
 import org.jfree.chart.*;
@@ -13,14 +16,18 @@ import org.jfree.chart.ui.RectangleInsets;
 import org.jfree.chart.ui.TextAnchor;
 import org.jfree.data.category.*;
 
+import com.eoneifour.common.util.Refreshable;
 import com.eoneifour.wms.home.view.MainFrame;
+import com.eoneifour.wms.inboundrate.model.Rack;
+import com.eoneifour.wms.inboundrate.repository.RackDAO;
 
-public class AllInboundRatePage extends JPanel {
+public class AllInboundRatePage extends JPanel implements Refreshable{
 
 	private static final Color[] BAR_COLORS = { 
 			new Color(0x4CAF50), // 공Cell
 			new Color(0x2196F3), // 입고
-			new Color(0xFF9800) // 출고대기
+			new Color(0xFF9800), // 출고대기
+			new Color(0xFA8EE5)  // 입고중
 	};
 
 	private static final Font FONT_TITLE      = new Font("맑은 고딕", Font.BOLD, 28);
@@ -31,29 +38,21 @@ public class AllInboundRatePage extends JPanel {
 	private MainFrame mainFrame;
 	private JFreeChart chart;
 	private CategoryPlot plot;
+	private RackDAO rackDAO;
+	private List<Rack> rackList = new ArrayList<>();
 
 	public AllInboundRatePage(MainFrame mainFrame) {
 		this.mainFrame = mainFrame;
-
-		CategoryDataset dataset = createDataset();
-		this.chart = createChart(dataset);
-		this.plot = chart.getCategoryPlot();
-
-		configureLegendFont();
-		customizeLegendItems(); 
-		configurePlotStyle();
-		configureRenderer(dataset);
-
-		setLayout(new BorderLayout());
-		add(createTopPanel(dataset), BorderLayout.NORTH);
-		add(createChartPanel(), BorderLayout.CENTER);
+		this.rackDAO = new RackDAO();
 	}
 
 	private CategoryDataset createDataset() {
 		DefaultCategoryDataset dataset = new DefaultCategoryDataset();
-		dataset.addValue(100, "공Cell", "");
-		dataset.addValue(8, "입고", "");
-		dataset.addValue(1, "출고대기", "");
+		dataset.addValue(rackDAO.selectRackStatusCnt(0), "공Cell"	 , "");
+		dataset.addValue(rackDAO.selectRackStatusCnt(2), "입고"	 , "");
+		dataset.addValue(rackDAO.selectRackStatusCnt(1), "입고중"	 , "");
+		dataset.addValue(rackDAO.selectRackStatusCnt(3), "출고대기", "");
+		
 		return dataset;
 	}
 
@@ -73,7 +72,7 @@ public class AllInboundRatePage extends JPanel {
 	private void customizeLegendItems() {
 	    LegendItemCollection legendItems = new LegendItemCollection();
 
-	    String[] labels = { "공Cell", "입고", "출고대기" };
+	    String[] labels = { "공Cell", "입고", "출고대기", "입고중" };
 	    
 	    for (int i = 0; i < labels.length; i++) {
 	        Shape shape = new Rectangle(25, 25); // 사각형 크기 (폭, 높이)
@@ -92,7 +91,7 @@ public class AllInboundRatePage extends JPanel {
 		plot.setDomainGridlinesVisible(false);
 		plot.getDomainAxis().setVisible(false);
 		plot.getRangeAxis().setVisible(false);
-		plot.getRangeAxis().setRange(0, 110);
+		plot.getRangeAxis().setRange(0, 200);
 	}
 
 	private void configureRenderer(final CategoryDataset dataset) {
@@ -110,7 +109,7 @@ public class AllInboundRatePage extends JPanel {
 			@Override
 			public String generateLabel(CategoryDataset ds, int row, int column) {
 				Number value = ds.getValue(row, column);
-				return value != null ? value.intValue() + "%" : "";
+				return value != null ? value.intValue() + "개" : "";
 			}
 		});
 
@@ -130,7 +129,7 @@ public class AllInboundRatePage extends JPanel {
 		titleLabel.setFont(FONT_TITLE);
 		titleLabel.setForeground(new Color(0x333333));
 
-	    int percentValue = getSumFromDataset(dataset, "입고", "출고대기");
+	    int percentValue = (int)((double)getSumFromDataset(dataset, "입고", "출고대기") / rackDAO.selectRackStatusCnt(-1)  * 100);
 		JLabel percentLabel = new JLabel(percentValue + "%", SwingConstants.CENTER);
 		percentLabel.setFont(FONT_PERCENT);
 		percentLabel.setForeground(new Color(236, 0, 63)); // 입고 색상과 매칭
@@ -161,6 +160,28 @@ public class AllInboundRatePage extends JPanel {
 		panel.setBackground(Color.WHITE);
 		return panel;
 	}
-	
 
+	@Override
+	public void refresh() {
+		if(chart != null) {
+	        chart.removeLegend();
+	    }
+
+	    CategoryDataset dataset = createDataset();
+	    this.chart = createChart(dataset);
+	    this.plot = chart.getCategoryPlot();
+
+	    configureLegendFont();
+	    customizeLegendItems();
+	    configurePlotStyle();
+	    configureRenderer(dataset);
+
+	    removeAll(); 
+	    setLayout(new BorderLayout());
+	    add(createTopPanel(dataset), BorderLayout.NORTH);
+	    add(createChartPanel(), BorderLayout.CENTER);
+
+	    revalidate(); 
+	    repaint();    
+	}
 }
