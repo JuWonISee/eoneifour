@@ -1,6 +1,7 @@
 package com.eoneifour.shopadmin.purchaseOrder.view;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.event.MouseAdapter;
@@ -8,11 +9,13 @@ import java.awt.event.MouseEvent;
 import java.util.List;
 
 import javax.swing.BorderFactory;
+import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTable;
+import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
 
 import com.eoneifour.common.exception.UserException;
@@ -31,7 +34,7 @@ public class PurchaseOrderListPage extends AbstractTablePage implements Refresha
 
 	private PurchaseOrderDAO purchaseOrderDAO;
 	private List<PurchaseOrder> purchaseOrderList;
-	private String[] cols = { "발주번호", "상품명", "요청수량", "요청일자", "요청자", "처리상태 ", "처리일자", "재고반영여부"};
+	private String[] cols = { "발주번호", "상품명", "요청수량", "요청일자", "요청자", "처리상태 ", "처리일자"};
 
 	public PurchaseOrderListPage(ShopAdminMainFrame mainFrame) {
 		super(mainFrame);
@@ -53,16 +56,23 @@ public class PurchaseOrderListPage extends AbstractTablePage implements Refresha
 		JLabel title = new JLabel("발주 목록");
 		title.setFont(new Font("맑은 고딕", Font.BOLD, 24));
 		topPanel.add(title, BorderLayout.WEST);
+		
+		//검색 영역
+		JTextField searchField = new JTextField("");
+		searchField.setPreferredSize(new Dimension(200, 30));
+		JButton searchBtn = ButtonUtil.createPrimaryButton("검색", 20, 100, 30);
+		searchBtn.setBorderPainted(false);
 
-		// 재고 최신화 버튼
-		JButton reflectBtn = ButtonUtil.createPrimaryButton("재고 최신화", 14, 120, 40);
-		reflectBtn.addActionListener(e -> {
-			reflectAll();
+		// 검색 영역 엔터 이벤트 (검색버튼 클릭과 동일한 효과)
+		searchField.addActionListener(e -> {
+			searchBtn.doClick(); //
 		});
+
 		JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 
 		rightPanel.setOpaque(false);
-		rightPanel.add(reflectBtn);
+		rightPanel.add(searchField);
+		rightPanel.add(searchBtn);
 		topPanel.add(rightPanel, BorderLayout.EAST);
 		
 		add(topPanel, BorderLayout.NORTH);
@@ -113,22 +123,12 @@ public class PurchaseOrderListPage extends AbstractTablePage implements Refresha
 			PurchaseOrder purchaseOrder = purchaseOrderList.get(i);
 			data[i] = new Object[] { purchaseOrder.getPurchase_order_id(), purchaseOrder.getProduct().getName(),
 					purchaseOrder.getQuantity(), purchaseOrder.getRequest_date(), purchaseOrder.getUser().getName(),
-					purchaseOrder.getStatus(), purchaseOrder.getComplete_date(),
-					(purchaseOrder.getReflect()) == 0 ? "미반영" : "반영됨"};
+					purchaseOrder.getStatus(), purchaseOrder.getComplete_date()};
 		}
 
 		return data;
 	}
 	
-	public void reflectAll() {
-	    try {
-	        purchaseOrderDAO.reflectAll();
-	        JOptionPane.showMessageDialog(this, "재고가 반영되었습니다.");
-	        refresh(); // 테이블 갱신
-	    } catch (UserException e) {
-	        JOptionPane.showMessageDialog(this, "재고 반영 중 오류 발생: " + e.getMessage());
-	    }
-	}
 	
 	
 }

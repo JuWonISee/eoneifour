@@ -3,6 +3,7 @@ package com.eoneifour.shopadmin.product.view;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Cursor;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.event.MouseAdapter;
@@ -11,26 +12,32 @@ import java.awt.event.MouseMotionAdapter;
 import java.util.List;
 
 import javax.swing.BorderFactory;
+import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTable;
+import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
 
 import com.eoneifour.common.exception.UserException;
 import com.eoneifour.common.frame.AbstractTablePage;
 import com.eoneifour.common.util.ButtonUtil;
 import com.eoneifour.common.util.Refreshable;
+import com.eoneifour.common.util.SessionUtil;
 import com.eoneifour.common.util.TableUtil;
 import com.eoneifour.shopadmin.product.model.Product;
 import com.eoneifour.shopadmin.product.repository.ProductDAO;
 import com.eoneifour.shopadmin.purchaseOrder.repository.PurchaseOrderDAO;
+import com.eoneifour.shopadmin.user.model.User;
 import com.eoneifour.shopadmin.view.ShopAdminMainFrame;
+import com.eoneifour.wms.iobound.model.InBoundOrder;
 
 public class ProductListPage extends AbstractTablePage implements Refreshable {
 	private ShopAdminMainFrame mainFrame;
 	private int productId = 0; // product 상세 보기를 위해 product ID 를 담기 위한 변수
+	private int userId = 0; //purchase_order 할 때 , 주문자의 userId를 담기 위한 변수
 	private ProductRegistPage productRegistPage;
 	private ProductDetailPage productDetailPage;
 	private ProductUpdatePage productUpdatePage;
@@ -63,6 +70,43 @@ public class ProductListPage extends AbstractTablePage implements Refreshable {
 		JLabel title = new JLabel("상품 목록");
 		title.setFont(new Font("맑은 고딕", Font.BOLD, 24));
 		topPanel.add(title, BorderLayout.WEST);
+		
+		//검색 영역
+		JTextField searchField = new JTextField("");
+		searchField.setPreferredSize(new Dimension(200, 30));
+		JButton searchBtn = ButtonUtil.createPrimaryButton("검색", 20, 100, 30);
+		searchBtn.setBorderPainted(false);
+		
+		//검색 기능
+		searchBtn.addActionListener(e ->{
+			String keyword = searchField.getText().trim();
+			List<Product> searchResults;
+			
+			if (!keyword.isEmpty()) {
+				searchResults = productDAO.serchByKeyword(keyword);
+				searchField.setText(null);
+			} else {
+				// keyword가 비어있을 경우 전체 목록 다시 조회
+				searchResults = productDAO.getProductList();
+				searchField.setText(null);
+			}
+
+			if (searchResults.isEmpty()) {
+				JOptionPane.showMessageDialog(null, "해당 제품이 없습니다.", "Info", JOptionPane.INFORMATION_MESSAGE);
+				searchResults = productDAO.getProductList();
+				searchField.setText(null);
+			}
+			
+			model.setDataVector(toTableData(searchResults), cols);
+			applyStyle();
+		});
+
+
+		// 검색 영역 엔터 이벤트 (검색버튼 클릭과 동일한 효과)
+		searchField.addActionListener(e -> {
+			searchBtn.doClick(); //
+		});
+		
 		// 등록 버튼
 		JButton registBtn = ButtonUtil.createPrimaryButton("상품 등록", 14, 120, 40);
 		registBtn.addActionListener(e -> {
@@ -72,6 +116,9 @@ public class ProductListPage extends AbstractTablePage implements Refreshable {
 		JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 
 		rightPanel.setOpaque(false);
+		rightPanel.add(searchField);
+		rightPanel.add(searchBtn);
+		rightPanel.add(Box.createHorizontalStrut(40));
 		rightPanel.add(registBtn);
 		topPanel.add(rightPanel, BorderLayout.EAST);
 
@@ -153,6 +200,14 @@ public class ProductListPage extends AbstractTablePage implements Refreshable {
 		TableUtil.applyColorTextRenderer(table, "발주요청", Color.DARK_GRAY);
 		TableUtil.applyColorTextRenderer(table, "수정", new Color(25, 118, 210));
 	}
+	
+	public void applyStyle() {
+		TableUtil.applyDefaultTableStyle(table);
+		TableUtil.applyConditionalTextRenderer(table, "품절상태", "품절", Color.RED);
+		TableUtil.applyConditionalTextRenderer(table, "상태", "비활성", Color.RED);
+		TableUtil.applyColorTextRenderer(table, "발주요청", Color.DARK_GRAY);
+		TableUtil.applyColorTextRenderer(table, "수정", new Color(25, 118, 210));
+	}
 
 	// 테이블용 데이터로 변환
 	private Object[][] toTableData(List<Product> productList) {
@@ -184,16 +239,16 @@ public class ProductListPage extends AbstractTablePage implements Refreshable {
 	// 발주 처리 로직
 	private void purchaseOrder(int productId) {
 		Product product = productDAO.getProduct(productId);
-
+		User loginUser = SessionUtil.getLoginUser();
+		userId = loginUser.getUserId();
 		dialog = new PurchaseModalDialog(mainFrame, product);
 		dialog.setVisible(true);
 
 		if (dialog.isConfirmed()) {
 			int quantity = dialog.getQuantity();
-
 	        try {
 	            productDAO.updateStock_quantity(product, quantity);
-	            purchaseOrderDAO.insertPurchase(productId, quantity);
+	            purchaseOrderDAO.insertPurchase(productId, quantity, userId );
 	            JOptionPane.showMessageDialog(this, "발주가 요청되었습니다. 수량: " + quantity);
 	            refresh();
 	        } catch (UserException e) {

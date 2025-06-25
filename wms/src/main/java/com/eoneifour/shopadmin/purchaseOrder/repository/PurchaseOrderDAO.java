@@ -30,7 +30,7 @@ public class PurchaseOrderDAO {
 		StringBuffer sql = new StringBuffer();
 		sql.append("select po.purchase_order_id, p.name AS product_name, po.quantity, ");
 		sql.append(" po.request_date, u.name AS requested_by_name, po.status, ");
-		sql.append(" po.complete_date, po.requested_by, po.product_id , po.reflect");
+		sql.append(" po.complete_date, po.requested_by, po.product_id ");
 		sql.append(" FROM shop_purchase_order po ");
 		sql.append(" JOIN shop_user u ON po.requested_by = u.user_id ");
 		sql.append(" JOIN shop_product p ON po.product_id = p.product_id");
@@ -51,7 +51,6 @@ public class PurchaseOrderDAO {
 				user.setName(rs.getString("requested_by_name"));
 				purchaseOrder.setStatus(rs.getString("status"));
 				purchaseOrder.setComplete_date(rs.getDate("complete_date"));
-				purchaseOrder.setReflect(rs.getInt("reflect"));
 				purchaseOrder.setProduct(product);
 				purchaseOrder.setUser(user);
 				
@@ -122,7 +121,7 @@ public class PurchaseOrderDAO {
 	}
 
 	//발주 1건 추가
-	public void insertPurchase(int productId, int quantity) throws UserException {
+	public void insertPurchase(int productId, int quantity, int userId) throws UserException {
 	    Connection con = null;
 	    PreparedStatement pstmt = null;
 
@@ -137,7 +136,7 @@ public class PurchaseOrderDAO {
 	        purchaseOrder.setQuantity(quantity);
 	        purchaseOrder.setStatus("창고도착"); // 발주 상태는 창고도착 하드코딩 (발주완료 , 창고도착 , 입고완료)
 	        purchaseOrder.setComplete_date(null);
-	        purchaseOrder.setRequested_by(1); //주문자는 로그인 정보에서 얻어올 로직 필요. 현재 1로 하드코딩
+	        purchaseOrder.setRequested_by(userId); //주문자는 로그인 정보에서 얻어오는 로직.
 	        purchaseOrder.setProduct_id(productId);
 
 	        pstmt = con.prepareStatement(sql.toString());
@@ -159,54 +158,6 @@ public class PurchaseOrderDAO {
 	    }
 	}
 	
-	//재고최신화 버튼을 눌렀을 때 ,  재고에 반영 (reflect가 0인것만 골라서 1로 바꾸고 재고 반영)
-	public void reflectAll() throws UserException {
-	    Connection con = null;
-	    PreparedStatement pstmt = null;
-	    ResultSet rs = null;
-	    con = dbManager.getConnection();
-	    
-        // status가 '입고완료'이고 reflect = 0인 발주만 조회
-        StringBuffer sql = new StringBuffer();
-        sql.append("SELECT purchase_order_id, product_id, quantity FROM shop_purchase_order ");
-        sql.append("WHERE status = '입고완료' AND reflect = 0");
-
-	    try {
-	        
-	        pstmt = con.prepareStatement(sql.toString());
-	        rs = pstmt.executeQuery();
-
-	        while (rs.next()) {
-	            int purchaseOrderId = rs.getInt("purchase_order_id");
-	            int productId = rs.getInt("product_id");
-	            int quantity = rs.getInt("quantity");
-
-	            // 1. 상품 조회
-	            Product product = new ProductDAO().getProduct(productId);
-
-	            // 2. 재고 수량 증가
-	            new ProductDAO().updateStock_quantity(product, quantity);
-
-	            // 3. reflect = 1로 반영 상태 업데이트
-	            StringBuffer sql2 = new StringBuffer();
-	            sql2.append("UPDATE shop_purchase_order ");
-	            sql2.append("SET reflect = 1 ");
-	            sql2.append("WHERE purchase_order_id = ?");
-	            
-	            PreparedStatement updateStmt = con.prepareStatement(sql2.toString());
-	            updateStmt.setInt(1, purchaseOrderId);
-	            updateStmt.executeUpdate();
-	            updateStmt.close();
-	            
-	        }
-
-	    } catch (SQLException e) {
-	        e.printStackTrace();
-	        throw new UserException("재고 반영 중 오류 발생", e);
-	    } finally {
-	        dbManager.release(pstmt, rs);
-	    }
-	}
 	
 	
 }

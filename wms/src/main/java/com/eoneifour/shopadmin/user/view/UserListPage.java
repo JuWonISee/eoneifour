@@ -3,6 +3,7 @@ package com.eoneifour.shopadmin.user.view;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Cursor;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.event.MouseAdapter;
@@ -12,11 +13,13 @@ import java.text.SimpleDateFormat;
 import java.util.List;
 
 import javax.swing.BorderFactory;
+import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTable;
+import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
 
 import com.eoneifour.common.exception.UserException;
@@ -57,6 +60,17 @@ public class UserListPage extends AbstractTablePage implements Refreshable {
         JLabel title = new JLabel("회원 목록");
         title.setFont(new Font("맑은 고딕",Font.BOLD,24));
         topPanel.add(title, BorderLayout.WEST);
+        
+		//검색 영역
+		JTextField searchField = new JTextField("");
+		searchField.setPreferredSize(new Dimension(200, 30));
+		JButton searchBtn = ButtonUtil.createPrimaryButton("검색", 20, 100, 30);
+		searchBtn.setBorderPainted(false);
+		// 검색 영역 엔터 이벤트 (검색버튼 클릭과 동일한 효과)
+		searchField.addActionListener(e -> {
+			searchBtn.doClick(); //
+		});
+		
         // 등록 버튼
         JButton registBtn = ButtonUtil.createPrimaryButton("회원 등록", 14, 120, 40);
         registBtn.addActionListener(e -> {
@@ -66,6 +80,9 @@ public class UserListPage extends AbstractTablePage implements Refreshable {
         JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         
         rightPanel.setOpaque(false);
+		rightPanel.add(searchField);
+		rightPanel.add(searchBtn);
+		rightPanel.add(Box.createHorizontalStrut(40));
         rightPanel.add(registBtn);
         topPanel.add(rightPanel, BorderLayout.EAST);
 
