@@ -70,8 +70,7 @@ public class UserListPage extends AbstractTablePage implements Refreshable {
 		searchField = new JTextField("회원명 또는 이메일을 입력하세요");
 		searchField.setForeground(Color.GRAY);
 		searchField.setPreferredSize(new Dimension(250, 30));
-		JButton searchBtn = ButtonUtil.createPrimaryButton("검색", 15, 100, 30);
-		searchBtn.setBorderPainted(false);
+		JButton searchBtn = ButtonUtil.createDefaultButton("검색", 14, 100, 30);
 		
 		placeholder();
 		
@@ -81,23 +80,26 @@ public class UserListPage extends AbstractTablePage implements Refreshable {
 			List<User> searchResults;
 			
 			if (!keyword.isEmpty() || keyword == "회원명 또는 이메일을 입력하세요") {
-				//searchResults = productDAO.serchByKeyword(keyword);
+				searchResults = userDAO.serchByKeyword(keyword);
 				searchField.setText(null);
 				placeholder();
 			} else {
 				// keyword가 비어있을 경우 전체 목록 다시 조회
-				//searchResults = productDAO.getProductList();
+				searchResults = userDAO.getUserList();
 				searchField.setText(null);
 				placeholder();
 			}
 
-//			if (searchResults.isEmpty()) {
-//				JOptionPane.showMessageDialog(null, "해당 제품이 없습니다.", "Info", JOptionPane.INFORMATION_MESSAGE);
-//				//searchResults = productDAO.getProductList();
-//				searchField.setText(null);
-//				placeholder();
-//				searchField.setForeground(Color.BLACK);
-//			}
+			if (searchResults.isEmpty()) {
+				JOptionPane.showMessageDialog(null, "해당 제품이 없습니다.", "Info", JOptionPane.INFORMATION_MESSAGE);
+				searchResults = userDAO.getUserList();
+				searchField.setText(null);
+				placeholder();
+				searchField.setForeground(Color.BLACK);
+			}
+			
+			model.setDataVector(toTableData(searchResults), cols);
+			applyStyle();
 		});
 
 		
@@ -195,7 +197,6 @@ public class UserListPage extends AbstractTablePage implements Refreshable {
 	
 	private void applyStyle() {
 		TableUtil.applyDefaultTableStyle(table);
-		
 		TableUtil.applyColorTextRenderer(table, "수정", new Color(25, 118, 210));
 		TableUtil.applyColorTextRenderer(table, "삭제", new Color(211, 47, 47));
 	}

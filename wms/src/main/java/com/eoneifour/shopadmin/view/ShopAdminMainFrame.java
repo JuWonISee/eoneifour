@@ -172,15 +172,10 @@ public class ShopAdminMainFrame extends AbstractMainFrame {
 		ButtonUtil.styleMenuButton(purchaseBtn);
 		purchaseBtn.addActionListener(e -> showContent("PURCHASE_LIST"));
 
-		JButton settingBtn = new JButton("설정");
-		ButtonUtil.styleMenuButton(settingBtn);
-		settingBtn.addActionListener(e -> showContent("SETTING"));
-
 		menuBar.add(userBtn);
 		menuBar.add(productBtn);
 		menuBar.add(orderBtn);
 		menuBar.add(purchaseBtn);
-		menuBar.add(settingBtn);
 
 		return menuBar;
 	}

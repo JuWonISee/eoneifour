@@ -77,8 +77,7 @@ public class ProductListPage extends AbstractTablePage implements Refreshable {
 		searchField = new JTextField("카테고리명 또는 상품명을 입력하세요");
 		searchField.setForeground(Color.GRAY);
 		searchField.setPreferredSize(new Dimension(250, 30));
-		JButton searchBtn = ButtonUtil.createPrimaryButton("검색", 15, 100, 30);
-		searchBtn.setBorderPainted(false);
+		JButton searchBtn = ButtonUtil.createDefaultButton("검색", 14, 100, 30);
 		
 		placeholder();
 		
@@ -153,7 +152,7 @@ public class ProductListPage extends AbstractTablePage implements Refreshable {
 		TableUtil.applyColorTextRenderer(table, "발주요청", Color.DARK_GRAY);
 		TableUtil.applyColorTextRenderer(table, "수정", new Color(25, 118, 210));
 
-		// 상세 , 수정 , 삭제 이벤트 연결
+		// 발주요청, 상세 , 수정 , 활성화 이벤트 연결
 		table.addMouseListener(new MouseAdapter() {
 			public void mouseClicked(MouseEvent e) {
 
