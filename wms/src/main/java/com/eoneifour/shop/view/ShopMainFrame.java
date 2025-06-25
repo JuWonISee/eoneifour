@@ -99,45 +99,42 @@ public class ShopMainFrame extends AbstractMainFrame {
 		infoBar.add(leftWrapper, BorderLayout.WEST);
 
 		// Right Panel: 버튼 area
-		JButton homeBtn = new JButton("HOME");
-		ButtonUtil.styleHeaderButton(homeBtn);
 		JButton logoutButton = new JButton("로그아웃");
 		ButtonUtil.styleHeaderButton(logoutButton);
-		homeBtn.addActionListener(e -> {
-			// 상품리스트로 이동
-		});
-		
 		logoutButton.addActionListener(e -> {
 			SessionUtil.clear();
 			dispose();
 			new LoginPage().setVisible(true);
 		});
 
+		rightWrapper = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 10));
 		rightWrapper.setOpaque(false);
-		rightWrapper.add(getHeaderActionButton());
+		rightWrapper.add(createSwitchMenuButton());
 		rightWrapper.add(logoutButton);
 		infoBar.add(rightWrapper, BorderLayout.EAST);
 
 		return infoBar;
 	}
 	
-	private JButton getHeaderActionButton() {
-		if ("PRODUCT_MENU".equals(currentMenuKey)) {
-	        JButton mypageBtn = new JButton("마이페이지");
-	        ButtonUtil.styleHeaderButton(mypageBtn);
-	        mypageBtn.addActionListener(e -> showPage("MY_USER_DTL", "MYPAGE_MENU"));
-	        return mypageBtn;
-	    } else {
-	        JButton homeBtn = new JButton("HOME");
-	        ButtonUtil.styleHeaderButton(homeBtn);
-	        homeBtn.addActionListener(e -> showPage("SH_PRODUCT_LISTPAGE", "PRODUCT_MENU"));
-	        return homeBtn;
-	    }
+	private JButton createSwitchMenuButton() {
+	    boolean isInMypage = "MYPAGE_MENU".equals(currentMenuKey);
+	    JButton button = new JButton(isInMypage ? "HOME" : "마이페이지");
+	    ButtonUtil.styleHeaderButton(button);
+
+	    button.addActionListener(e -> {
+	        if (isInMypage) {
+	            showPage("SH_PRODUCT_LISTPAGE", "PRODUCT_MENU");
+	        } else {
+	            showPage("MY_USER_DTL", "MYPAGE_MENU");
+	        }
+	    });
+
+	    return button;
 	}
 	
 	public void updateHeaderButton() {
 	    rightWrapper.remove(0); // 기존 버튼 제거
-	    rightWrapper.add(getHeaderActionButton(), 0); // 새 버튼 추가
+	    rightWrapper.add(createSwitchMenuButton(), 0); // 새 버튼 추가
 	    rightWrapper.revalidate();
 	    rightWrapper.repaint();
 	}
