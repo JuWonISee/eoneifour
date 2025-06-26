@@ -160,7 +160,6 @@ public class UserListPage extends AbstractTablePage implements Refreshable {
                 				userDAO.deleteUser(userId);
                 				refresh();
                 				JOptionPane.showMessageDialog(null, userName + "님이 삭제 처리되었습니다.");
-                				
                 			} catch (UserException e2) {
                 				JOptionPane.showMessageDialog(null, e2.getMessage(), "오류", JOptionPane.ERROR_MESSAGE);
                 			}

@@ -119,7 +119,6 @@ public class OrderUpdatePage extends JPanel {
         		try {
 					updateOrder();
 				} catch (Exception e1) {
-					
 					e1.printStackTrace();
 				}
         		JOptionPane.showMessageDialog(this, "수정이 완료되었습니다.");
