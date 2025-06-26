@@ -57,7 +57,7 @@ public class MyOrderListPage extends AbstractTablePage implements Refreshable{
 	
 	// 테이블 초기화 및 클릭 이벤트 연결
 	public void initTable() {
-		orderList = orderDAO.getOrderListByUserId(SessionUtil.getLoginUser().getUserId());
+		orderList = orderDAO.getOrderListByUserId(mainFrame.userId);
         
         model = new DefaultTableModel(toTableData(orderList), cols) {
             public boolean isCellEditable(int row, int column) { return false; }
