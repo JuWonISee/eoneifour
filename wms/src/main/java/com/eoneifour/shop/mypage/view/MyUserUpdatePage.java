@@ -67,7 +67,7 @@ public class MyUserUpdatePage extends JPanel{
         formPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
         
         // 타이틀 생성
-        JLabel title = new JLabel("회원 수정");
+        JLabel title = new JLabel("회원 정보 수정");
         title.setFont(new Font("맑은 고딕", Font.BOLD, 24));
         title.setAlignmentX(Component.CENTER_ALIGNMENT);
         formPanel.add(title);

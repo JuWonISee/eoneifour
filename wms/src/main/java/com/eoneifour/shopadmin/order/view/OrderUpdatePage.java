@@ -111,7 +111,7 @@ public class OrderUpdatePage extends JPanel {
 	// 하단 버튼 패널 초기화
 	private JPanel createButtonPanel() {
 		// 버튼 생성
-        updateBtn = ButtonUtil.createWarningButton("수정", 15, 120, 40);
+        updateBtn = ButtonUtil.createPrimaryButton("저장", 15, 120, 40);
         listBtn = ButtonUtil.createDefaultButton("목록", 15, 120, 40);
         // 수정 버튼 이벤트
         updateBtn.addActionListener(e-> {

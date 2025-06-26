@@ -33,7 +33,7 @@ public class MyOrderListPage extends AbstractTablePage implements Refreshable{
 	private ShopMainFrame mainFrame;
 	private OrderDAO orderDAO;
 	private List<Order> orderList;
-	private String[] cols = {"주문번호", "주문일시", "브랜드", "상품명", "가격", "수량", "총 결제금액", "주문상태", "수정", "취소"};
+	private String[] cols = {"주문번호", "주문일시", "브랜드", "상품명", "가격(원)", "수량(개)", "총 결제금액(원)", "주문상태", "수정", "취소"};
 	
 	public MyOrderListPage(ShopMainFrame mainFrame) {
 		super(mainFrame);
@@ -95,7 +95,7 @@ public class MyOrderListPage extends AbstractTablePage implements Refreshable{
                 		}
                 	}
             	} else { // 주문 상세
-                	mainFrame.myOrderDetailPage.setUser(orderId);
+                	mainFrame.myOrderDetailPage.setOrder(orderId);
                 	mainFrame.showPage("MY_ORDER_DTL", "MYPAGE_MENU");
                 }
             }
@@ -159,7 +159,6 @@ public class MyOrderListPage extends AbstractTablePage implements Refreshable{
 	        }
 	    });
 	}
-	
 	// 테이블용 데이터로 변환
 	private Object[][] toTableData(List<Order> orderList) {
 		Object[][] data = new Object[orderList.size()][cols.length];
@@ -167,8 +166,8 @@ public class MyOrderListPage extends AbstractTablePage implements Refreshable{
 		for (int i = 0; i < orderList.size(); i++) {
 			Order order = orderList.get(i);
 			data[i] = new Object[] {
-				order.getOrderId(), sdf.format(order.getOrderDate()), order.getBrand(), order.getPrice(), order.getProductName(), order.getQuantity(),
-				order.getTotalPrice(), order.getStatusName(), "수정", "취소"
+				order.getOrderId(), sdf.format(order.getOrderDate()), order.getBrand(), order.getProductName(), order.getPrice()
+				, order.getQuantity(), order.getTotalPrice(), order.getStatusName(), "수정", "취소"
 			};
 		}
 		

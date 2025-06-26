@@ -77,7 +77,7 @@ public class MyOrderDetailPage extends JPanel {
         formPanel.add(FieldUtil.createField("총 액", totalPriceField));
         formPanel.add(Box.createVerticalStrut(12));
         statusField = new JTextField(16);
-        formPanel.add(FieldUtil.createField("배송 상태", statusField));
+        formPanel.add(FieldUtil.createField("주문 상태", statusField));
         formPanel.add(Box.createVerticalStrut(12));
         addressField = new JTextField(16);
         formPanel.add(FieldUtil.createField("도로명 주소", addressField));
@@ -103,7 +103,7 @@ public class MyOrderDetailPage extends JPanel {
 	// 하단 버튼 패널 초기화
 	private JPanel createButtonPanel() {
 		// 버튼 생성
-        updateBtn = ButtonUtil.createWarningButton("수정", 15, 120, 40);
+        updateBtn = ButtonUtil.createPrimaryButton("수정", 15, 120, 40);
         updateBtn.addActionListener(e-> {
         	if(!statusField.getText().equals("주문확인중")) JOptionPane.showMessageDialog(null,"주문확인중 상태가 아닌 주문은 수정할 수 없습니다.");
         	else {
@@ -127,7 +127,7 @@ public class MyOrderDetailPage extends JPanel {
 	}
 	
 	// orderId 설정
-	public void setUser(int orderId) {
+	public void setOrder(int orderId) {
 		this.orderId = orderId;
 		loadUser();
 	}
