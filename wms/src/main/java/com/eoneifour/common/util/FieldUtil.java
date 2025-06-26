@@ -2,6 +2,8 @@ package com.eoneifour.common.util;
 
 import java.awt.Dimension;
 import java.awt.Font;
+import java.text.NumberFormat;
+import java.util.Locale;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -68,6 +70,13 @@ public class FieldUtil {
         panel.add(label);
         panel.add(comboBox);
         return panel;
+    }
+    
+    //int Field에 3자리마다 콤마(,) 를 추가해주는 메서드
+    //단, 해당 Field 값은 int에서 ,가 포함되므로 String으로 바뀜.
+    public static String commaFormat(int num) {
+    	NumberFormat numberFormat = NumberFormat.getNumberInstance(Locale.KOREA);
+        return numberFormat.format(num);
     }
 }
 
