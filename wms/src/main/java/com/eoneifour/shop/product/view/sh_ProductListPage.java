@@ -72,7 +72,7 @@ public class sh_ProductListPage extends JPanel{
 
         sh_ProductImg productImg = sh_productImgDAO.getProductImg(product.getProduct_id());
         
-        //만약 productImg 객체 및 productimg의 filename이 존재할 경우와 존재하지 않을 경우 맵핑
+        //productImg 객체 및 productimg의 filename이 존재할 경우와 존재하지 않을 경우 맵핑
         String filename = (productImg != null && productImg.getFilename() != null) ? productImg.getFilename() : "";
 
         //이미지가 로드됐는지 확인하기 위한 변수

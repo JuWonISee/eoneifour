@@ -152,7 +152,7 @@ public class ProductRegistPage extends JPanel {
 		// 이미지 필드 + 이미지 업로드 버튼 (imageField는 편집 불가)
 		imageField = new JTextField(16);
 		imageField.setEditable(false);
-		JButton imgBtn = ButtonUtil.createDefaultButton("업로드", 13, 90, 36);
+		imgBtn = ButtonUtil.createDefaultButton("업로드", 13, 90, 36);
 		formPanel.add(FieldUtil.createFieldWithButton("이미지", imageField, imgBtn));
 		formPanel.add(Box.createVerticalStrut(18));
 
@@ -172,8 +172,8 @@ public class ProductRegistPage extends JPanel {
 	private JPanel createButtonPanel() {
 		
 		// 등록 , 목록으로 돌아가기 버튼 생성
-		registBtn = ButtonUtil.createPrimaryButton("저장", 15, 120, 40);
-		listBtn = ButtonUtil.createDefaultButton("목록", 15, 120, 40);
+		registBtn = ButtonUtil.createPrimaryButton("저장", 14, 120, 40);
+		listBtn = ButtonUtil.createDefaultButton("목록", 14, 120, 40);
 
 		//중복 확인 버튼 이벤트
         checkBtn.addActionListener(e->{

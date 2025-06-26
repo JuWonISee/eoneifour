@@ -158,7 +158,7 @@ public class PurchaseOrderDAO {
 	    }
 	}
 	
-	public List<PurchaseOrder> serchByKeyword(String keyword){
+	public List<PurchaseOrder> searchByKeyword(String keyword){
 		Connection con = null;
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;

@@ -70,7 +70,7 @@ public class ShopMainFrame extends AbstractMainFrame {
     	
     	contentCardPanel.add(sh_productListPage, "SH_PRODUCT_LIST"); // 쇼핑몰 상품목록
     	contentCardPanel.add(sh_productDetailPage, "SH_PRODUCT_DETAIL"); // 쇼핑몰 상품상세
-    	//contentCardPanel.add(sh_orderCompletePage, "SH_ORDER_COMPLETE"); // 주문 완료 Alert 페이지 
+    	contentCardPanel.add(sh_orderCompletePage, "SH_ORDER_COMPLETE"); // 주문 완료 Alert 페이지 
     	
     	// 메뉴 등록
     	menuCardPanel.add(new MypageMenuPanel(this), "MYPAGE_MENU");

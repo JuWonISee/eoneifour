@@ -75,7 +75,7 @@ public class PurchaseOrderListPage extends AbstractTablePage implements Refresha
 			List<PurchaseOrder> searchResults;
 			
 			if (!keyword.isEmpty() || keyword == "발주번호 또는 상품명을 입력하세요") {
-				searchResults = purchaseOrderDAO.serchByKeyword(keyword);
+				searchResults = purchaseOrderDAO.searchByKeyword(keyword);
 				searchField.setText(null);
 				placeholder();
 			} else {
