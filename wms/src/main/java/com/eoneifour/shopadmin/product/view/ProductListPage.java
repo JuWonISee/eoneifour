@@ -26,6 +26,7 @@ import javax.swing.table.DefaultTableModel;
 import com.eoneifour.common.exception.UserException;
 import com.eoneifour.common.frame.AbstractTablePage;
 import com.eoneifour.common.util.ButtonUtil;
+import com.eoneifour.common.util.FieldUtil;
 import com.eoneifour.common.util.Refreshable;
 import com.eoneifour.common.util.SessionUtil;
 import com.eoneifour.common.util.TableUtil;
@@ -220,7 +221,7 @@ public class ProductListPage extends AbstractTablePage implements Refreshable {
 			Product product = productList.get(i);
 
 			data[i] = new Object[] { product.getProduct_id(), product.getSub_category().getTop_category().getName(),
-					product.getBrand_name(), product.getName(), product.getPrice(), product.getStock_quantity(),
+					product.getBrand_name(), product.getName(), FieldUtil.commaFormat(product.getPrice()), FieldUtil.commaFormat(product.getStock_quantity()),
 					(product.getStock_quantity()) == 0 ? "품절" : "판매중", (product.getStatus() == 0) ? "활성" : "비활성",
 					"발주요청", "수정" };
 		}
@@ -250,7 +251,6 @@ public class ProductListPage extends AbstractTablePage implements Refreshable {
 		if (dialog.isConfirmed()) {
 			int quantity = dialog.getQuantity();
 	        try {
-	            productDAO.updateStock_quantity(product, quantity);
 	            purchaseOrderDAO.insertPurchase(productId, quantity, userId );
 	            JOptionPane.showMessageDialog(this, "발주가 요청되었습니다. 수량: " + quantity);
 	            refresh();
