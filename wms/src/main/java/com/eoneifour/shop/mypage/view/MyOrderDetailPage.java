@@ -1,4 +1,4 @@
-package com.eoneifour.shopadmin.order.view;
+package com.eoneifour.shop.mypage.view;
 
 import java.awt.Color;
 import java.awt.Component;
@@ -15,17 +15,15 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import com.eoneifour.common.exception.UserException;
 import com.eoneifour.common.util.ButtonUtil;
 import com.eoneifour.common.util.FieldUtil;
+import com.eoneifour.shop.view.ShopMainFrame;
 import com.eoneifour.shopadmin.order.model.Order;
 import com.eoneifour.shopadmin.order.repository.OrderDAO;
-import com.eoneifour.shopadmin.view.ShopAdminMainFrame;
 
-public class OrderDetailPage extends JPanel {
-	private ShopAdminMainFrame mainFrame;
+public class MyOrderDetailPage extends JPanel {
+	private ShopMainFrame mainFrame;
 	
-	private JTextField userNameField;
     private JTextField prodNameField;
     private JTextField quantityField;
     private JTextField totalPriceField;
@@ -38,7 +36,7 @@ public class OrderDetailPage extends JPanel {
     
     private int orderId;
     
-	public OrderDetailPage(ShopAdminMainFrame mainFrame) {
+	public MyOrderDetailPage(ShopMainFrame mainFrame) {
 		this.mainFrame = mainFrame;
 		
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
@@ -69,9 +67,6 @@ public class OrderDetailPage extends JPanel {
         formPanel.add(Box.createVerticalStrut(20));
         
         // 필드 생성
-        userNameField = new JTextField(16);
-        formPanel.add(FieldUtil.createField("고객명", userNameField));
-        formPanel.add(Box.createVerticalStrut(12));
         prodNameField = new JTextField(16);
         formPanel.add(FieldUtil.createField("상품명", prodNameField));
         formPanel.add(Box.createVerticalStrut(12));
@@ -92,7 +87,6 @@ public class OrderDetailPage extends JPanel {
         formPanel.add(Box.createVerticalStrut(12));
         
         // 필드 비활성화
-        userNameField.setEditable(false);
         prodNameField.setEditable(false);
         quantityField.setEditable(false);
         totalPriceField.setEditable(false);
@@ -110,17 +104,16 @@ public class OrderDetailPage extends JPanel {
 	private JPanel createButtonPanel() {
 		// 버튼 생성
         updateBtn = ButtonUtil.createWarningButton("수정", 15, 120, 40);
-        listBtn = ButtonUtil.createDefaultButton("목록", 15, 120, 40);
-        // 취소 버튼 이벤트
         updateBtn.addActionListener(e-> {
         	if(!statusField.getText().equals("주문확인중")) JOptionPane.showMessageDialog(null,"주문확인중 상태가 아닌 주문은 수정할 수 없습니다.");
         	else {
-        		mainFrame.orderUpdatePage.prepare(orderId);
-            	mainFrame.showContent("ORDER_UPDATE");
+        		mainFrame.myOrderUpdatePage.prepare(orderId);
+        		mainFrame.showPage("MY_ORDER_UPD", "MYPAGE_MENU");
         	}
         });
-        // 목록 버튼 이벤트
-        listBtn.addActionListener(e-> mainFrame.showContent("ORDER_LIST"));
+        
+        listBtn = ButtonUtil.createDefaultButton("목록", 15, 120, 40);
+        listBtn.addActionListener(e-> mainFrame.showPage("MY_ORDER_LIST", "MYPAGE_MENU"));
         
         // 버튼 패널
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 0));
@@ -143,7 +136,6 @@ public class OrderDetailPage extends JPanel {
 	private void loadUser() {
 		Order order = new OrderDAO().getOrderById(orderId);
 		
-		userNameField.setText(order.getUserName());
         prodNameField.setText(order.getProductName());
         quantityField.setText(String.valueOf(order.getQuantity()));
         totalPriceField.setText(String.valueOf(order.getTotalPrice()));

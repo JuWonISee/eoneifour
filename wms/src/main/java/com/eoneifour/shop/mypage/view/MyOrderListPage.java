@@ -72,14 +72,13 @@ public class MyOrderListPage extends AbstractTablePage implements Refreshable{
                 int col = table.columnAtPoint(e.getPoint());
                 
                 int orderId = (int)model.getValueAt(row, 0);
-                String userName = (String)model.getValueAt(row, 2);
                 String orderStatus = (String)model.getValueAt(row, 7);
                 
                 if (col == table.getColumn("수정").getModelIndex()) { // 주문 수정
                 	if(!orderStatus.equals("주문확인중")) JOptionPane.showMessageDialog(null,"주문확인중 상태가 아닌 주문은 수정할 수 없습니다.");
                 	else {
-//                		mainFrame.orderUpdatePage.prepare(orderId);
-//                    	mainFrame.showContent("ORDER_UPDATE");
+                		mainFrame.myOrderUpdatePage.prepare(orderId);
+                		mainFrame.showPage("MY_ORDER_UPD", "MYPAGE_MENU");
                 	}
                 } else if (col == table.getColumn("취소").getModelIndex()) { // 주문 취소
                 	if(!orderStatus.equals("주문확인중")) JOptionPane.showMessageDialog(null,"주문확인중 상태가 아닌 주문은 취소할 수 없습니다.");
@@ -96,8 +95,8 @@ public class MyOrderListPage extends AbstractTablePage implements Refreshable{
                 		}
                 	}
             	} else { // 주문 상세
-//                	mainFrame.orderDetailPage.setUser(orderId);
-//                	mainFrame.showContent("ORDER_DETAIL");
+                	mainFrame.myOrderDetailPage.setUser(orderId);
+                	mainFrame.showPage("MY_ORDER_DTL", "MYPAGE_MENU");
                 }
             }
         });
