@@ -20,7 +20,7 @@ public class InBoundOrderDAO {
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 
-		String sql = "SELECT stock_product_id, product_NAME FROM stock_product WHERE stock_status = ?";
+		String sql = "SELECT stock_product_id, product_name FROM stock_product WHERE stock_status = ?";
 		List<StockProduct> list = new ArrayList<>();
 
 		try {
@@ -104,9 +104,12 @@ public class InBoundOrderDAO {
 				pstmt.setInt(7, sp.getY());
 				pstmt.setInt(8, 0);
 				pstmt.setString(9, sp.getDetail());
-
-				pstmt.executeUpdate(); // 한 줄씩 insert
+				
+				// 모든 쿼리문을 메모리에 저장해두었다가 한번에 보내기
+				pstmt.addBatch();
 			}
+			// 저장된 쿼리 실행
+			pstmt.executeBatch(); 
 			conn.setAutoCommit(true);
 
 		} catch (SQLException e) {
@@ -115,23 +118,29 @@ public class InBoundOrderDAO {
 			db.release(pstmt);
 		}
 	}
+	
+	// 입고 위치 업데이트
+	public void updateStatusWithPosition(int id, int statusNum, int s, int z, int x, int y) {
+	    Connection conn = db.getConnection();
+	    PreparedStatement pstmt = null;
 
-	public void updateStatus(int id, int statusNum) {
-		Connection conn = db.getConnection();
-		PreparedStatement pstmt = null;
+	    try {
+	        String sql = "UPDATE stock_product SET stock_status = ?, s = ?, z = ?, x = ?, y = ? WHERE stock_product_id = ?";
+	        pstmt = conn.prepareStatement(sql);
+	        pstmt.setInt(1, statusNum);
+	        pstmt.setInt(2, s);
+	        pstmt.setInt(3, z);
+	        pstmt.setInt(4, x);
+	        pstmt.setInt(5, y);
+	        pstmt.setInt(6, id);
 
-		try {
-			String sql = "UPDATE stock_product SET stock_status = ? WHERE stock_product_id = ?";
-			pstmt = conn.prepareStatement(sql);
-			pstmt.setInt(1, statusNum);
-			pstmt.setInt(2, id);
-
-			pstmt.executeUpdate();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} finally {
-			db.release(pstmt);
-		}
+	        pstmt.executeUpdate();
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	        throw new UserException("입고 위치 업데이트 실패", e);
+	    } finally {
+	        db.release(pstmt);
+	    }
 	}
 
 }

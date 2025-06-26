@@ -4,84 +4,78 @@ import java.sql.Date;
 
 import com.eoneifour.shopadmin.product.model.Product;
 
-/*
-발주 테이블
-테이블명 : purchase_order
-컬럼종류 : 수량, 상태, 요청일, 완료일, 발주상태?, 상품 ID
-*/ 
-
 public class OutBoundOrder {
-	
-	private int stock_product_id;
-	private int product_id;
-	private String product_name;
-	private String product_brand;
-	private int s;
-	private int z;
-	private int x;
-	private int y;
-	private int stock_status;
-	private String detail;
-	public int getStock_product_id() {
-		return stock_product_id;
-	}
-	public void setStock_product_id(int stock_product_id) {
-		this.stock_product_id = stock_product_id;
-	}
-	public int getProduct_id() {
-		return product_id;
-	}
-	public void setProduct_id(int product_id) {
-		this.product_id = product_id;
-	}
-	public String getProduct_name() {
-		return product_name;
-	}
-	public void setProduct_name(String product_name) {
-		this.product_name = product_name;
-	}
-	public String getProduct_brand() {
-		return product_brand;
-	}
-	public void setProduct_brand(String product_brand) {
-		this.product_brand = product_brand;
-	}
-	public int getS() {
-		return s;
-	}
-	public void setS(int s) {
-		this.s = s;
-	}
-	public int getZ() {
-		return z;
-	}
-	public void setZ(int z) {
-		this.z = z;
-	}
-	public int getX() {
-		return x;
-	}
-	public void setX(int x) {
-		this.x = x;
-	}
-	public int getY() {
-		return y;
-	}
-	public void setY(int y) {
-		this.y = y;
-	}
-	public int getStock_status() {
-		return stock_status;
-	}
-	public void setStock_status(int stock_status) {
-		this.stock_status = stock_status;
-	}
-	public String getDetail() {
-		return detail;
-	}
-	public void setDetail(String detail) {
-		this.detail = detail;
-	}
-	
-}
 
+    private int outbound_order_id;     // 출고 요청 ID
+    private int quantity;              // 출고 수량
+    private int status;                // 출고 상태 (4~6)
+    private Date request_date;         // 출고 요청일
+    private Date complete_date;        // 출고 완료일
+    private int requested_by;          // 출고 요청자 ID
+    private int product_id;            // 상품 ID
+    private Product product;           // 상품 객체
+
+    public int getOutbound_order_id() {
+        return outbound_order_id;
+    }
+
+    public void setOutbound_order_id(int outbound_order_id) {
+        this.outbound_order_id = outbound_order_id;
+    }
+
+    public int getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
+    }
+
+    public Date getRequest_date() {
+        return request_date;
+    }
+
+    public void setRequest_date(Date request_date) {
+        this.request_date = request_date;
+    }
+
+    public Date getComplete_date() {
+        return complete_date;
+    }
+
+    public void setComplete_date(Date complete_date) {
+        this.complete_date = complete_date;
+    }
+
+    public int getRequested_by() {
+        return requested_by;
+    }
+
+    public void setRequested_by(int requested_by) {
+        this.requested_by = requested_by;
+    }
+
+    public int getProduct_id() {
+        return product_id;
+    }
+
+    public void setProduct_id(int product_id) {
+        this.product_id = product_id;
+    }
+
+    public Product getProduct() {
+        return product;
+    }
+
+    public void setProduct(Product product) {
+        this.product = product;
+    }
+}
