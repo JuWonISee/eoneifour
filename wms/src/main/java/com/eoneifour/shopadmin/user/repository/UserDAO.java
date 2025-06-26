@@ -184,6 +184,27 @@ public class UserDAO {
 		}
 	}
 	
+	// userId에 대해 비밀번호가 일치하는지 확인
+	public boolean validatePassword(int userId, String password) {
+	    String sql = "select 1 from shop_user where user_id = ? and password = ? and status = 0";
+	    Connection conn = db.getConnection();
+	    PreparedStatement pstmt = null;
+	    ResultSet rs = null;
+
+	    try {
+	        pstmt = conn.prepareStatement(sql);
+	        pstmt.setInt(1, userId);
+	        pstmt.setString(2, password);
+	        rs = pstmt.executeQuery();
+	        return rs.next();
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	        throw new UserException("비밀번호 검증 중 오류 발생했습니다.", e);
+	    } finally {
+	        db.release(pstmt, rs);
+	    }
+	}
+
 	public List<User> serchByKeyword(String keyword){
 		String sql = "select * from shop_user where status = 0 and (name like ? or email like ?)";
 		
@@ -223,5 +244,4 @@ public class UserDAO {
 			db.release(pstmt, rs);
 		}
 	}
-	
 }
