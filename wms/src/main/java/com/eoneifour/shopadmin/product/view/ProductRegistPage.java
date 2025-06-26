@@ -8,9 +8,8 @@ import java.awt.Font;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.File;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -53,6 +52,7 @@ public class ProductRegistPage extends JPanel {
 	private JFileChooser chooser;
 	private File[] files;
 	private JTextField imageField;
+	private List<String> imageFileNames; // 파일명만 저장할 리스트
 	
 	private JButton registBtn;
 	private JButton checkBtn;
@@ -157,7 +157,7 @@ public class ProductRegistPage extends JPanel {
 		formPanel.add(Box.createVerticalStrut(18));
 
 		// 이미지 업로드 버튼 이벤트 연결 및 함수 호출
-		chooser = new JFileChooser("C:/");
+		chooser = new JFileChooser("src/main/resources/images/");
 		chooser.setMultiSelectionEnabled(true); // 다중 선택 가능하도록 설정
 		imgBtn.addActionListener(e -> {
 			selectImg();
@@ -279,12 +279,25 @@ public class ProductRegistPage extends JPanel {
 
 	//filechooser로 이미지 선택했을 때 , 파일명만 보이게 하기
 	public void selectImg() {
-		chooser.showOpenDialog(ProductRegistPage.this);
-		files = chooser.getSelectedFiles();
-		if (files.length > 0) {
-			String fileNames = Arrays.stream(files).map(File::getName).collect(Collectors.joining(", "));
-			imageField.setText(fileNames);
-		}
+	    chooser.showOpenDialog(ProductRegistPage.this);
+	    files = chooser.getSelectedFiles();
+
+	    if (files.length > 0) {
+	        imageFileNames = new ArrayList<>();
+
+	        StringBuilder sb = new StringBuilder();
+	        for (int i = 0; i < files.length; i++) {
+	            String fileName = files[i].getName();
+	            imageFileNames.add(fileName);
+
+	            sb.append(fileName);
+	            if (i < files.length - 1) {
+	                sb.append(", ");
+	            }
+	        }
+
+	        imageField.setText(sb.toString());
+	    }
 	}
 
 	// 유효성 검사 후 insert
@@ -337,11 +350,10 @@ public class ProductRegistPage extends JPanel {
 			int product_id = productDAO.selectRecentPk();
 			product.setProduct_id(product_id);
 			
-			for (int i = 0; i < files.length; i++) {
-				File file = files[i]; 
-				productImg.setProduct(product); 
-				productImg.setFilename(file.getAbsolutePath()); 
-				productImgDAO.insertProductImg(productImg);
+			for (String fileName : imageFileNames) {
+			    productImg.setProduct(product);
+			    productImg.setFilename("images/" + fileName); // DB에는 상대경로만 저장
+			    productImgDAO.insertProductImg(productImg);
 			}
 
 		} catch (UserException e) {

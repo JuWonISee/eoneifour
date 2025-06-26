@@ -20,6 +20,7 @@ import com.eoneifour.common.repository.LoginDAO;
 import com.eoneifour.common.util.ButtonUtil;
 import com.eoneifour.common.util.FieldUtil;
 import com.eoneifour.common.util.SessionUtil;
+import com.eoneifour.shop.view.ShopMainFrame;
 import com.eoneifour.shopadmin.user.model.User;
 import com.eoneifour.shopadmin.view.ShopAdminMainFrame;
 
@@ -90,7 +91,7 @@ public class LoginPage extends JFrame {
     			user = loginDAO.findByEmailAndPwd(email, pwd);
     			SessionUtil.setLoginUser(user);
     			if(user.getRole() == 1) new ShopAdminMainFrame();
-    			else JOptionPane.showMessageDialog(this, "유저페이지");
+    			else new ShopMainFrame();
     			
     			dispose(); // 로그인 창 닫기
 			} catch (UserException e) {

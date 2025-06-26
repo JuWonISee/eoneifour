@@ -66,7 +66,7 @@ public class ProductListPage extends AbstractTablePage implements Refreshable {
 	// 사상단 패널 UI 구성 (제목 + 등록 버튼)
 	public void initTopPanel() {
 		JPanel topPanel = new JPanel(new BorderLayout());
-		// 패널 안쪽 여백 설정 (시계반대방향)
+		// 패널 안쪽 여백 설s정 (시계반대방향)
 		topPanel.setBorder(BorderFactory.createEmptyBorder(20, 50, 10, 50));
 		// 제목 라벨
 		JLabel title = new JLabel("상품 목록");
@@ -77,8 +77,7 @@ public class ProductListPage extends AbstractTablePage implements Refreshable {
 		searchField = new JTextField("카테고리명 또는 상품명을 입력하세요");
 		searchField.setForeground(Color.GRAY);
 		searchField.setPreferredSize(new Dimension(250, 30));
-		JButton searchBtn = ButtonUtil.createPrimaryButton("검색", 15, 100, 30);
-		searchBtn.setBorderPainted(false);
+		JButton searchBtn = ButtonUtil.createDefaultButton("검색", 14, 100, 30);
 		
 		placeholder();
 		
@@ -145,7 +144,6 @@ public class ProductListPage extends AbstractTablePage implements Refreshable {
 		};
 
 		table = new JTable(model);
-		table.setRowHeight(36); // cell 높이 설정
 
 		// 테이블 컬럼 스타일 적용 (품절, 비활성 : 빨강 / 발주요청 : 회색 / 수정 : 파랑)
 		TableUtil.applyConditionalTextRenderer(table, "품절상태", "품절", Color.RED);
@@ -153,7 +151,7 @@ public class ProductListPage extends AbstractTablePage implements Refreshable {
 		TableUtil.applyColorTextRenderer(table, "발주요청", Color.DARK_GRAY);
 		TableUtil.applyColorTextRenderer(table, "수정", new Color(25, 118, 210));
 
-		// 상세 , 수정 , 삭제 이벤트 연결
+		// 발주요청, 상세 , 수정 , 활성화 이벤트 연결
 		table.addMouseListener(new MouseAdapter() {
 			public void mouseClicked(MouseEvent e) {
 
@@ -203,11 +201,7 @@ public class ProductListPage extends AbstractTablePage implements Refreshable {
 		productList = productDAO.getProductList();
 		model.setDataVector(toTableData(productList), cols);
 
-		TableUtil.applyDefaultTableStyle(table);
-		TableUtil.applyConditionalTextRenderer(table, "품절상태", "품절", Color.RED);
-		TableUtil.applyConditionalTextRenderer(table, "상태", "비활성", Color.RED);
-		TableUtil.applyColorTextRenderer(table, "발주요청", Color.DARK_GRAY);
-		TableUtil.applyColorTextRenderer(table, "수정", new Color(25, 118, 210));
+		applyStyle();
 	}
 	
 	public void applyStyle() {
