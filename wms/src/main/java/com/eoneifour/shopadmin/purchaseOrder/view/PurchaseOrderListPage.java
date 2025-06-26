@@ -22,6 +22,7 @@ import javax.swing.table.DefaultTableModel;
 
 import com.eoneifour.common.frame.AbstractTablePage;
 import com.eoneifour.common.util.ButtonUtil;
+import com.eoneifour.common.util.FieldUtil;
 import com.eoneifour.common.util.Refreshable;
 import com.eoneifour.common.util.TableUtil;
 import com.eoneifour.shopadmin.purchaseOrder.model.PurchaseOrder;
@@ -155,7 +156,7 @@ public class PurchaseOrderListPage extends AbstractTablePage implements Refresha
 		for (int i = 0; i < purchaseOrderList.size(); i++) {
 			PurchaseOrder purchaseOrder = purchaseOrderList.get(i);
 			data[i] = new Object[] { purchaseOrder.getPurchase_order_id(), purchaseOrder.getProduct().getName(),
-					purchaseOrder.getQuantity(), purchaseOrder.getRequest_date(), purchaseOrder.getUser().getName(),
+					FieldUtil.commaFormat(purchaseOrder.getQuantity()), purchaseOrder.getRequest_date(), purchaseOrder.getUser().getName(),
 					purchaseOrder.getStatus(), purchaseOrder.getComplete_date()};
 		}
 

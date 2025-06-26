@@ -7,6 +7,8 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.Image;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.net.URL;
 import java.util.List;
 
@@ -18,6 +20,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
+import com.eoneifour.common.util.FieldUtil;
 import com.eoneifour.shop.product.model.sh_Product;
 import com.eoneifour.shop.product.model.sh_ProductImg;
 import com.eoneifour.shop.product.repository.sh_ProductDAO;
@@ -28,10 +31,13 @@ public class sh_ProductListPage extends JPanel{
 	private ShopMainFrame mainFrame;
 	private sh_ProductDAO sh_productDAO;
 	private sh_ProductImgDAO sh_productImgDAO;
-	private int productId;
+	private sh_ProductDetailPage sh_productDetailPage;
+	private JPanel productContainer;
 	
 	public sh_ProductListPage(ShopMainFrame mainFrame){
 		this.mainFrame = mainFrame;
+		this.sh_productDetailPage = mainFrame.sh_productDetailPage;
+		
 		sh_productDAO = new sh_ProductDAO();
 		sh_productImgDAO = new sh_ProductImgDAO();
 		
@@ -39,18 +45,13 @@ public class sh_ProductListPage extends JPanel{
         
 
         // 상품 전체 패널 (GridLayout 사용: 4칸씩)
-        JPanel productContainer = new JPanel();
+        productContainer = new JPanel();
         productContainer.setLayout(new GridLayout(0, 4, 40, 50)); // 열 4개, 여백 설정
         productContainer.setBorder(BorderFactory.createEmptyBorder(20, 40, 20, 40)); // 패널 안쪽 여백 설정
 
-        // DB에서 상품 리스트 받아오기
-        List<sh_Product> productList = sh_productDAO.getProductList();
-
-        for (sh_Product product : productList) {
-            JPanel productPanel = createProductPanel(product);
-            productContainer.add(productPanel);
-        }
-
+        //기본적으로 전체 상품 리스트 출력
+        showAllProducts();
+        
         // 스크롤 가능하게 설정
         JScrollPane scrollPane = new JScrollPane(productContainer);
         scrollPane.setBorder(null);
@@ -111,7 +112,7 @@ public class sh_ProductListPage extends JPanel{
         nameLabel.setFont(new Font("맑은 고딕", Font.BOLD, 20));
 
         // 가격
-        JLabel priceLabel = new JLabel(product.getPrice() + " 원", JLabel.CENTER);
+        JLabel priceLabel = new JLabel(FieldUtil.commaFormat(product.getPrice()) + " 원", JLabel.CENTER);
         priceLabel.setFont(new Font("맑은 고딕", Font.PLAIN, 16));
         priceLabel.setBorder(BorderFactory.createEmptyBorder(5, 0, 10, 0));
 
@@ -132,6 +133,40 @@ public class sh_ProductListPage extends JPanel{
 
         return panel;
     }
-	
+    
+    private void refreshProductList(List<sh_Product> productList) {
+        productContainer.removeAll(); // 기존 패널 모두 제거
+        productContainer.revalidate(); // 레이아웃 다시 계산
+        productContainer.repaint();    // UI 다시 그리기
 
+        // 상품갯수만큼 Panel 생성 및 클릭 이벤트
+        for (sh_Product product : productList) {
+            JPanel productPanel = createProductPanel(product);
+
+            final int productId = product.getProduct_id(); // 상품 ID 저장
+            //패널별 클릭 이벤트
+            productPanel.addMouseListener(new MouseAdapter() {
+                public void mouseClicked(MouseEvent e) {
+                    System.out.println(productId);
+                    mainFrame.sh_productDetailPage.setProduct(productId);
+                    mainFrame.showPage("SH_PRODUCT_DETAIL", "PRODUCT_MENU");
+                }
+            });
+
+            productContainer.add(productPanel);
+        }
+    }
+	
+    //상품 전체 리스트 보여주기
+    public void showAllProducts() {
+        List<sh_Product> productList = sh_productDAO.getProductList();
+        refreshProductList(productList);
+    }
+    
+    //카테고리별 리스트 보여주기
+    public void showProductsByCategory(int topCategoryId) {
+        List<sh_Product> productList = sh_productDAO.getProductsByTopCategory(topCategoryId);
+        refreshProductList(productList);
+    }
+    
 }

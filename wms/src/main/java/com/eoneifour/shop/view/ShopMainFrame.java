@@ -15,6 +15,8 @@ import com.eoneifour.common.util.ButtonUtil;
 import com.eoneifour.common.util.SessionUtil;
 import com.eoneifour.common.view.LoginPage;
 import com.eoneifour.shop.mypage.view.MyOrderListPage;
+import com.eoneifour.shop.product.view.sh_OrderCompletePage;
+import com.eoneifour.shop.product.view.sh_ProductDetailPage;
 import com.eoneifour.shop.product.view.sh_ProductListPage;
 import com.eoneifour.shopadmin.user.model.User;
 
@@ -27,12 +29,15 @@ import com.eoneifour.shopadmin.user.model.User;
 public class ShopMainFrame extends AbstractMainFrame {
 	public MyOrderListPage myOrderListPage;
 	public sh_ProductListPage sh_productListPage;
+	public sh_ProductDetailPage sh_productDetailPage;
+	public sh_OrderCompletePage sh_orderCompletePage;
 
     public ShopMainFrame() {
         super("쇼핑몰 메인");
         // 페이지 생성
         myOrderListPage = new MyOrderListPage(this);
         sh_productListPage = new sh_ProductListPage(this);
+        sh_productDetailPage = new sh_ProductDetailPage(this);
         initPages();
     }
 
@@ -40,12 +45,15 @@ public class ShopMainFrame extends AbstractMainFrame {
     private void initPages() {
     	// 페이지 등록
     	contentCardPanel.add(myOrderListPage, "MY_ORDER_LIST"); // 마이페이지 주문내역
-    	contentCardPanel.add(sh_productListPage, "SH_PRODUCT_LISTPAGE"); // 마이페이지 주문내역
+    	contentCardPanel.add(sh_productListPage, "SH_PRODUCT_LIST"); // 쇼핑몰 상품목록
+    	contentCardPanel.add(sh_productDetailPage, "SH_PRODUCT_DETAIL"); // 쇼핑몰 상품상세
+    	//contentCardPanel.add(sh_orderCompletePage, "SH_ORDER_COMPLETE"); // 주문 완료 Alert 페이지 
+    	
     	// 메뉴 등록
     	menuCardPanel.add(new MypageMenuPanel(this), "MYPAGE_MENU");
     	menuCardPanel.add(new ProductMenuPanel(this), "PRODUCT_MENU");
     	// 초기 화면
-    	showPage("SH_PRODUCT_LISTPAGE", "PRODUCT_MENU");
+    	showPage("SH_PRODUCT_LIST", "PRODUCT_MENU");
 	}
 
 	// 상단 정보 바 + 메뉴 바 구성
@@ -81,7 +89,7 @@ public class ShopMainFrame extends AbstractMainFrame {
 		JButton logoutButton = new JButton("로그아웃");
 		ButtonUtil.styleHeaderButton(logoutButton);
 		homeBtn.addActionListener(e -> {
-			// 상품리스트로 이동
+			showPage("SH_PRODUCT_LIST", "PRODUCT_MENU");
 		});
 		
 		logoutButton.addActionListener(e -> {
