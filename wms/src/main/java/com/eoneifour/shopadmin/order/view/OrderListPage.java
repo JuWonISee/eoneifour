@@ -29,6 +29,7 @@ import javax.swing.table.DefaultTableModel;
 import com.eoneifour.common.exception.UserException;
 import com.eoneifour.common.frame.AbstractTablePage;
 import com.eoneifour.common.util.ButtonUtil;
+import com.eoneifour.common.util.FieldUtil;
 import com.eoneifour.common.util.Refreshable;
 import com.eoneifour.common.util.TableUtil;
 import com.eoneifour.shopadmin.order.model.Order;
@@ -241,8 +242,8 @@ public class OrderListPage extends AbstractTablePage implements Refreshable {
 		for (int i = 0; i < orderList.size(); i++) {
 			Order order = orderList.get(i);
 			data[i] = new Object[] {
-				order.getOrderId(), sdf.format(order.getOrderDate()), order.getUserName(), order.getProductName(), order.getQuantity(),
-				order.getTotalPrice(), order.getStatusName(), "수정", "취소"
+				order.getOrderId(), sdf.format(order.getOrderDate()), order.getUserName(), order.getProductName(), FieldUtil.commaFormat(order.getQuantity()),
+				FieldUtil.commaFormat(order.getTotalPrice()), order.getStatusName(), "수정", "취소"
 			};
 		}
 		
