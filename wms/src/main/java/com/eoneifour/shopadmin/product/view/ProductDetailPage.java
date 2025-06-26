@@ -140,7 +140,7 @@ public class ProductDetailPage extends JPanel {
 	    	return buttonPanel;
 		}
 		
-		// 화면 진입 전에 호출 필요. userId로 상세 정보 설정
+		// 화면 진입 전에 호출 필요. productId로 상세 정보 설정
 		public void setProduct(int productId) {
 			this.productId = productId;
 			loadProduct();

@@ -85,8 +85,12 @@ public class MainFrame extends AbstractMainFrame {
 		contentCardPanel.repaint();
 
 		// 세부 페이지 부착
+
+		contentCardPanel.add(new InboundOrderPage(this), "INBOUND_ORDER");
+
 		contentCardPanel.add(new InboundOrderPage(this), "INBOUND_ORDER");
 		contentCardPanel.add(new OutBoundOrderPage(this), "OUTBOUND_ORDER");
+
 		contentCardPanel.add(new lookupProduct(this), "PRODUCT_LOOKUP");
 		contentCardPanel.add(new AllInboundRatePage(this), "ALL_INBOUND_RATE");
 		contentCardPanel.add(new StackerInboundRate(this), "STACKER_INBOUND_RATE");

@@ -14,20 +14,6 @@ public class User {
     private int status;
     private Date createdAt;
     
-    public User() {}
-    
-    public User(int userId, String email, String password, String name, String address, String addressDetail, int role, int status, Date createdAt) {
-	    this.userId = userId;
-	    this.email = email;
-	    this.password = password;
-	    this.name = name;
-	    this.address = address;
-	    this.addressDetail = addressDetail;
-	    this.role = role;
-	    this.status = status;
-	    this.createdAt = createdAt;
-	}
-    
 	public int getUserId() {
 		return userId;
 	}

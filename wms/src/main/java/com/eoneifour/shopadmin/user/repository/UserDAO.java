@@ -183,4 +183,65 @@ public class UserDAO {
 			db.release(pstmt, rs);
 		}
 	}
+	
+	// userId에 대해 비밀번호가 일치하는지 확인
+	public boolean validatePassword(int userId, String password) {
+	    String sql = "select 1 from shop_user where user_id = ? and password = ? and status = 0";
+	    Connection conn = db.getConnection();
+	    PreparedStatement pstmt = null;
+	    ResultSet rs = null;
+
+	    try {
+	        pstmt = conn.prepareStatement(sql);
+	        pstmt.setInt(1, userId);
+	        pstmt.setString(2, password);
+	        rs = pstmt.executeQuery();
+	        return rs.next();
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	        throw new UserException("비밀번호 검증 중 오류 발생했습니다.", e);
+	    } finally {
+	        db.release(pstmt, rs);
+	    }
+	}
+
+	public List<User> serchByKeyword(String keyword){
+		String sql = "select * from shop_user where status = 0 and (name like ? or email like ?)";
+		
+		Connection conn = db.getConnection();
+		PreparedStatement pstmt = null; 
+		ResultSet rs = null;
+		try {
+			List<User> list = new ArrayList<>();
+			pstmt = conn.prepareStatement(sql);
+			
+	        String likeKeyword = "%" + keyword + "%";
+	        pstmt.setString(1, likeKeyword);
+	        pstmt.setString(2, likeKeyword);
+	        
+			rs = pstmt.executeQuery();
+			
+			while(rs.next()) {
+				User user = new User();
+				
+				user.setUserId(rs.getInt("user_id"));
+				user.setEmail(rs.getString("email"));
+				user.setName(rs.getString("name"));
+				user.setAddress(rs.getString("address"));
+				user.setAddressDetail(rs.getString("address_detail"));
+				user.setRole(rs.getInt("role"));
+				user.setStatus(rs.getInt("status"));
+				user.setCreatedAt(rs.getDate("created_at"));
+				
+				list.add(user);
+			}
+			
+			return list;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw new UserException("회원 목록 조회 중 오류 발생", e);
+		} finally {
+			db.release(pstmt, rs);
+		}
+	}
 }

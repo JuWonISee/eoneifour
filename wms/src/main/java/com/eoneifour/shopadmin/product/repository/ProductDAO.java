@@ -27,8 +27,7 @@ public class ProductDAO {
 		con = dbManager.getConnection();
 
 		StringBuffer sql = new StringBuffer();
-		sql.append(
-				"select product_id, t.name AS top_category_name, brand_name, p.name AS product_name, price, p.status, stock_quantity ");
+		sql.append("select product_id, t.name AS top_category_name, brand_name, p.name AS product_name, price, p.status, stock_quantity ");
 		sql.append(" from shop_top_category t , shop_sub_category s , shop_product p");
 		sql.append(" where t.top_category_id = s.top_category_id and");
 		sql.append(" s.sub_category_id = p.sub_category_id ");
@@ -51,7 +50,7 @@ public class ProductDAO {
 				product.setBrand_name(rs.getString("brand_name"));
 				product.setName(rs.getString("product_name"));
 				product.setPrice(rs.getInt("price"));
-				product.setStatus(rs.getInt("p.status"));
+				product.setStatus(rs.getInt("status"));
 				product.setStock_quantity(rs.getInt("stock_quantity"));
 
 				list.add(product);
@@ -329,4 +328,60 @@ public class ProductDAO {
 			dbManager.release(pstmt);
 		}
 	}
+	
+	public List<Product> serchByKeyword(String keyword){
+		Connection con = null;
+		PreparedStatement pstmt = null;
+		List<Product> list = new ArrayList<>();
+		ResultSet rs = null;
+		
+		con = dbManager.getConnection();
+
+		StringBuffer sql = new StringBuffer();
+
+		sql.append("SELECT product_id, t.name AS top_category_name, brand_name, ");
+		sql.append("p.name AS product_name, price, p.status, stock_quantity ");
+		sql.append("FROM shop_product p ");
+		sql.append("JOIN shop_sub_category s ON p.sub_category_id = s.sub_category_id ");
+		sql.append("JOIN shop_top_category t ON s.top_category_id = t.top_category_id ");
+		sql.append("WHERE (t.name LIKE ? OR p.name LIKE ?)");
+		
+		try {
+			pstmt = con.prepareStatement(sql.toString());
+
+	        String likeKeyword = "%" + keyword + "%";
+	        pstmt.setString(1, likeKeyword);
+	        pstmt.setString(2, likeKeyword);
+	        
+			rs = pstmt.executeQuery();
+
+			while (rs.next()) {
+				Product product = new Product();
+				product.setProduct_id(rs.getInt("product_id"));
+
+				SubCategory subCategory = new SubCategory();
+				TopCategory topCategory = new TopCategory();
+				topCategory.setName(rs.getString("top_category_name"));
+				subCategory.setTop_category(topCategory);
+				product.setSub_category(subCategory);
+
+				product.setBrand_name(rs.getString("brand_name"));
+				product.setName(rs.getString("product_name"));
+				product.setPrice(rs.getInt("price"));
+				product.setStatus(rs.getInt("status"));
+				product.setStock_quantity(rs.getInt("stock_quantity"));
+
+				list.add(product);
+			}
+			return list;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw new UserException("상품 목록 조회 중 오류 발생", e);
+		} finally {
+			dbManager.release(pstmt, rs);
+		}
+		
+		
+	}
+	
 }
