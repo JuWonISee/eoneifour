@@ -30,7 +30,6 @@ public class InBoundOrderDAO {
 		try {
 			List<InBoundOrder> list = new ArrayList<>();
 			pstmt = conn.prepareStatement(sql);
-			pstmt.setString(1, "창고도착");
 			rs = pstmt.executeQuery();
 
 			while (rs.next()) {

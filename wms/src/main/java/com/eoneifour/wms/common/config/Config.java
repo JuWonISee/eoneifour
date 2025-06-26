@@ -6,6 +6,8 @@ public class Config {
 	public static final String[] MENUKYES = { "ADMIN", "IO_BOUND", "IO_LOG", "STOCK_MODIFY", "INBOUND_RATE", "INBOUND",
 			"OUTBOUND", "MONITORING" };
 
+	public static int ADMIN_LOGIN = 0;
+	
 	public static final String[][] PAGENAME = {
 
 			{ "관리자 로그인", "관리자 가입", "관리자 정보 수정", "관리자 탈퇴" }, 

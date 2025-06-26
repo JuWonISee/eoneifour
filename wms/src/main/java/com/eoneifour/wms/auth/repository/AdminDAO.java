@@ -9,7 +9,6 @@ import com.eoneifour.common.util.DBManager;
 import com.eoneifour.wms.auth.model.Admin;
 
 public class AdminDAO {
-    // DBManager 인스턴스 생성 (UserDAO 스타일)
     DBManager db = DBManager.getInstance();
 
     // 회원가입
@@ -18,7 +17,6 @@ public class AdminDAO {
         Connection con = null;
         PreparedStatement pstmt = null;
         String sql = "INSERT INTO admin(email, password, name) VALUES (?, ?, ?)";
-        System.out.println(admin.getEmail()+","+admin.getPassword()+","+admin.getName());
 
         try {
             con = db.getConnection();
@@ -59,7 +57,7 @@ public class AdminDAO {
         return exists;
     }
 
-    // 로그인 admib@ 1234
+    // 로그인
     public Admin login(String email, String password) {
         Admin admin = null;
         Connection con = null;
@@ -89,7 +87,7 @@ public class AdminDAO {
         return admin;
     }
 
-  //완 관리자 정보 수정
+    // 관리자 정보 수정
     public int update(Admin admin) {
         int result = 0;
         Connection con = null;
@@ -110,9 +108,9 @@ public class AdminDAO {
         }
 
         return result;
-        
-  //완 로그인 DAO부분 추가 ??? 
     }
+
+    // 기본 관리자 계정 삽입
     public void insertDefaultAdmin() {
         String defaultEmail = "admin@wms.com";
         String defaultPassword = "1234";
@@ -125,5 +123,26 @@ public class AdminDAO {
             admin.setName(defaultName);
             insert(admin);
         }
+    }
+
+    // 🔥 관리자 탈퇴 (이메일 기준)
+    public int deleteByEmail(String email) {
+        int result = 0;
+        Connection con = null;
+        PreparedStatement pstmt = null;
+        String sql = "DELETE FROM admin WHERE email = ?";
+
+        try {
+            con = db.getConnection();
+            pstmt = con.prepareStatement(sql);
+            pstmt.setString(1, email);
+            result = pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            db.release(pstmt);
+        }
+
+        return result;
     }
 }

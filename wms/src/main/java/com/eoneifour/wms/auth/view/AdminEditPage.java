@@ -28,14 +28,14 @@ import com.eoneifour.wms.home.view.MainFrame;
  */
 public class AdminEditPage extends JPanel {
 
-    private AbstractMainFrame mainFrame; // 메인 프레임 참조
+    private MainFrame mainFrame; // 메인 프레임 참조
     private JTextField emailField, nameField; // 이메일, 이름 필드
     private JPasswordField passwordField, confirmField; // 비밀번호, 비밀번호 확인 필드
     private JButton editBtn; // 수정 버튼
 
     private AdminDAO adminDAO; // DB 연동 DAO
 
-    public AdminEditPage(AbstractMainFrame mainFrame) {
+    public AdminEditPage(MainFrame mainFrame) {
         this.mainFrame = mainFrame;
         this.adminDAO = new AdminDAO();
 
@@ -137,13 +137,17 @@ public class AdminEditPage extends JPanel {
         add(box);
         add(Box.createVerticalGlue());
         
-        getAdminInfo();
+        MainFrame mf=(MainFrame)mainFrame;
+        if(mf.admin !=null) { //로그인 한 경우만...
+        	getAdminInfo();
+        }
     }
 
-    public void 	 {
-    	MainFrame mf=(MainFrame)mainFrame;
+    public void getAdminInfo(){
+//    	MainFrame mf=(MainFrame)mainFrame;
     	
-    	emailField.setText(mf.admin.getEmail());
+    	emailField.setText(mainFrame.admin.getEmail());
+    	nameField.setText(mainFrame.admin.getName());
     }
     
     
@@ -170,6 +174,10 @@ public class AdminEditPage extends JPanel {
         int result = adminDAO.update(admin);  // ← AdminDAO에 update 메서드 있어야 함
         if (result > 0) {
             JOptionPane.showMessageDialog(this, "관리자 정보가 수정되었습니다.");
+            
+            passwordField.setText("");
+            confirmField.setText("");
+            
             mainFrame.showContent("HOME"); // 수정 후 홈으로 이동
         } else {
             JOptionPane.showMessageDialog(this, "수정에 실패했습니다.");

@@ -28,7 +28,7 @@ import com.eoneifour.wms.home.view.MainFrame;
  */
 public class AdminLoginPage extends JPanel {
 
-    private AbstractMainFrame mainFrame; // 메인 프레임 참조
+    private MainFrame mainFrame; // 메인 프레임 참조
 
     // 입력 필드 및 버튼
     private JTextField emailField;
@@ -38,7 +38,7 @@ public class AdminLoginPage extends JPanel {
     private AdminDAO adminDAO; // DB 접근용 DAO
 
     // 생성자
-    public AdminLoginPage(AbstractMainFrame mainFrame) {
+    public AdminLoginPage(MainFrame mainFrame) {
         this.mainFrame = mainFrame;
         this.adminDAO = new AdminDAO(); // DAO 초기화
 
@@ -134,12 +134,18 @@ public class AdminLoginPage extends JPanel {
         if (admin != null) {
             // 로그인 성공
             JOptionPane.showMessageDialog(this, "로그인 성공! " + admin.getName() + "님");
-            MainFrame mf=(MainFrame)mainFrame;
-            mf.admin=admin;
-           
+            
+            //로그인 성공과 동시에, 관리자 정보를 mainFrame에 보관
+            mainFrame.admin=admin;
+            mainFrame.setAdminInfo(mainFrame.admin.getName());
+            
+            //회원정보 수정 페이지에 미리 값 넣어놓기 
+            mainFrame.adminEditPage.getAdminInfo();
+            
             // 🔽 입력 필드 초기화 굿
             emailField.setText("");
             passwordField.setText("");
+            
             
             mainFrame.showContent("HOME");
         } else {
