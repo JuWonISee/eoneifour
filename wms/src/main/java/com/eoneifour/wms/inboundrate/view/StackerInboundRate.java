@@ -14,48 +14,41 @@ import org.jfree.chart.labels.StandardPieSectionLabelGenerator;
 import org.jfree.chart.plot.PiePlot;
 import org.jfree.data.general.DefaultPieDataset;
 
+import com.eoneifour.common.util.Refreshable;
 import com.eoneifour.wms.home.view.MainFrame;
+import com.eoneifour.wms.inboundrate.repository.RackDAO;
 
-public class StackerInboundRate extends JPanel {
+public class StackerInboundRate extends JPanel implements Refreshable{
     MainFrame mainFrame;
-    private static final Font FONT_TITLE = new Font("맑은 고딕", Font.BOLD, 40);
-    private static final Font FONT_RATE = new Font("맑은 고딕", Font.BOLD, 40);
-    private static final Font FONT_LABEL = new Font("맑은 고딕", Font.BOLD, 20);
+    RackDAO rackDAO;
+    
+    private static final Font FONT_TITLE     = new Font("맑은 고딕", Font.BOLD, 40);
+    private static final Font FONT_RATE   	  = new Font("맑은 고딕", Font.BOLD, 40);
+    private static final Font FONT_LABEL    = new Font("맑은 고딕", Font.BOLD, 20);
     private static final Font FONT_LEGEND = new Font("맑은 고딕", Font.BOLD, 22);
-
+    
     public StackerInboundRate(MainFrame mainFrame) {
         this.mainFrame = mainFrame;
-
-        setLayout(new BorderLayout(0, 10));
-        setBackground(Color.WHITE);
-        setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-
-        JPanel chartsPanel = new JPanel(new GridLayout(1, 2, 20, 0));
-        chartsPanel.setBackground(Color.WHITE);
-        chartsPanel.add(createChartPanel("1번 스태커", createDataset1()));
-        chartsPanel.add(createChartPanel("2번 스태커", createDataset2()));
-
-        add(chartsPanel, BorderLayout.CENTER);
-        add(createLegendPanel(), BorderLayout.SOUTH);
+        this.rackDAO = new RackDAO();
     }
 
-    private DefaultPieDataset createDataset1() {
+    private DefaultPieDataset createDataset(int stackerNum) {
         DefaultPieDataset dataset = new DefaultPieDataset();
-        dataset.setValue("입고", 25);
-        dataset.setValue("공 CELL", 50);
-        dataset.setValue("출고 대기", 25);
+        
+        int in             = rackDAO.selectRackStatusCnt(2, stackerNum);
+        int waitOut     = rackDAO.selectRackStatusCnt(3, stackerNum);
+        int emptyCELL = rackDAO.selectRackStatusCnt(0, stackerNum);
+        int inIng         = rackDAO.selectRackStatusCnt(1, stackerNum);
+        
+        if (in > 0)             { dataset.setValue("입고"     	, in); }
+        if (waitOut > 0)     { dataset.setValue("출고 대기", waitOut); }
+        if (emptyCELL > 0) { dataset.setValue("공 CELL"	, emptyCELL); }
+        if (inIng > 0)         { dataset.setValue("입고중"   	, inIng); }
+        
         return dataset;
     }
 
-    private DefaultPieDataset createDataset2() {
-        DefaultPieDataset dataset = new DefaultPieDataset();
-        dataset.setValue("입고", 50);
-        dataset.setValue("공 CELL", 40);
-        dataset.setValue("출고 대기", 10);
-        return dataset;
-    }
-
-    private JPanel createChartPanel(String title, DefaultPieDataset dataset) {
+    private JPanel createChartPanel(String title, int stackerNum, DefaultPieDataset dataset) {
         JFreeChart chart = ChartFactory.createPieChart(null, dataset, false, false, false);
         PiePlot plot = (PiePlot) chart.getPlot();
         plot.setBackgroundPaint(Color.WHITE);
@@ -72,27 +65,18 @@ public class StackerInboundRate extends JPanel {
         for (Object keyObj : dataset.getKeys()) {
             Comparable key = (Comparable) keyObj;
             switch (key.toString()) {
-                case "입고": plot.setSectionPaint(key, new Color(0x2196F3)); break;
-                case "출고 대기": plot.setSectionPaint(key, new Color(0xFF9800)); break;
-                case "공 CELL": plot.setSectionPaint(key, new Color(0x4CAF50)); break;
+                case "입고"     	: plot.setSectionPaint(key, new Color(0x2196F3))	; break;
+                case "출고 대기"	: plot.setSectionPaint(key, new Color(0xFF9800))	; break;
+                case "공 CELL"	: plot.setSectionPaint(key, new Color(0x4CAF50))	; break;
+                case "입고중"   	: plot.setSectionPaint(key, new Color(0xFA8EE5))	; break;
                 default: plot.setSectionPaint(key, Color.GRAY);
             }
         }
 
-        double total = 0;
-        double inbound = 0;
-        for (Object keyObj : dataset.getKeys()) {
-            Comparable key = (Comparable) keyObj;
-            Number value = dataset.getValue(key);
-            if (value != null) {
-                double val = value.doubleValue();
-                total += val;
-                if ("입고".equals(key)) {
-                    inbound = val;
-                }
-            }
-        }
-        int inboundRate = (int) ((inbound / total) * 100);
+        int sum  = rackDAO.selectRackStatusCnt(2 , stackerNum) + rackDAO.selectRackStatusCnt(3, stackerNum);
+        int total = rackDAO.selectRackStatusCnt(-1, stackerNum);
+        
+        int inboundRate = (int) (((double)sum / total) * 100);
 
         JLabel titleLabel = new JLabel(title, SwingConstants.CENTER);
         titleLabel.setFont(FONT_TITLE);
@@ -124,6 +108,7 @@ public class StackerInboundRate extends JPanel {
         legendPanel.add(createLegendItem(new Color(0x2196F3), "입고"));
         legendPanel.add(createLegendItem(new Color(0x4CAF50), "공 CELL"));
         legendPanel.add(createLegendItem(new Color(0xFF9800), "출고 대기"));
+        legendPanel.add(createLegendItem(new Color(0xFA8EE5), "입고중"));
 
         return legendPanel;
     }
@@ -169,4 +154,24 @@ public class StackerInboundRate extends JPanel {
             e.printStackTrace();
         }
     }
+
+	@Override
+	public void refresh() {
+        JPanel chartsPanel = new JPanel(new GridLayout(1, 2, 20, 0));
+        chartsPanel.setBackground(Color.WHITE);
+        chartsPanel.add(createChartPanel("1번 스태커", 1, createDataset(1)));
+        chartsPanel.add(createChartPanel("2번 스태커", 2, createDataset(2)));
+		
+		removeAll();
+	    
+        setLayout(new BorderLayout(0, 10));
+        setBackground(Color.WHITE);
+        setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        
+        add(chartsPanel, BorderLayout.CENTER);
+        add(createLegendPanel(), BorderLayout.SOUTH);
+
+	    revalidate(); 
+	    repaint();   
+	}
 }
