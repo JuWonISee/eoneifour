@@ -120,7 +120,7 @@ public class MyOrderListPage extends AbstractTablePage implements Refreshable{
 	
 	// 테이블 데이터 새로고침
 	public void refresh() {
-		orderList = orderDAO.getOrderListByUserId(SessionUtil.getLoginUser().getUserId());
+		orderList = orderDAO.getOrderListByUserId(mainFrame.userId);
 		model.setDataVector(toTableData(orderList), cols);
 		applyStyle();
 	}

@@ -13,7 +13,7 @@ public class LoginDAO {
 	DBManager db = DBManager.getInstance();
 	
 	public User findByEmailAndPwd(String email, String password) {
-		String sql = "select * from shop_user where email = ? and password = ?";
+		String sql = "select * from shop_user where email = ? and password = ? and status = 0";
 		
 		Connection conn = db.getConnection();
 		PreparedStatement pstmt = null;
