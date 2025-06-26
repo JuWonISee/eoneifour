@@ -47,7 +47,6 @@ public class ShopAdminMainFrame extends AbstractMainFrame {
 	public ProductDetailPage productDetailPage;
 	public ProductUpdatePage productUpdatePage;
 	public ProductListPage productListPage;
-
 	public PurchaseOrderListPage purchaseOrderListPage;
 	public PurchaseOrderDetailPage purchaseOrderDetailPage;
 
@@ -58,10 +57,12 @@ public class ShopAdminMainFrame extends AbstractMainFrame {
     public ShopAdminMainFrame() {
         super("쇼핑몰 메인 (관리자)"); // 타이틀 설정
         
+        // 페이지 생성
         userRegistPage = new UserRegistPage(this);
         userDetailPage = new UserDetailPage(this);
         userUpdatePage = new UserUpdatePage(this);
         userListPage = new UserListPage(this);
+        
 
         productRegistPage = new ProductRegistPage(this);
         productDetailPage = new ProductDetailPage(this);
@@ -76,16 +77,15 @@ public class ShopAdminMainFrame extends AbstractMainFrame {
     	orderUpdatePage = new OrderUpdatePage(this);
     	
         initPages();
-        showContent("USER_LIST");
     }
 
     // 페이지 등록
     private void initPages() {
     	// 회원관리
-    	contentCardPanel.add(userListPage, "USER_LIST"); 		// 회원관리 페이지
+    	contentCardPanel.add(userListPage, "USER_LIST"); 				// 회원관리 페이지
     	contentCardPanel.add(userRegistPage, "USER_REGIST"); 	// 회원등록
     	contentCardPanel.add(userDetailPage, "USER_DETAIL"); 	// 회원상세
-    	contentCardPanel.add(userUpdatePage, "USER_UPDATE"); 	// 회원수정
+    	contentCardPanel.add(userUpdatePage, "USER_UPDATE"); 		// 회원수정
     	
     	// 상품관리
         contentCardPanel.add(productListPage, "PRODUCT_LIST"); // 상품관리 페이지
@@ -172,19 +172,13 @@ public class ShopAdminMainFrame extends AbstractMainFrame {
 		ButtonUtil.styleMenuButton(purchaseBtn);
 		purchaseBtn.addActionListener(e -> showContent("PURCHASE_LIST"));
 
-		JButton settingBtn = new JButton("설정");
-		ButtonUtil.styleMenuButton(settingBtn);
-		settingBtn.addActionListener(e -> showContent("SETTING"));
-
 		menuBar.add(userBtn);
 		menuBar.add(productBtn);
 		menuBar.add(orderBtn);
 		menuBar.add(purchaseBtn);
-		menuBar.add(settingBtn);
 
 		return menuBar;
 	}
-
 	// 쇼핑몰은 좌측패널 없음
 	@Override
 	public JPanel createLeftPanel() {
@@ -196,7 +190,7 @@ public class ShopAdminMainFrame extends AbstractMainFrame {
 		if (SessionUtil.getLoginUser() == null) {
 			new LoginPage().setVisible(true);
 		} else {
-			new ShopAdminMainFrame().setVisible(true);
+			new ShopAdminMainFrame();
 		}
 
 	}

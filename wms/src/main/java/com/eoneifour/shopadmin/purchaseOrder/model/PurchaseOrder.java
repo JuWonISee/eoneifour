@@ -16,23 +16,6 @@ public class PurchaseOrder {
 	private int reflect;
 	private Product product;
 	private User user;
-	
-	public PurchaseOrder() {}
-	
-	public PurchaseOrder(int purchase_order_id, int quantity, String status, Date request_date,
-						Date complete_date, int requested_by, int product_id, Product product, User user 
-						, int reflect) {
-		this.purchase_order_id = purchase_order_id;
-		this.quantity = quantity;
-		this.status = status;
-		this.request_date = request_date;
-		this.complete_date = complete_date;
-		this.requested_by = requested_by;
-		this.product_id = product_id;
-		this.product = product;
-		this.user = user;
-		this.reflect = reflect;
-	}
 
 	public int getPurchase_order_id() {
 		return purchase_order_id;

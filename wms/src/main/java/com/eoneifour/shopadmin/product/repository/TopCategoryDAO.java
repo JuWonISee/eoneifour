@@ -26,12 +26,6 @@ public class TopCategoryDAO {
 		pstmt = con.prepareStatement(sql.toString());
 		rs=pstmt.executeQuery();
 		list = new ArrayList();
-		//만일 배열로 RS의 데이터를 담게되면 , 배열의 크기를 명시해야 하는 이유로 , rs.last() , getRow()
-		//rs.before() 
-		//TopCategory[] list = new TopCategory[];
-		//Collection framework ? 객체를 모아서 처리하는데 , 유용한 Api 지원하는 패키지
-		//모여진 모습은 총 2가지. 
-		//순서 있는 모습 (List, Queue) or 순서 없는 모습 (Set, Map)
 		
 		while(rs.next()) {
 		TopCategory topcategory = new TopCategory();

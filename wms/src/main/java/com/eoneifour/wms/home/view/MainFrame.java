@@ -6,6 +6,10 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -25,14 +29,10 @@ import com.eoneifour.wms.auth.view.AdminDeletePage;
 import com.eoneifour.wms.auth.view.AdminEditPage;
 import com.eoneifour.wms.auth.view.AdminLoginPage;
 import com.eoneifour.wms.auth.view.AdminRegistPage;
-
-
 import com.eoneifour.wms.common.config.Config;
 import com.eoneifour.wms.inbound.view.RackInboundStatusPage;
 import com.eoneifour.wms.inboundrate.view.AllInboundRatePage;
 import com.eoneifour.wms.inboundrate.view.StackerInboundRate;
-import com.eoneifour.wms.iobound.view.InboundOrderPage;
-import com.eoneifour.wms.iobound.view.OutBoundOrderPage;
 import com.eoneifour.wms.iobound.view.lookupProduct;
 
 /**
@@ -63,6 +63,17 @@ public class MainFrame extends AbstractMainFrame {
 		// 정해진 시간 간격으로 ActionEvent(ActionListener의 actionPerformed()) 를 발생시키는 메서드.
 		// 5초 간격마다 DB 연결 상태 체크.
 		new Timer(5000, e -> updateDBstatus(dbStatusLabel)).start();
+
+		addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosing(WindowEvent e) {
+				// 자원 정리 예시
+				DBManager.getInstance().release(DBManager.getInstance().getConnection());
+
+				// 종료
+				System.exit(0);
+			}
+		});
 	}
 
 	/***
@@ -225,9 +236,22 @@ public class MainFrame extends AbstractMainFrame {
 				button.addActionListener(e -> showContent(PAGEKEY));
 				button.setAlignmentX(JButton.CENTER_ALIGNMENT);
 				groupPanel.add(button);
+				
+				/***
+				 * 팝업으로 띄울시 이곳에다가 추가 
+				 */
+				if(PAGEKEY.equals("MONITORING")) {
+			        button.addMouseListener(new MouseAdapter() {
+			        	@Override
+			        	public void mouseClicked(MouseEvent e) {
+//			        		MonitoringPopup.showPopup(MainFrame.this); // 팝업만 실행
+			        	}
+					});
+			    }
 			}
 			menuCardPanel.add(groupPanel, groupKey);
 		}
+		
 	}
 
 	// 메인 카테고리 버튼 클릭에 대응되는 세부 카테고리 패널
