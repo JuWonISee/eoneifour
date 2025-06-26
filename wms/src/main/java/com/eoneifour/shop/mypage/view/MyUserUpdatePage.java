@@ -108,11 +108,7 @@ public class MyUserUpdatePage extends JPanel{
         backBtn = ButtonUtil.createDefaultButton("돌아가기", 15, 120, 40);
         
     	updateBtn.addActionListener(e->{
-        	if(validateForm()) {
-        		updateUser();
-        		JOptionPane.showMessageDialog(this, "수정이 완료되었습니다.");
-        		mainFrame.showPage("MY_USER_DTL", "MYPAGE_MENU");
-        	}
+        	if(validateForm())updateUser();
         });
         
         backBtn.addActionListener(e-> mainFrame.showPage("MY_USER_DTL", "MYPAGE_MENU"));
@@ -139,6 +135,10 @@ public class MyUserUpdatePage extends JPanel{
 			user.setAddressDetail(addressDetailField.getText());
 			
 			userDAO.updateUser(user);
+			
+
+    		JOptionPane.showMessageDialog(this, "수정이 완료되었습니다.");
+    		mainFrame.showPage("MY_USER_DTL", "MYPAGE_MENU");
     	} catch (UserException e) {
     		JOptionPane.showMessageDialog(this, e.getMessage());
     		e.printStackTrace();

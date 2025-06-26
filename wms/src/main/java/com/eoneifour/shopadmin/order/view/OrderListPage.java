@@ -234,7 +234,6 @@ public class OrderListPage extends AbstractTablePage implements Refreshable {
 	    });
 	}
 
-	
 	// 테이블용 데이터로 변환
 	private Object[][] toTableData(List<Order> orderList) {
 		Object[][] data = new Object[orderList.size()][cols.length];
@@ -243,14 +242,14 @@ public class OrderListPage extends AbstractTablePage implements Refreshable {
 			Order order = orderList.get(i);
 			data[i] = new Object[] {
 				order.getOrderId(), sdf.format(order.getOrderDate()), order.getUserName(), order.getProductName(), order.getQuantity(),
-				FieldUtil.commaFormat(order.getTotalPrice()), order.getStatusName(), "수정", "취소"
+				order.getTotalPrice(), order.getStatusName(), "수정", "취소"
 			};
 		}
 		
 		return data;
 	}
 	
-	//검색 TextField에 placeholder 효과 주기 (forcus 이벤트 활용)
+	//검색 TextField에 placeholder 효과 주기 (focus 이벤트 활용)
 	public void placeholder() {
 		searchField.addFocusListener(new FocusAdapter() {
 		    public void focusGained(FocusEvent e) {

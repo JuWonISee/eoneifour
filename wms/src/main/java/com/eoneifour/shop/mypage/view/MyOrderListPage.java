@@ -120,6 +120,7 @@ public class MyOrderListPage extends AbstractTablePage implements Refreshable{
 	// 테이블 데이터 새로고침
 	public void refresh() {
 		orderList = orderDAO.getOrderListByUserId(mainFrame.userId);
+		if (orderList.isEmpty()) JOptionPane.showMessageDialog(this, "주문 내역이 없습니다.", "안내", JOptionPane.INFORMATION_MESSAGE);
 		model.setDataVector(toTableData(orderList), cols);
 		applyStyle();
 	}

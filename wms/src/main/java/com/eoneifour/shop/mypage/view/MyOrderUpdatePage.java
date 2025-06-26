@@ -110,11 +110,7 @@ public class MyOrderUpdatePage extends JPanel {
         listBtn = ButtonUtil.createDefaultButton("목록", 15, 120, 40);
         // 수정 버튼 이벤트
         updateBtn.addActionListener(e-> {
-        	if(validateForm()) {
-        		updateOrder();
-        		JOptionPane.showMessageDialog(this, "수정이 완료되었습니다.");
-        		mainFrame.showPage("MY_ORDER_LIST", "MYPAGE_MENU");
-        	}
+        	if(validateForm()) updateOrder();
         });
         // 목록 버튼 이벤트
         listBtn.addActionListener(e-> mainFrame.showPage("MY_ORDER_LIST", "MYPAGE_MENU"));
@@ -137,6 +133,9 @@ public class MyOrderUpdatePage extends JPanel {
 			String addressDetail = addressDetailField.getText();
 			
 			orderDAO.updateOrder(orderId, address, addressDetail);
+			
+			JOptionPane.showMessageDialog(this, "수정이 완료되었습니다.");
+    		mainFrame.showPage("MY_ORDER_LIST", "MYPAGE_MENU");
     	} catch (UserException e) {
     		JOptionPane.showMessageDialog(this, e.getMessage());
     		e.printStackTrace();
