@@ -62,8 +62,7 @@ public class ShopMainFrame extends AbstractMainFrame {
     	contentCardPanel.add(myUserUpdatePage, "MY_USER_UPD"); // 마이페이지 회원수정
     	contentCardPanel.add(myUserDeletePage, "MY_USER_DEL"); // 마이페이지 회원탈퇴
     	
-    	contentCardPanel.add(sh_productListPage, "SH_PRODUCT_LISTPAGE"); // 마이페이지 주문내역
-    	
+    	contentCardPanel.add(sh_productListPage, "SH_PRODUCT_LISTPAGE");
     	// 메뉴 등록
     	menuCardPanel.add(new MypageMenuPanel(this), "MYPAGE_MENU");
     	menuCardPanel.add(new ProductMenuPanel(this), "PRODUCT_MENU");
