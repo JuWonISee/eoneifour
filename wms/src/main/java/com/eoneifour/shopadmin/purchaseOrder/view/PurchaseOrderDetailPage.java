@@ -135,7 +135,7 @@ public class PurchaseOrderDetailPage extends JPanel{
 	private void loadPurchase() {
 		PurchaseOrder purchaseOrder = new PurchaseOrderDAO().getPurchase(purchaseId);
 		productNameField.setText(purchaseOrder.getProduct().getName());
-		quantityField.setText(Integer.toString(purchaseOrder.getQuantity()));
+		quantityField.setText(FieldUtil.commaFormat(purchaseOrder.getQuantity()));
 		requesteDateField.setText(purchaseOrder.getRequest_date().toString());
 		userNameField.setText(purchaseOrder.getUser().getName());
 		statusField.setText(purchaseOrder.getStatus());
