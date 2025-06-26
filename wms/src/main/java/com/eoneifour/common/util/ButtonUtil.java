@@ -1,9 +1,15 @@
 package com.eoneifour.common.util;
 
-import javax.swing.*;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.List;
+
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
 
 /**
  * 버튼 공통 디자인 유틸 클래스
@@ -108,4 +114,18 @@ public class ButtonUtil {
         
         return button;
     }
+    
+    // 선택된 메뉴 active 효과
+    public static void applyMenuActiveStyle(List<JButton> menuButtons, JButton activeButton) {
+        for (JButton btn : menuButtons) {
+            btn.setForeground(Color.BLACK);
+            btn.setFont(new Font("맑은 고딕", Font.PLAIN, 15));
+            btn.setBorder(BorderFactory.createEmptyBorder());
+        }
+
+        activeButton.setForeground(new Color(25, 118, 210));
+        activeButton.setFont(new Font("맑은 고딕", Font.BOLD, 15));
+        activeButton.setBorder(BorderFactory.createMatteBorder(0, 0, 2, 0, new Color(25, 118, 210)));
+    }
+
 }

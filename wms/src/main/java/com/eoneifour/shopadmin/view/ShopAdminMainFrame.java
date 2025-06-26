@@ -4,6 +4,8 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -152,12 +154,16 @@ public class ShopAdminMainFrame extends AbstractMainFrame {
 	}
 
 	private JPanel createMenuBar() {
+		List<JButton> menuButtons = new ArrayList<>();
 		JPanel menuBar = new JPanel(new FlowLayout(FlowLayout.CENTER, 40, 10));
 		menuBar.setBackground(Color.WHITE);
 
 		JButton userBtn = new JButton("회원관리");
 		ButtonUtil.styleMenuButton(userBtn);
-		userBtn.addActionListener(e -> showContent("USER_LIST"));
+		userBtn.addActionListener(e -> {
+			showContent("USER_LIST");
+			ButtonUtil.applyMenuActiveStyle(menuButtons, userBtn);
+		});
 
 		JButton productBtn = new JButton("상품관리");
 		ButtonUtil.styleMenuButton(productBtn);
@@ -175,6 +181,11 @@ public class ShopAdminMainFrame extends AbstractMainFrame {
 		menuBar.add(productBtn);
 		menuBar.add(orderBtn);
 		menuBar.add(purchaseBtn);
+		
+		menuButtons.add(userBtn);
+		menuButtons.add(productBtn);
+		menuButtons.add(orderBtn);
+		menuButtons.add(purchaseBtn);
 
 		return menuBar;
 	}

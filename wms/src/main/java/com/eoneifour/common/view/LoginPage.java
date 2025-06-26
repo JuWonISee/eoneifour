@@ -80,6 +80,7 @@ public class LoginPage extends JFrame {
         loginPanel.add(buttonPanel);
         add(loginPanel);
         
+        emailField.addActionListener(e -> loginUser());
         passwordField.addActionListener(e -> loginUser());
     }
     
