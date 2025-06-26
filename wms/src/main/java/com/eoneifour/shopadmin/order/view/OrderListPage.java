@@ -147,21 +147,21 @@ public class OrderListPage extends AbstractTablePage implements Refreshable {
                 		if (confirm == JOptionPane.YES_OPTION) {
                 			try {
                 				orderDAO.cancelOrder(orderId);
-                				JOptionPane.showMessageDialog(null, orderId + " 주문 취소되었습니다.");
                 				refresh();
+                				JOptionPane.showMessageDialog(null, orderId + " 주문 취소되었습니다.");
                 			} catch (UserException e2) {
                 				JOptionPane.showMessageDialog(null, e2.getMessage(), "오류", JOptionPane.ERROR_MESSAGE);
                 			}
                 		}
                 	}
-                } else if (col == table.getColumn("주문상태").getModelIndex() && (orderStatus == "주문확인중" || orderStatus == "배송준비")) { // 상태변경
+                } else if (col == table.getColumn("주문상태").getModelIndex() && (orderStatus.equals("주문확인중") || orderStatus.equals("배송준비"))) { // 상태변경
             		int confirm = JOptionPane.showConfirmDialog(null, orderId + "번 " + orderStatus + " 처리 하시겠습니까?", orderStatus, JOptionPane.YES_NO_OPTION);
             		if (confirm == JOptionPane.YES_OPTION) {
             			try {
             				if(orderStatus=="주문확인중") orderDAO.changeStatus(orderId, 0, 0);
             				else orderDAO.changeStatus(orderId, 1, quantity);
-            				JOptionPane.showMessageDialog(null, orderStatus + "처리 완료되었습니다.");
             				refresh();
+            				JOptionPane.showMessageDialog(null, orderStatus + "처리 완료되었습니다.");
             			} catch (UserException e2) {
             				JOptionPane.showMessageDialog(null, e2.getMessage(), "오류", JOptionPane.ERROR_MESSAGE);
             			}
@@ -242,7 +242,7 @@ public class OrderListPage extends AbstractTablePage implements Refreshable {
 		for (int i = 0; i < orderList.size(); i++) {
 			Order order = orderList.get(i);
 			data[i] = new Object[] {
-				order.getOrderId(), sdf.format(order.getOrderDate()), order.getUserName(), order.getProductName(), FieldUtil.commaFormat(order.getQuantity()),
+				order.getOrderId(), sdf.format(order.getOrderDate()), order.getUserName(), order.getProductName(), order.getQuantity(),
 				FieldUtil.commaFormat(order.getTotalPrice()), order.getStatusName(), "수정", "취소"
 			};
 		}
