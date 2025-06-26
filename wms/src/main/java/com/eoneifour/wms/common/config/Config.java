@@ -8,7 +8,7 @@ public class Config {
 
 	public static final String[][] PAGENAME = {
 
-			{ "관리자 가입", "관리자 정보 수정", "회원 탈퇴" }, 
+			{ "관리자 로그인", "관리자 가입", "관리자 정보 수정", "관리자 탈퇴" }, 
 			{ "입고 지시", "출고 지시", "제품 조회" }, 
 			{ "입고 기록", "출고 기록" }, 
 			{ "재고 수정" },
@@ -19,7 +19,7 @@ public class Config {
 			};
 
 	public static final String[][] PAGEKEYS = { 
-	/* 관리자    */	{ "ADMIN_REGISTER", "ADMIN_EDIT", "ADMIN_DELETE" },
+	/* 관리자    */	{ "ADMIN_LOGIN","ADMIN_REGISTER", "ADMIN_EDIT", "ADMIN_DELETE" },
 	/* 입/출고   */	{ "INBOUND_ORDER", "OUTBOUND_ORDER", "PRODUCT_LOOKUP" }, 
 	/* 입/출고기록 */	{ "INBOUND_HISTORY", "OUTBOUND_HISTORY" },
 	/* 재고 수정  */	{ "INVENTORY_UPDATE" }, 

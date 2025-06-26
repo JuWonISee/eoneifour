@@ -20,7 +20,11 @@ import javax.swing.Timer;
 import com.eoneifour.common.frame.AbstractMainFrame;
 import com.eoneifour.common.util.ButtonUtil;
 import com.eoneifour.common.util.DBManager;
-import com.eoneifour.wms.admin.view.UserListPage;
+import com.eoneifour.wms.auth.model.Admin;
+import com.eoneifour.wms.auth.view.AdminDeletePage;
+import com.eoneifour.wms.auth.view.AdminEditPage;
+import com.eoneifour.wms.auth.view.AdminLoginPage;
+import com.eoneifour.wms.auth.view.AdminRegistPage;
 import com.eoneifour.wms.common.config.Config;
 import com.eoneifour.wms.inbound.view.RackInboundStatusPage;
 import com.eoneifour.wms.inboundrate.view.AllInboundRatePage;
@@ -38,14 +42,15 @@ import com.eoneifour.wms.iobound.view.lookupProduct;
 public class MainFrame extends AbstractMainFrame {
 	JLabel dbStatusLabel;
 	DBManager db;
-
+	
+	public Admin admin;
+	
 	public MainFrame() {
 		super("WMS 메인(관리자)"); // 타이틀 설정
 
 		connectDB(); // 프로그램 가동시 DB 연결
 		menuCardPanel.setPreferredSize(new Dimension(0, 50));
 		initPages();
-		showContent("HOME"); // 초기 HOME 화면 설정
 
 		// DB연결
 		updateDBstatus(dbStatusLabel);
@@ -73,13 +78,18 @@ public class MainFrame extends AbstractMainFrame {
 		contentCardPanel.repaint();
 
 		// 세부 페이지 부착
-		contentCardPanel.add(new UserListPage(this), "ADMIN_REGISTER"); // 더미 페이지
 		contentCardPanel.add(new InboundOrderPage(this), "INBOUND_ORDER");
 		contentCardPanel.add(new OutBoundOrder(this), "OUTBOUND_ORDER");
 		contentCardPanel.add(new lookupProduct(this), "PRODUCT_LOOKUP");
 		contentCardPanel.add(new AllInboundRatePage(this), "ALL_INBOUND_RATE");
 		contentCardPanel.add(new StackerInboundRate(this), "STACKER_INBOUND_RATE");
 		contentCardPanel.add(new RackInboundStatusPage(this), "RACK_INBOUND_STATUS");
+		
+		//완 로그인 페이지
+		contentCardPanel.add(new AdminLoginPage(this), "ADMIN_LOGIN"); 
+		contentCardPanel.add(new AdminRegistPage(this), "ADMIN_REGISTER");
+		contentCardPanel.add(new AdminDeletePage(this), "ADMIN_DELETE");
+		contentCardPanel.add(new AdminEditPage(this), "ADMIN_EDIT");
 
 		// 초기 화면을 홈 화면으로 고정하기 위한 메서드.
 		contentCardPanel.revalidate();
@@ -180,6 +190,7 @@ public class MainFrame extends AbstractMainFrame {
 
 			menuPanel.add(Box.createVerticalStrut(20)); // 간격 추가
 			menuPanel.add(button);
+		
 		}
 		//
 		menuPanel.add(Box.createVerticalGlue()); // 아래 공간 채우기
@@ -201,6 +212,7 @@ public class MainFrame extends AbstractMainFrame {
 				JButton button = new JButton(Config.PAGENAME[i][j]);
 				ButtonUtil.styleMenuButton(button);
 				final String PAGEKEY = Config.PAGEKEYS[i][j];
+				
 				button.addActionListener(e -> showContent(PAGEKEY));
 				button.setAlignmentX(JButton.CENTER_ALIGNMENT);
 				groupPanel.add(button);

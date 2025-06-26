@@ -17,7 +17,7 @@ public class InBoundOrderDAO {
 	Connection conn = db.getConnection();
 
 	public List<InBoundOrder> getOrderList() {
-		String sql = "SELECT p.name " + "FROM product p " + "JOIN purchase_order po ON p.product_id = po.product_id "
+		String sql = "SELECT p.name " + "FROM shop_product p " + "JOIN shop_purchase_order po ON p.product_id = po.product_id "
 				+ "WHERE po.status = 0";
 
 		Connection conn = db.getConnection();
