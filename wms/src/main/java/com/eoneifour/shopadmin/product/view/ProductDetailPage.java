@@ -156,9 +156,9 @@ public class ProductDetailPage extends JPanel {
 			subcategoryField.setText(product.getSub_category().getName());
 			productNameField.setText(product.getName());
 			brandField.setText(product.getBrand_name());
-			priceField.setText(Integer.toString(product.getPrice()));
+			priceField.setText(FieldUtil.commaFormat(product.getPrice()));
 			detailField.setText(product.getDetail());
-			stockQuantityField.setText(Integer.toString(product.getStock_quantity()));
+			stockQuantityField.setText(FieldUtil.commaFormat(product.getStock_quantity()));
 			
 			StringBuilder sb = new StringBuilder();
 			for (int i = 0; i < imgList.size(); i++) {

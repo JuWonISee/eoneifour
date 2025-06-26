@@ -164,7 +164,6 @@ public class UserListPage extends AbstractTablePage implements Refreshable {
                 			} catch (UserException e2) {
                 				JOptionPane.showMessageDialog(null, e2.getMessage(), "오류", JOptionPane.ERROR_MESSAGE);
                 			}
-                			
                 		}
                 	}
                 } else { // 회원 상세

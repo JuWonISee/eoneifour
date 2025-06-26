@@ -116,7 +116,12 @@ public class OrderUpdatePage extends JPanel {
         // 수정 버튼 이벤트
         updateBtn.addActionListener(e-> {
         	if(validateForm()) {
-        		updateOrder();
+        		try {
+					updateOrder();
+				} catch (Exception e1) {
+					
+					e1.printStackTrace();
+				}
         		JOptionPane.showMessageDialog(this, "수정이 완료되었습니다.");
         		mainFrame.showContent("ORDER_LIST");
         	}
