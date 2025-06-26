@@ -6,8 +6,8 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -29,6 +29,8 @@ import com.eoneifour.wms.inboundrate.view.StackerInboundRate;
 import com.eoneifour.wms.iobound.view.InboundOrderPage;
 import com.eoneifour.wms.iobound.view.OutBoundOrderPage;
 import com.eoneifour.wms.iobound.view.lookupProduct;
+import com.eoneifour.wms.monitoring.view.MonitoringPage;
+import com.eoneifour.wms.monitoring.view.MonitoringPopup;
 
 /**
  * - 사이드 메뉴바, 상단 메뉴바 구현. - 상태바에 DB 상태 표시. (추후 클래스 분리해야 함.)
@@ -216,12 +218,27 @@ public class MainFrame extends AbstractMainFrame {
 				JButton button = new JButton(Config.PAGENAME[i][j]);
 				ButtonUtil.styleMenuButton(button);
 				final String PAGEKEY = Config.PAGEKEYS[i][j];
+				
+				
 				button.addActionListener(e -> showContent(PAGEKEY));
 				button.setAlignmentX(JButton.CENTER_ALIGNMENT);
 				groupPanel.add(button);
+				
+				/***
+				 * 팝업으로 띄울시 이곳에다가 추가 
+				 */
+				if(PAGEKEY.equals("MONITORING")) {
+			        button.addMouseListener(new MouseAdapter() {
+			        	@Override
+			        	public void mouseClicked(MouseEvent e) {
+//			        		MonitoringPopup.showPopup(MainFrame.this); // 팝업만 실행
+			        	}
+					});
+			    }
 			}
 			menuCardPanel.add(groupPanel, groupKey);
 		}
+		
 	}
 
 	// 메인 카테고리 버튼 클릭에 대응되는 세부 카테고리 패널
