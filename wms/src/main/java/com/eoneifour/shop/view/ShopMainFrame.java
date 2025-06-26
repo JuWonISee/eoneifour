@@ -18,6 +18,9 @@ import com.eoneifour.shop.mypage.view.MyOrderListPage;
 import com.eoneifour.shop.product.view.sh_OrderCompletePage;
 import com.eoneifour.shop.product.view.sh_ProductDetailPage;
 import com.eoneifour.shop.product.view.sh_ProductListPage;
+import com.eoneifour.shop.mypage.view.MyUserDeletePage;
+import com.eoneifour.shop.mypage.view.MyUserDetailPage;
+import com.eoneifour.shop.mypage.view.MyUserUpdatePage;
 import com.eoneifour.shopadmin.user.model.User;
 
 /**
@@ -27,17 +30,33 @@ import com.eoneifour.shopadmin.user.model.User;
  */
 
 public class ShopMainFrame extends AbstractMainFrame {
+	// 마이페이지
+	public MyUserDetailPage myUserDetailPage;
+	public MyUserUpdatePage myUserUpdatePage;
+	public MyUserDeletePage myUserDeletePage;
 	public MyOrderListPage myOrderListPage;
+	
 	public sh_ProductListPage sh_productListPage;
 	public sh_ProductDetailPage sh_productDetailPage;
 	public sh_OrderCompletePage sh_orderCompletePage;
 
+	private JPanel rightWrapper;
+	public String currentMenuKey = "PRODUCT_MENU";
+	public int userId;
+	
     public ShopMainFrame() {
         super("쇼핑몰 메인");
+        userId = SessionUtil.getLoginUser().getUserId();
         // 페이지 생성
+        myUserDetailPage = new MyUserDetailPage(this);
+        myUserUpdatePage = new MyUserUpdatePage(this);
         myOrderListPage = new MyOrderListPage(this);
+        myUserDeletePage = new MyUserDeletePage(this);
+        
         sh_productListPage = new sh_ProductListPage(this);
         sh_productDetailPage = new sh_ProductDetailPage(this);
+        sh_orderCompletePage = new sh_OrderCompletePage(this);
+        
         initPages();
     }
 
@@ -45,6 +64,10 @@ public class ShopMainFrame extends AbstractMainFrame {
     private void initPages() {
     	// 페이지 등록
     	contentCardPanel.add(myOrderListPage, "MY_ORDER_LIST"); // 마이페이지 주문내역
+    	contentCardPanel.add(myUserDetailPage, "MY_USER_DTL"); // 마이페이지 회원상세
+    	contentCardPanel.add(myUserUpdatePage, "MY_USER_UPD"); // 마이페이지 회원수정
+    	contentCardPanel.add(myUserDeletePage, "MY_USER_DEL"); // 마이페이지 회원탈퇴
+    	
     	contentCardPanel.add(sh_productListPage, "SH_PRODUCT_LIST"); // 쇼핑몰 상품목록
     	contentCardPanel.add(sh_productDetailPage, "SH_PRODUCT_DETAIL"); // 쇼핑몰 상품상세
     	//contentCardPanel.add(sh_orderCompletePage, "SH_ORDER_COMPLETE"); // 주문 완료 Alert 페이지 
@@ -52,6 +75,7 @@ public class ShopMainFrame extends AbstractMainFrame {
     	// 메뉴 등록
     	menuCardPanel.add(new MypageMenuPanel(this), "MYPAGE_MENU");
     	menuCardPanel.add(new ProductMenuPanel(this), "PRODUCT_MENU");
+    	
     	// 초기 화면
     	showPage("SH_PRODUCT_LIST", "PRODUCT_MENU");
 	}
@@ -82,15 +106,9 @@ public class ShopMainFrame extends AbstractMainFrame {
 		leftWrapper.add(userInfoLabel);
 		infoBar.add(leftWrapper, BorderLayout.WEST);
 
-		
 		// Right Panel: 버튼 area
-		JButton homeBtn = new JButton("HOME");
-		ButtonUtil.styleHeaderButton(homeBtn);
 		JButton logoutButton = new JButton("로그아웃");
 		ButtonUtil.styleHeaderButton(logoutButton);
-		homeBtn.addActionListener(e -> {
-			showPage("SH_PRODUCT_LIST", "PRODUCT_MENU");
-		});
 		
 		logoutButton.addActionListener(e -> {
 			SessionUtil.clear();
@@ -98,20 +116,46 @@ public class ShopMainFrame extends AbstractMainFrame {
 			new LoginPage().setVisible(true);
 		});
 
-		// 오른쪽 정렬 + 좌우 15pt,위아래 10px 여백을 위한 Panel
-		JPanel rightWrapper = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 10));
+		rightWrapper = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 10));
 		rightWrapper.setOpaque(false);
-		rightWrapper.add(homeBtn);
+		rightWrapper.add(createSwitchMenuButton());
 		rightWrapper.add(logoutButton);
 		infoBar.add(rightWrapper, BorderLayout.EAST);
 
 		return infoBar;
 	}
 	
+	private JButton createSwitchMenuButton() {
+	    boolean isInMypage = "MYPAGE_MENU".equals(currentMenuKey);
+	    JButton button = new JButton(isInMypage ? "HOME" : "마이페이지");
+	    ButtonUtil.styleHeaderButton(button);
+
+	    button.addActionListener(e -> {
+	        if (isInMypage) {
+	            showPage("SH_PRODUCT_LIST", "PRODUCT_MENU");
+	        } else {
+	            showPage("MY_USER_DTL", "MYPAGE_MENU");
+	        }
+	    });
+
+	    return button;
+	}
+	
+	public void updateHeaderButton() {
+	    rightWrapper.remove(0); // 기존 버튼 제거
+	    rightWrapper.add(createSwitchMenuButton(), 0); // 새 버튼 추가
+	    rightWrapper.revalidate();
+	    rightWrapper.repaint();
+	}
+	
 	// 메뉴와 콘텐츠를 동시에 전환하는 메서드
     public void showPage(String contentKey, String menuKey) {
+    	boolean menuChanged = !menuKey.equals(currentMenuKey);
+    	currentMenuKey = menuKey;
         showContent(contentKey);
         ((CardLayout) menuCardPanel.getLayout()).show(menuCardPanel, menuKey);
+        
+        if (menuChanged) updateHeaderButton();
     }
 
 	@Override
