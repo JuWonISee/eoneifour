@@ -44,6 +44,8 @@ public class ShopMainFrame extends AbstractMainFrame {
 	public sh_ProductListPage sh_productListPage;
 	public sh_ProductDetailPage sh_productDetailPage;
 	public sh_OrderCompletePage sh_orderCompletePage;
+	
+	public ProductMenuPanel productMenuPanel;
 
 	private JPanel rightWrapper;
 	public String currentMenuKey = "PRODUCT_MENU";
@@ -65,6 +67,8 @@ public class ShopMainFrame extends AbstractMainFrame {
         sh_productDetailPage = new sh_ProductDetailPage(this);
         sh_orderCompletePage = new sh_OrderCompletePage(this);
         
+        productMenuPanel = new ProductMenuPanel(this);
+        
         initPages();
     }
 
@@ -85,7 +89,7 @@ public class ShopMainFrame extends AbstractMainFrame {
     	
     	// 메뉴 등록
     	menuCardPanel.add(new MypageMenuPanel(this), "MYPAGE_MENU");
-    	menuCardPanel.add(new ProductMenuPanel(this), "PRODUCT_MENU");
+    	menuCardPanel.add(productMenuPanel, "PRODUCT_MENU");
     	
     	// 초기 화면
     	showPage("SH_PRODUCT_LIST", "PRODUCT_MENU");

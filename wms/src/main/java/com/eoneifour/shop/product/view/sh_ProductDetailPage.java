@@ -20,6 +20,7 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
 import com.eoneifour.common.exception.UserException;
+import com.eoneifour.common.util.ButtonUtil;
 import com.eoneifour.common.util.FieldUtil;
 import com.eoneifour.common.util.SessionUtil;
 import com.eoneifour.shop.product.model.sh_OrderItem;
@@ -363,8 +364,10 @@ public class sh_ProductDetailPage extends JPanel {
 
 			sh_ordersDAO.insertOrder(orders);
 			
-			
-			
+	        if (mainFrame.sh_productListPage.scrollPane != null) {
+	        	mainFrame.sh_productListPage.scrollPane.getVerticalScrollBar().setValue(0);
+	        }
+	        			
 		} catch (UserException e) {
 			JOptionPane.showMessageDialog(this, e.getMessage());
 			e.printStackTrace();

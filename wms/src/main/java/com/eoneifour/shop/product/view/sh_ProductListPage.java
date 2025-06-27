@@ -35,6 +35,7 @@ public class sh_ProductListPage extends JPanel{
 	private sh_ProductImgDAO sh_productImgDAO;
 	private sh_ProductDetailPage sh_productDetailPage;
 	private JPanel productContainer;
+	public JScrollPane scrollPane;
 	
 	public sh_ProductListPage(ShopMainFrame mainFrame){
 		this.mainFrame = mainFrame;
@@ -55,7 +56,7 @@ public class sh_ProductListPage extends JPanel{
         showAllProducts();
         
         // 스크롤 가능하게 설정
-        JScrollPane scrollPane = new JScrollPane(productContainer);
+        this.scrollPane = new JScrollPane(productContainer);
         scrollPane.setBorder(null);
         scrollPane.getVerticalScrollBar().setUnitIncrement(16);
 
@@ -163,6 +164,11 @@ public class sh_ProductListPage extends JPanel{
             });
 
             productContainer.add(productPanel);
+        }
+        
+        // 스크롤 맨 위로 이동
+        if (scrollPane != null) {
+            scrollPane.getVerticalScrollBar().setValue(0);
         }
     }
 	
