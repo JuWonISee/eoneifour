@@ -67,7 +67,7 @@ public class MyUserUpdatePage extends JPanel{
         formPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
         
         // 타이틀 생성
-        JLabel title = new JLabel("회원 수정");
+        JLabel title = new JLabel("회원 정보 수정");
         title.setFont(new Font("맑은 고딕", Font.BOLD, 24));
         title.setAlignmentX(Component.CENTER_ALIGNMENT);
         formPanel.add(title);
@@ -107,16 +107,9 @@ public class MyUserUpdatePage extends JPanel{
         updateBtn = ButtonUtil.createPrimaryButton("저장", 15, 120, 40);
         backBtn = ButtonUtil.createDefaultButton("돌아가기", 15, 120, 40);
         
-        // 수정 버튼 이벤트 (등록 이벤트 중복 방지)
-        if (updateBtn.getActionListeners().length == 0) {
-        	updateBtn.addActionListener(e->{
-	        	if(validateForm()) {
-	        		updateUser();
-	        		JOptionPane.showMessageDialog(this, "수정이 완료되었습니다.");
-	        		mainFrame.showPage("MY_USER_DTL", "MYPAGE_MENU");
-	        	}
-	        });
-        }
+    	updateBtn.addActionListener(e->{
+        	if(validateForm())updateUser();
+        });
         
         backBtn.addActionListener(e-> mainFrame.showPage("MY_USER_DTL", "MYPAGE_MENU"));
 
@@ -142,6 +135,10 @@ public class MyUserUpdatePage extends JPanel{
 			user.setAddressDetail(addressDetailField.getText());
 			
 			userDAO.updateUser(user);
+			
+
+    		JOptionPane.showMessageDialog(this, "수정이 완료되었습니다.");
+    		mainFrame.showPage("MY_USER_DTL", "MYPAGE_MENU");
     	} catch (UserException e) {
     		JOptionPane.showMessageDialog(this, e.getMessage());
     		e.printStackTrace();
