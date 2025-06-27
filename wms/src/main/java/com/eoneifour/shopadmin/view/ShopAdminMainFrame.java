@@ -4,7 +4,6 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JButton;
@@ -101,7 +100,7 @@ public class ShopAdminMainFrame extends AbstractMainFrame {
         contentCardPanel.add(orderUpdatePage, "ORDER_UPDATE"); // 주문수정 페이지
 
 		// 회원 목록을 초기화면으로 (active 효과)
-//        ButtonUtil.applyMenuActiveStyle(menuButtons, menuButtons.get(0));
+        ButtonUtil.applyMenuActiveStyle(menuButtons, menuButtons.get(0));
 		showContent("USER_LIST");
 	}
 
@@ -153,10 +152,8 @@ public class ShopAdminMainFrame extends AbstractMainFrame {
 	}
 
 	private JPanel createMenuBar() {
-		List<JButton> menuButtons = new ArrayList<>();
 		JPanel menuBar = new JPanel(new FlowLayout(FlowLayout.CENTER, 40, 10));
 		menuBar.setBackground(Color.WHITE);
-		System.out.println(menuButtons);
 
 		JButton userBtn = createMenuButton("회원관리", "USER_LIST", menuButtons);
 		JButton productBtn = createMenuButton("상품관리", "PRODUCT_LIST", menuButtons);
@@ -167,6 +164,7 @@ public class ShopAdminMainFrame extends AbstractMainFrame {
 		menuBar.add(productBtn);
 		menuBar.add(orderBtn);
 		menuBar.add(purchaseBtn);
+
 		return menuBar;
 	}
 	
@@ -178,7 +176,7 @@ public class ShopAdminMainFrame extends AbstractMainFrame {
 	        showContent(pageKey);
 	        ButtonUtil.applyMenuActiveStyle(menuButtons, btn);
 	    });
-//	    menuButtons.add(btn);
+	    menuButtons.add(btn);
 	    return btn;
 	}
 
