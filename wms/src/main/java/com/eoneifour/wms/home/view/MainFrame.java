@@ -50,15 +50,19 @@ public class MainFrame extends AbstractMainFrame {
 	JLabel dbStatusLabel;
 	DBManager db;
 	public AdminEditPage adminEditPage;
-
+	
+	ConveyorDAO cd;
+	InBoundOrderDAO io;
 	public Admin admin;
 	JLabel adminInfoLabel;
 
 	public MainFrame() {
 		super("WMS 메인(관리자)"); // 타이틀 설정
 
-		connectDB(); // 프로그램 가동시 DB 연결
 		menuCardPanel.setPreferredSize(new Dimension(0, 50));
+		cd = new ConveyorDAO();
+		io = new InBoundOrderDAO();
+		connectDB(); // 프로그램 가동시 DB 연결
 		initPages();
 
 		// DB연결
@@ -284,9 +288,7 @@ public class MainFrame extends AbstractMainFrame {
 		new Thread(() -> {
 			try {
 				while (true) {
-					Thread.sleep(9000); // 3초대기
-					InBoundOrderDAO io = new InBoundOrderDAO();
-					ConveyorDAO cd = new ConveyorDAO();
+					Thread.sleep(5000); // 9초대기
 					if (cd.selectById(301) == 1) {
 						System.out.println("컨베이어에 이미 제품이 적재되어 있습니다.");
 						continue;
@@ -294,6 +296,7 @@ public class MainFrame extends AbstractMainFrame {
 					int[] pos = io.getPositionByASC();
 					if (pos.length > 1) {
 						cd.updateOnProductByIdWithPos(pos[0], pos[1], pos[2], pos[3]);
+						System.out.println();
 					}
 				}
 			} catch (InterruptedException e) {

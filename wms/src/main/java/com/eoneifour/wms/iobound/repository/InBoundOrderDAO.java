@@ -20,7 +20,7 @@ public class InBoundOrderDAO {
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 
-		String sql = "SELECT stock_product_id, product_name FROM stock_product WHERE stock_status = ?";
+		String sql = "SELECT stock_product_id, product_name, s, z, x, y FROM stock_product WHERE stock_status = ?";
 		List<StockProduct> list = new ArrayList<>();
 
 		try {
@@ -31,7 +31,10 @@ public class InBoundOrderDAO {
 				StockProduct stockProduct = new StockProduct();
 				stockProduct.setStockprodutId(rs.getInt("stock_product_id"));
 				stockProduct.setProductName(rs.getString("product_name"));
-
+				stockProduct.setS(rs.getInt("s"));
+				stockProduct.setZ(rs.getInt("z"));
+				stockProduct.setX(rs.getInt("x"));
+				stockProduct.setY(rs.getInt("y"));
 				list.add(stockProduct);
 			}
 
@@ -145,32 +148,41 @@ public class InBoundOrderDAO {
 
 	// 시간 순으로 정렬해서 포지션 리턴
 	public int[] getPositionByASC() {
-		Connection conn = db.getConnection();
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
+	    Connection conn = db.getConnection();
+	    PreparedStatement pstmt = null;
+	    ResultSet rs = null;
 
-		// 입고상태가 1번(입고대기중)
-		String sql = "SELECT s, z, x, y FROM stock_product WHERE stock_status = 1 ORDER BY time ASC LIMIT 1";
-		try {
-			pstmt = conn.prepareStatement(sql);
-			rs = pstmt.executeQuery();
+	    String sql = "SELECT stock_product_id, s, z, x, y FROM stock_product WHERE stock_status = 1 ORDER BY time ASC LIMIT 1";
 
-			if (rs.next()) { // 결과가 있다면
-				int[] pos = new int[4];
-				pos[0] = rs.getInt("s");
-				pos[1] = rs.getInt("z");
-				pos[2] = rs.getInt("x");
-				pos[3] = rs.getInt("y");
-				return pos;
-			}
-			return new int[0];
-		} catch (SQLException e) {
-			e.printStackTrace();
-			new UserException("위치값을 가져오는 중 문제가 발생했습니다.", e);
-			return new int[0];	
-		} finally {
-			db.release(pstmt, rs);
-		}
+	    try {
+	        pstmt = conn.prepareStatement(sql);
+	        rs = pstmt.executeQuery();
 
+	        if (rs.next()) {
+	            int stockProductId = rs.getInt("stock_product_id");
+	            int[] pos = new int[4];
+	            pos[0] = rs.getInt("s");
+	            pos[1] = rs.getInt("z");
+	            pos[2] = rs.getInt("x");
+	            pos[3] = rs.getInt("y");
+
+	            // 상태 업데이트 쿼리
+	            String updateSql = "UPDATE stock_product SET stock_status = 2 WHERE stock_product_id = ?";
+	            PreparedStatement updateStmt = conn.prepareStatement(updateSql);
+	            updateStmt.setInt(1, stockProductId);
+	            updateStmt.executeUpdate();
+	            updateStmt.close();
+
+	            return pos;
+	        }
+
+	        return new int[0];
+
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	        throw new UserException("위치값 가져오기 또는 상태 변경 중 오류", e);
+	    } finally {
+	        db.release(pstmt, rs);
+	    }
 	}
 }
