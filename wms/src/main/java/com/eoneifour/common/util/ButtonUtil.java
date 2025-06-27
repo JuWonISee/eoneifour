@@ -21,17 +21,19 @@ import javax.swing.JButton;
  * @author 혜원
  */
 public class ButtonUtil {
-    // 메뉴 버튼 색상 상수
-    private static final Color MENU_NORMAL = Color.BLACK;  // 기본 검정색
-    private static final Color MENU_HOVER = new Color(13, 71, 161); // hover시 파란색
-    // 헤더 버튼 색상 상수
-    private static final Color HEADER_BG = new Color(231, 76, 60);  // 기본 빨간색
-    private static final Color HEADER_HOVER = new Color(192, 57, 43); // hover시 진한빨강
+	// 메뉴 버튼 색상 상수
+	public static final Color MENU_NORMAL = new Color(51, 51, 51);      // #333333 기본회색
+	public static final Color MENU_HOVER = new Color(13, 71, 161);      // #0D47A1 진한 파랑
+	public static final Color MENU_ACTIVE = new Color(0, 87, 255);    // #1976D2 파랑
+
+	// 헤더 버튼 색상 상수
+	public static final Color HEADER_BG = new Color(231, 76, 60);  // 기본 빨간색
+	public static final Color HEADER_HOVER = new Color(192, 57, 43); // hover시 진한빨강
     
     //기본 버튼 색상 상수
-    private static final Color PRIMARY_COLOR = new Color(0, 104, 255);
-    private static final Color WARNING_COLOR = new Color(231, 76, 60);
-    private static final Color DEFAULT_COLOR = new Color(220, 220, 220);
+    public static final Color PRIMARY_COLOR = new Color(0, 104, 255);
+    public static final Color WARNING_COLOR = new Color(231, 76, 60);
+    public static final Color DEFAULT_COLOR = new Color(220, 220, 220);
     
     /**
      * InfoBar 버튼
@@ -74,16 +76,25 @@ public class ButtonUtil {
         btn.setPreferredSize(new Dimension(160, 40));
         btn.setCursor(new Cursor(Cursor.HAND_CURSOR)); // 마우스 손모양 표시
         btn.setFont(new Font("맑은 고딕", Font.BOLD, 16)); // 폰트 설정
-        // hover 효과
+        btn.putClientProperty("active", false); // 기본 상태는 비활성
+        
+        // 호버 시
         btn.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {
-                btn.setForeground(MENU_HOVER);  // 글씨 파란색으로
+                if (!(Boolean) btn.getClientProperty("active")) {
+                    btn.setForeground(MENU_HOVER); // hover 색상
+                    btn.setFont(new Font("맑은 고딕", Font.BOLD, 16)); // hover도 bold 유지
+                }
             }
 
             @Override
             public void mouseExited(MouseEvent e) {
-                btn.setForeground(MENU_NORMAL); // 원래 검정색 복귀
+                if (!(Boolean) btn.getClientProperty("active")) {
+                    btn.setForeground(MENU_NORMAL);
+                    btn.setFont(new Font("맑은 고딕", Font.BOLD, 16));
+                    btn.setBorder(BorderFactory.createEmptyBorder());
+                }
             }
         });
     }
@@ -117,15 +128,15 @@ public class ButtonUtil {
     
     // 선택된 메뉴 active 효과
     public static void applyMenuActiveStyle(List<JButton> menuButtons, JButton activeButton) {
-        for (JButton btn : menuButtons) {
-            btn.setForeground(Color.BLACK);
-            btn.setFont(new Font("맑은 고딕", Font.PLAIN, 15));
+    	for (JButton btn : menuButtons) {
+            btn.putClientProperty("active", false);
+            btn.setForeground(MENU_NORMAL);
+            btn.setFont(new Font("맑은 고딕", Font.BOLD, 16));
             btn.setBorder(BorderFactory.createEmptyBorder());
         }
 
-        activeButton.setForeground(new Color(25, 118, 210));
-        activeButton.setFont(new Font("맑은 고딕", Font.BOLD, 15));
-        activeButton.setBorder(BorderFactory.createMatteBorder(0, 0, 2, 0, new Color(25, 118, 210)));
+        activeButton.putClientProperty("active", true);
+        activeButton.setForeground(MENU_ACTIVE);
+        activeButton.setFont(new Font("맑은 고딕", Font.BOLD, 16));
     }
-
 }
