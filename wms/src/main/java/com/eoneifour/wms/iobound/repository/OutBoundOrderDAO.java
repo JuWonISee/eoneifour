@@ -14,8 +14,8 @@ public class OutBoundOrderDAO {
 
     // 출고대기(4) 상태 상품 조회
     public List<StockProduct> selectByStatus(int status) {
-        List<StockProduct> list = new ArrayList<>();
-        String sql = "SELECT stock_product_id, product_name, s, z, x, y FROM stock_product WHERE stock_status = ?";
+        List<StockProduct> list = new ArrayList<>();	
+        String sql = "SELECT stock_product_id, product_name, s, z, x, y FROM stock_product WHERE stock_status = ? ORDER BY time ASC";
 
         Connection conn = db.getConnection();
         PreparedStatement pstmt = null;

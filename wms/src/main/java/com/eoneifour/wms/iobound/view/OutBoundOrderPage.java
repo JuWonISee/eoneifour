@@ -64,6 +64,7 @@ public class OutBoundOrderPage extends AbstractTablePage implements Refreshable 
         });
         westPanel.add(outboundAllBtn);
         topPanel.add(westPanel, BorderLayout.WEST);
+        
 
         searchField = new JTextField("상품명을 입력하세요(공백 : 전체검색)");
         searchField.setPreferredSize(new Dimension(200, 30));

@@ -38,7 +38,7 @@ public class LoginDAO {
 				
 				return user;
 			} else {
-	            throw new UserException("해당 회원이 존재하지 않습니다.");
+	            throw new UserException("해당 회원이 존재하지 않습니다.\n아이디와 비밀번호를 확인하세요.");
 	        }
 		} catch (SQLException e) {
 			e.printStackTrace();

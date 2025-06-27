@@ -4,6 +4,8 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -53,6 +55,8 @@ public class ShopAdminMainFrame extends AbstractMainFrame {
 	public OrderListPage orderListPage;
 	public OrderDetailPage orderDetailPage;
 	public OrderUpdatePage orderUpdatePage;
+	
+	List<JButton> menuButtons = new ArrayList<>();
 
     public ShopAdminMainFrame() {
         super("쇼핑몰 메인 (관리자)"); // 타이틀 설정
@@ -101,7 +105,8 @@ public class ShopAdminMainFrame extends AbstractMainFrame {
         contentCardPanel.add(orderDetailPage, "ORDER_DETAIL"); // 주문상세 페이지
         contentCardPanel.add(orderUpdatePage, "ORDER_UPDATE"); // 주문수정 페이지
 
-		// 회원 목록을 초기화면으로
+		// 회원 목록을 초기화면으로 (active 효과)
+        ButtonUtil.applyMenuActiveStyle(menuButtons, menuButtons.get(0));
 		showContent("USER_LIST");
 	}
 
@@ -156,22 +161,11 @@ public class ShopAdminMainFrame extends AbstractMainFrame {
 		JPanel menuBar = new JPanel(new FlowLayout(FlowLayout.CENTER, 40, 10));
 		menuBar.setBackground(Color.WHITE);
 
-		JButton userBtn = new JButton("회원관리");
-		ButtonUtil.styleMenuButton(userBtn);
-		userBtn.addActionListener(e -> showContent("USER_LIST"));
-
-		JButton productBtn = new JButton("상품관리");
-		ButtonUtil.styleMenuButton(productBtn);
-		productBtn.addActionListener(e -> showContent("PRODUCT_LIST"));
-
-		JButton orderBtn = new JButton("주문관리");
-		ButtonUtil.styleMenuButton(orderBtn);
-		orderBtn.addActionListener(e -> showContent("ORDER_LIST"));
-
-		JButton purchaseBtn = new JButton("발주관리");
-		ButtonUtil.styleMenuButton(purchaseBtn);
-		purchaseBtn.addActionListener(e -> showContent("PURCHASE_LIST"));
-
+		JButton userBtn = createMenuButton("회원관리", "USER_LIST", menuButtons);
+		JButton productBtn = createMenuButton("상품관리", "PRODUCT_LIST", menuButtons);
+		JButton orderBtn = createMenuButton("주문관리", "ORDER_LIST", menuButtons);
+		JButton purchaseBtn = createMenuButton("발주관리", "PURCHASE_LIST", menuButtons);
+		
 		menuBar.add(userBtn);
 		menuBar.add(productBtn);
 		menuBar.add(orderBtn);
@@ -179,6 +173,19 @@ public class ShopAdminMainFrame extends AbstractMainFrame {
 
 		return menuBar;
 	}
+	
+	// 메뉴에 들어가는 버튼들 공통 로직
+	private JButton createMenuButton(String title, String pageKey, List<JButton> menuButtons) {
+	    JButton btn = new JButton(title);
+	    ButtonUtil.styleMenuButton(btn);
+	    btn.addActionListener(e -> {
+	        showContent(pageKey);
+	        ButtonUtil.applyMenuActiveStyle(menuButtons, btn);
+	    });
+	    menuButtons.add(btn);
+	    return btn;
+	}
+
 	// 쇼핑몰은 좌측패널 없음
 	@Override
 	public JPanel createLeftPanel() {

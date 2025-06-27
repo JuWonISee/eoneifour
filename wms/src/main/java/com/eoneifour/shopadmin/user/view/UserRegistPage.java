@@ -145,17 +145,10 @@ public class UserRegistPage extends JPanel {
         	}
         });
         
-        // 등록 버튼 이벤트 (등록 이벤트 중복 방지)
-        if (registBtn.getActionListeners().length == 0) {
-	        registBtn.addActionListener(e->{
-	        	if(validateForm()) {
-	        		registerUser();
-	        		clearForm();
-	        		JOptionPane.showMessageDialog(this, "등록이 완료되었습니다.");
-	        		mainFrame.showContent("USER_LIST");
-	        	}
-	        });
-        }
+        // 등록 버튼 이벤트
+        registBtn.addActionListener(e->{
+        	if(validateForm()) registerUser();
+        });
         
         // 목록 버튼 이벤트
         listBtn.addActionListener(e-> mainFrame.showContent("USER_LIST"));
@@ -183,6 +176,10 @@ public class UserRegistPage extends JPanel {
 			user.setRole(roleCombo.getSelectedIndex());
 			
 			userDAO.insertUser(user);
+			
+			clearForm();
+    		JOptionPane.showMessageDialog(this, "등록이 완료되었습니다.");
+    		mainFrame.showContent("USER_LIST");
     	} catch (UserException e) {
     		JOptionPane.showMessageDialog(this, e.getMessage());
     		e.printStackTrace();

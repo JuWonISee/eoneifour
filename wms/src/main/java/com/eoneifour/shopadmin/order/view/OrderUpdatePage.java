@@ -20,7 +20,6 @@ import com.eoneifour.common.util.ButtonUtil;
 import com.eoneifour.common.util.FieldUtil;
 import com.eoneifour.shopadmin.order.model.Order;
 import com.eoneifour.shopadmin.order.repository.OrderDAO;
-import com.eoneifour.shopadmin.user.model.User;
 import com.eoneifour.shopadmin.view.ShopAdminMainFrame;
 
 public class OrderUpdatePage extends JPanel {
@@ -111,15 +110,11 @@ public class OrderUpdatePage extends JPanel {
 	// 하단 버튼 패널 초기화
 	private JPanel createButtonPanel() {
 		// 버튼 생성
-        updateBtn = ButtonUtil.createWarningButton("수정", 15, 120, 40);
+        updateBtn = ButtonUtil.createPrimaryButton("저장", 15, 120, 40);
         listBtn = ButtonUtil.createDefaultButton("목록", 15, 120, 40);
         // 수정 버튼 이벤트
         updateBtn.addActionListener(e-> {
-        	if(validateForm()) {
-        		updateOrder();
-        		JOptionPane.showMessageDialog(this, "수정이 완료되었습니다.");
-        		mainFrame.showContent("ORDER_LIST");
-        	}
+        	if(validateForm()) updateOrder();
         });
         // 목록 버튼 이벤트
         listBtn.addActionListener(e-> mainFrame.showContent("ORDER_LIST"));
@@ -142,6 +137,9 @@ public class OrderUpdatePage extends JPanel {
 			String addressDetail = addressDetailField.getText();
 			
 			orderDAO.updateOrder(orderId, address, addressDetail);
+			
+			JOptionPane.showMessageDialog(this, "수정이 완료되었습니다.");
+			mainFrame.showContent("ORDER_LIST");
     	} catch (UserException e) {
     		JOptionPane.showMessageDialog(this, e.getMessage());
     		e.printStackTrace();
