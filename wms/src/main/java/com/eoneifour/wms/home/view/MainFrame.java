@@ -8,6 +8,8 @@ import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -22,6 +24,11 @@ import javax.swing.Timer;
 import com.eoneifour.common.frame.AbstractMainFrame;
 import com.eoneifour.common.util.ButtonUtil;
 import com.eoneifour.common.util.DBManager;
+import com.eoneifour.wms.auth.model.Admin;
+import com.eoneifour.wms.auth.view.AdminDeletePage;
+import com.eoneifour.wms.auth.view.AdminEditPage;
+import com.eoneifour.wms.auth.view.AdminLoginPage;
+import com.eoneifour.wms.auth.view.AdminRegistPage;
 import com.eoneifour.wms.common.config.Config;
 import com.eoneifour.wms.inbound.view.RackInboundStatusPage;
 import com.eoneifour.wms.inboundrate.view.AllInboundRatePage;
@@ -29,8 +36,6 @@ import com.eoneifour.wms.inboundrate.view.StackerInboundRate;
 import com.eoneifour.wms.iobound.view.InboundOrderPage;
 import com.eoneifour.wms.iobound.view.OutBoundOrderPage;
 import com.eoneifour.wms.iobound.view.lookupProduct;
-import com.eoneifour.wms.monitoring.view.MonitoringPage;
-import com.eoneifour.wms.monitoring.view.MonitoringPopup;
 
 /**
  * - 사이드 메뉴바, 상단 메뉴바 구현. - 상태바에 DB 상태 표시. (추후 클래스 분리해야 함.)
@@ -41,14 +46,18 @@ import com.eoneifour.wms.monitoring.view.MonitoringPopup;
 public class MainFrame extends AbstractMainFrame {
 	JLabel dbStatusLabel;
 	DBManager db;
-
+	public AdminEditPage adminEditPage;
+	
+	
+	public Admin admin;
+	JLabel adminInfoLabel;
+	
 	public MainFrame() {
 		super("WMS 메인(관리자)"); // 타이틀 설정
 
 		connectDB(); // 프로그램 가동시 DB 연결
 		menuCardPanel.setPreferredSize(new Dimension(0, 50));
 		initPages();
-		showContent("HOME"); // 초기 HOME 화면 설정
 
 		// DB연결
 		updateDBstatus(dbStatusLabel);
@@ -56,6 +65,17 @@ public class MainFrame extends AbstractMainFrame {
 		// 정해진 시간 간격으로 ActionEvent(ActionListener의 actionPerformed()) 를 발생시키는 메서드.
 		// 5초 간격마다 DB 연결 상태 체크.
 		new Timer(5000, e -> updateDBstatus(dbStatusLabel)).start();
+
+		addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosing(WindowEvent e) {
+				// 자원 정리 예시
+				DBManager.getInstance().release(DBManager.getInstance().getConnection());
+
+				// 종료
+				System.exit(0);
+			}
+		});
 	}
 
 	/***
@@ -76,9 +96,6 @@ public class MainFrame extends AbstractMainFrame {
 		contentCardPanel.repaint();
 
 		// 세부 페이지 부착
-
-		contentCardPanel.add(new InboundOrderPage(this), "INBOUND_ORDER");
-
 		contentCardPanel.add(new InboundOrderPage(this), "INBOUND_ORDER");
 		contentCardPanel.add(new OutBoundOrderPage(this), "OUTBOUND_ORDER");
 
@@ -86,6 +103,15 @@ public class MainFrame extends AbstractMainFrame {
 		contentCardPanel.add(new AllInboundRatePage(this), "ALL_INBOUND_RATE");
 		contentCardPanel.add(new StackerInboundRate(this), "STACKER_INBOUND_RATE");
 		contentCardPanel.add(new RackInboundStatusPage(this), "RACK_INBOUND_STATUS");
+		
+		
+		//완 로그인 페이지
+		adminEditPage = new AdminEditPage(this);
+		
+		contentCardPanel.add(new AdminLoginPage(this), "ADMIN_LOGIN"); 
+		contentCardPanel.add(new AdminRegistPage(this), "ADMIN_REGISTER");
+		contentCardPanel.add(new AdminDeletePage(this), "ADMIN_DELETE");
+		contentCardPanel.add(adminEditPage, "ADMIN_EDIT");
 
 		// 초기 화면을 홈 화면으로 고정하기 위한 메서드.
 		contentCardPanel.revalidate();
@@ -146,7 +172,7 @@ public class MainFrame extends AbstractMainFrame {
 		// Right Panel: 관리자 이름 포함한 인삿말
 		// TODO --> 추후, 계정 연동 필요
 		String adminName = "운영자";
-		JLabel adminInfoLabel = new JLabel(adminName + "님, 안녕하세요");
+		adminInfoLabel = new JLabel(adminName + "님, 안녕하세요");
 		adminInfoLabel.setForeground(Color.WHITE);
 		// 오른쪽 정렬 + 좌우 15pt,위아래 10px 여백을 위한 Panel
 		JPanel rightWrapper = new JPanel(new FlowLayout(FlowLayout.RIGHT, 5, 5));
@@ -186,6 +212,7 @@ public class MainFrame extends AbstractMainFrame {
 
 			menuPanel.add(Box.createVerticalStrut(20)); // 간격 추가
 			menuPanel.add(button);
+		
 		}
 		//
 		menuPanel.add(Box.createVerticalGlue()); // 아래 공간 채우기
@@ -208,7 +235,6 @@ public class MainFrame extends AbstractMainFrame {
 				ButtonUtil.styleMenuButton(button);
 				final String PAGEKEY = Config.PAGEKEYS[i][j];
 				
-				
 				button.addActionListener(e -> showContent(PAGEKEY));
 				button.setAlignmentX(JButton.CENTER_ALIGNMENT);
 				groupPanel.add(button);
@@ -220,7 +246,7 @@ public class MainFrame extends AbstractMainFrame {
 			        button.addMouseListener(new MouseAdapter() {
 			        	@Override
 			        	public void mouseClicked(MouseEvent e) {
-			        		MonitoringPopup.showPopup(MainFrame.this); // 팝업만 실행
+//			        		MonitoringPopup.showPopup(MainFrame.this); // 팝업만 실행
 			        	}
 					});
 			    }
@@ -247,9 +273,16 @@ public class MainFrame extends AbstractMainFrame {
 			dbStatus.setForeground(Color.RED);
 		}
 	}
+	
+	//관리자 로그인 시, 해당관리자의 정보를 상단 영역에 출력하기 위한 메서드 정의 (by Wan)
+	public void setAdminInfo(String name) {
+		adminInfoLabel.setText(name + "님, 안녕하세요");
+	}
 
 	// DB 연결
 	public void connectDB() {
 		db = DBManager.getInstance();
 	}
+	
+	
 }

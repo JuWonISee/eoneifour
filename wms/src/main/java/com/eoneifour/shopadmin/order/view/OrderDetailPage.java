@@ -15,7 +15,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import com.eoneifour.common.exception.UserException;
 import com.eoneifour.common.util.ButtonUtil;
 import com.eoneifour.common.util.FieldUtil;
 import com.eoneifour.shopadmin.order.model.Order;
@@ -138,15 +137,14 @@ public class OrderDetailPage extends JPanel {
 		this.orderId = orderId;
 		loadUser();
 	}
-	
 	// orderId로 주문 정보 조회 후 필드에 표시
 	private void loadUser() {
 		Order order = new OrderDAO().getOrderById(orderId);
 		
 		userNameField.setText(order.getUserName());
         prodNameField.setText(order.getProductName());
-        quantityField.setText(String.valueOf(order.getQuantity()));
-        totalPriceField.setText(String.valueOf(order.getTotalPrice()));
+        quantityField.setText(FieldUtil.commaFormat(order.getQuantity()));
+        totalPriceField.setText(FieldUtil.commaFormat(order.getTotalPrice()));
         statusField.setText(order.getStatusName());
         addressField.setText(order.getDeliveryAddress());
         addressDetailField.setText(order.getDeliveryAddressDetail());

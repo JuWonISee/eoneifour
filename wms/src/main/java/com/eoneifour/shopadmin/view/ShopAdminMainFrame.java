@@ -47,7 +47,6 @@ public class ShopAdminMainFrame extends AbstractMainFrame {
 	public ProductDetailPage productDetailPage;
 	public ProductUpdatePage productUpdatePage;
 	public ProductListPage productListPage;
-
 	public PurchaseOrderListPage purchaseOrderListPage;
 	public PurchaseOrderDetailPage purchaseOrderDetailPage;
 
@@ -58,10 +57,12 @@ public class ShopAdminMainFrame extends AbstractMainFrame {
     public ShopAdminMainFrame() {
         super("쇼핑몰 메인 (관리자)"); // 타이틀 설정
         
+        // 페이지 생성
         userRegistPage = new UserRegistPage(this);
         userDetailPage = new UserDetailPage(this);
         userUpdatePage = new UserUpdatePage(this);
         userListPage = new UserListPage(this);
+        
 
         productRegistPage = new ProductRegistPage(this);
         productDetailPage = new ProductDetailPage(this);
@@ -81,10 +82,10 @@ public class ShopAdminMainFrame extends AbstractMainFrame {
     // 페이지 등록
     private void initPages() {
     	// 회원관리
-    	contentCardPanel.add(userListPage, "USER_LIST"); 		// 회원관리 페이지
+    	contentCardPanel.add(userListPage, "USER_LIST"); 				// 회원관리 페이지
     	contentCardPanel.add(userRegistPage, "USER_REGIST"); 	// 회원등록
     	contentCardPanel.add(userDetailPage, "USER_DETAIL"); 	// 회원상세
-    	contentCardPanel.add(userUpdatePage, "USER_UPDATE"); 	// 회원수정
+    	contentCardPanel.add(userUpdatePage, "USER_UPDATE"); 		// 회원수정
     	
     	// 상품관리
         contentCardPanel.add(productListPage, "PRODUCT_LIST"); // 상품관리 페이지
@@ -178,7 +179,6 @@ public class ShopAdminMainFrame extends AbstractMainFrame {
 
 		return menuBar;
 	}
-
 	// 쇼핑몰은 좌측패널 없음
 	@Override
 	public JPanel createLeftPanel() {

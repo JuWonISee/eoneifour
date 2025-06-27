@@ -21,12 +21,6 @@ public class InBoundOrder {
 	private int product_id;
 	private Product product;
 	
-	public Product getProduct() {
-		return product;
-	}
-	public void setProduct(Product product) {
-		this.product = product;
-	}
 	public int getPurchase_order_id() {
 		return purchase_order_id;
 	}
@@ -69,5 +63,13 @@ public class InBoundOrder {
 	public void setProduct_id(int product_id) {
 		this.product_id = product_id;
 	}
+	public Product getProduct() {
+		return product;
+	}
+	public void setProduct(Product product) {
+		this.product = product;
+	}
+	
+	
 }
 
