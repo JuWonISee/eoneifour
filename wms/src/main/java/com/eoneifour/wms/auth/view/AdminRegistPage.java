@@ -5,12 +5,21 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 
-import javax.swing.*;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JPasswordField;
+import javax.swing.JTextField;
 
 import com.eoneifour.common.frame.AbstractMainFrame;
 import com.eoneifour.common.util.ButtonUtil;
 import com.eoneifour.wms.auth.model.Admin;
 import com.eoneifour.wms.auth.repository.AdminDAO;
+import com.eoneifour.wms.home.view.MainFrame;
 
 /**
  * 관리자 회원가입 화면 클래스
@@ -171,6 +180,13 @@ public class AdminRegistPage extends JPanel {
      * - Admin 객체 생성 후 DB insert 시도
      */
     private void register() {
+    	
+        // 로그인된 관리자 가입 차단
+    	if (mainFrame instanceof MainFrame && ((MainFrame) mainFrame).admin != null) {
+    	    JOptionPane.showMessageDialog(this, "이미 로그인된 관리자입니다.");
+    	    return;
+    	}
+    	
         if (!emailChecked) {
             JOptionPane.showMessageDialog(this, "이메일 중복확인을 해주세요.");
             return;
@@ -196,11 +212,7 @@ public class AdminRegistPage extends JPanel {
         if (result > 0) {
             JOptionPane.showMessageDialog(this, "관리자 가입이 완료되었습니다.");
             
-            emailField.setText("");
-            nameField.setText("");
-            passwordField.setText("");
-            confirmField.setText("");
-            emailChecked = false;
+            clearForm();
             
             if (mainFrame != null) {
                 mainFrame.showContent("HOME"); // 메인 페이지로 이동
@@ -209,4 +221,12 @@ public class AdminRegistPage extends JPanel {
             JOptionPane.showMessageDialog(this, "가입에 실패했습니다.");
         }
     }
+    public void clearForm() {
+        emailField.setText("");
+        nameField.setText("");
+        passwordField.setText("");
+        confirmField.setText("");
+        emailChecked = false;
+    }
 }
+

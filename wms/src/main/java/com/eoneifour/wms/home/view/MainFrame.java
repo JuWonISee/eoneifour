@@ -15,7 +15,9 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 /* javax.swing.Timer는 자바의 스윙(Swing) GUI 애플리케이션에서 주기적인 작업을 간편하게 수행할 수 있도록 도와주는 클래스. 
  * 특히 이벤트 디스패치 스레드(Event Dispatch Thread, EDT) 에서 동작하기 때문에 GUI를 안전하게 조작할 수 있다는 장점이 있음.
  */
@@ -33,6 +35,8 @@ import com.eoneifour.wms.common.config.Config;
 import com.eoneifour.wms.inbound.view.RackInboundStatusPage;
 import com.eoneifour.wms.inboundrate.view.AllInboundRatePage;
 import com.eoneifour.wms.inboundrate.view.StackerInboundRate;
+import com.eoneifour.wms.iobound.view.InboundOrderPage;
+import com.eoneifour.wms.iobound.view.OutBoundOrderPage;
 import com.eoneifour.wms.iobound.view.lookupProduct;
 
 /**
@@ -45,6 +49,7 @@ public class MainFrame extends AbstractMainFrame {
 	JLabel dbStatusLabel;
 	DBManager db;
 	public AdminEditPage adminEditPage;
+	JPanel leftPane;
 	
 	
 	public Admin admin;
@@ -54,7 +59,7 @@ public class MainFrame extends AbstractMainFrame {
 		super("WMS 메인(관리자)"); // 타이틀 설정
 
 		connectDB(); // 프로그램 가동시 DB 연결
-		menuCardPanel.setPreferredSize(new Dimension(0, 50));
+		menuCardPanel.setPreferredSize(new Dimension(0, 50)); 	
 		initPages();
 
 		// DB연결
@@ -76,6 +81,7 @@ public class MainFrame extends AbstractMainFrame {
 		});
 	}
 
+
 	/***
 	 * Content(세부 메뉴별 Panel) 클래스 생성 후 아래 메서드에서 new 해야함. 2번째 매개변수(String)는
 	 * Config.java를 확인 후 대응되는 KEYS값을 넣어주면 됨.
@@ -83,8 +89,23 @@ public class MainFrame extends AbstractMainFrame {
 	 * @TODO 각 메뉴별 기능 구현이 완료되면 맵핑이나.. 다른 방식 활용해서 리팩토링 예정
 	 * @author 재환
 	 */
+	
+	// 완 로그아웃 메서드
+    public void logout() {
+        this.admin = null;
+        setAdminInfo(null); // 상단 정보 초기화
+        leftPanel.setVisible(false); // 좌측 메뉴 숨김
+        showContent("ADMIN_LOGIN"); // 로그인 화면으로 이동
+    }
+	
 	private void initPages() {
-		createSubMenu();
+		
+		//완 로그인 페이지
+		adminEditPage = new AdminEditPage(this);
+		contentCardPanel.add(new AdminLoginPage(this), "ADMIN_LOGIN");
+		contentCardPanel.add(new AdminRegistPage(this), "ADMIN_REGISTER");
+		contentCardPanel.add(new AdminDeletePage(this), "ADMIN_DELETE");
+		contentCardPanel.add(adminEditPage, "ADMIN_EDIT");
 
 		// 홈 버튼 연결
 		contentCardPanel.add(new HomePage(this), "HOME");
@@ -94,8 +115,8 @@ public class MainFrame extends AbstractMainFrame {
 		contentCardPanel.repaint();
 
 		// 세부 페이지 부착
-//		contentCardPanel.add(new InboundOrderPage(this), "INBOUND_ORDER");
-//		contentCardPanel.add(new OutBoundOrderPage(this), "OUTBOUND_ORDER");
+		contentCardPanel.add(new InboundOrderPage(this), "INBOUND_ORDER");
+		contentCardPanel.add(new OutBoundOrderPage(this), "OUTBOUND_ORDER");
 
 		contentCardPanel.add(new lookupProduct(this), "PRODUCT_LOOKUP");
 		contentCardPanel.add(new AllInboundRatePage(this), "ALL_INBOUND_RATE");
@@ -103,14 +124,8 @@ public class MainFrame extends AbstractMainFrame {
 		contentCardPanel.add(new RackInboundStatusPage(this), "RACK_INBOUND_STATUS");
 		
 		
-		//완 로그인 페이지
-		adminEditPage = new AdminEditPage(this);
-		
-		contentCardPanel.add(new AdminLoginPage(this), "ADMIN_LOGIN"); 
-		contentCardPanel.add(new AdminRegistPage(this), "ADMIN_REGISTER");
-		contentCardPanel.add(new AdminDeletePage(this), "ADMIN_DELETE");
-		contentCardPanel.add(adminEditPage, "ADMIN_EDIT");
 
+		createSubMenu();
 		// 초기 화면을 홈 화면으로 고정하기 위한 메서드.
 		contentCardPanel.revalidate();
 		contentCardPanel.repaint();
@@ -166,12 +181,23 @@ public class MainFrame extends AbstractMainFrame {
 		leftWrapper.add(dbStatusLabel);
 		leftWrapper.add(disconnectDB);
 		infoBar.add(leftWrapper, BorderLayout.WEST);
-
 		// Right Panel: 관리자 이름 포함한 인삿말
 		// TODO --> 추후, 계정 연동 필요
-		String adminName = "운영자";
-		adminInfoLabel = new JLabel(adminName + "님, 안녕하세요");
+		adminInfoLabel = new JLabel();
 		adminInfoLabel.setForeground(Color.WHITE);
+		
+        // ✅ 마우스 클릭 시 로그아웃 팝업 메뉴 띄우기
+        adminInfoLabel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                JPopupMenu popup = new JPopupMenu();
+                JMenuItem logoutItem = new JMenuItem("로그아웃");
+                logoutItem.addActionListener(ev -> logout()); // ✅ 로그아웃 호출
+                popup.add(logoutItem);
+                popup.show(adminInfoLabel, e.getX(), e.getY());
+            }
+        });
+		
 		// 오른쪽 정렬 + 좌우 15pt,위아래 10px 여백을 위한 Panel
 		JPanel rightWrapper = new JPanel(new FlowLayout(FlowLayout.RIGHT, 5, 5));
 		rightWrapper.setOpaque(false); // 컴포넌트의 투명여부 설정
@@ -179,16 +205,18 @@ public class MainFrame extends AbstractMainFrame {
 		infoBar.add(rightWrapper, BorderLayout.EAST);
 
 		return infoBar;
-	};
+	}
 
 	// 카테고리별 메인 메뉴를 담을 패널
 	@Override
 	public JPanel createLeftPanel() {
 		JPanel menuBar = createMainMenu();
 
-		JPanel leftPanel = new JPanel(new BorderLayout());
+		leftPanel = new JPanel(new BorderLayout());
 		leftPanel.setPreferredSize(new Dimension(150, 0)); // 사이드바 폭 설정
 		leftPanel.add(menuBar, BorderLayout.CENTER);
+		
+		leftPanel.setVisible(false);
 
 		return leftPanel;
 	};
@@ -274,12 +302,16 @@ public class MainFrame extends AbstractMainFrame {
 	
 	//관리자 로그인 시, 해당관리자의 정보를 상단 영역에 출력하기 위한 메서드 정의 (by Wan)
 	public void setAdminInfo(String name) {
-		adminInfoLabel.setText(name + "님, 안녕하세요");
+		adminInfoLabel.setText(name);
 	}
 
 	// DB 연결
 	public void connectDB() {
 		db = DBManager.getInstance();
+	}
+	
+	public void test() {
+		leftPanel.setVisible(true);
 	}
 	
 	

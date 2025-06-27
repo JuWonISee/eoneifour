@@ -10,9 +10,6 @@ import java.util.List;
 
 import com.eoneifour.common.exception.UserException;
 import com.eoneifour.common.util.DBManager;
-import com.eoneifour.shopadmin.product.model.Product;
-import com.eoneifour.shopadmin.purchaseOrder.model.PurchaseOrder;
-import com.eoneifour.wms.iobound.model.ShopPurchaseOrder;
 import com.eoneifour.wms.iobound.model.StockProduct;
 
 public class InBoundOrderDAO {
