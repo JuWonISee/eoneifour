@@ -40,6 +40,9 @@ import com.eoneifour.wms.iobound.repository.InBoundOrderDAO;
 import com.eoneifour.wms.iobound.view.InboundOrderPage;
 import com.eoneifour.wms.iobound.view.OutBoundOrderPage;
 import com.eoneifour.wms.iobound.view.lookupProduct;
+
+import com.eoneifour.wms.monitoring.view.MonitoringPopup;
+
 import com.eoneifour.wms.monitoring.repository.ConveyorDAO;
 
 /**
@@ -283,12 +286,13 @@ public class MainFrame extends AbstractMainFrame {
 				/***
 				 * 팝업으로 띄울시 이곳에다가 추가
 				 */
-				if (PAGEKEY.equals("MONITORING")) {
-					button.addMouseListener(new MouseAdapter() {
-						@Override
-						public void mouseClicked(MouseEvent e) {
-//			        		MonitoringPopup.showPopup(MainFrame.this); // 팝업만 실행
-						}
+
+				if(PAGEKEY.equals("MONITORING")) {
+			        button.addMouseListener(new MouseAdapter() {
+			        	@Override
+			        	public void mouseClicked(MouseEvent e) {
+			        		MonitoringPopup.showPopup(MainFrame.this); // 팝업만 실행
+			        	}
 					});
 				}
 			}
