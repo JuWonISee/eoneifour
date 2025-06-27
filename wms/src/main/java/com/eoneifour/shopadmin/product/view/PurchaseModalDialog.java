@@ -76,7 +76,7 @@ public class PurchaseModalDialog extends AbstractModalDialog{
     @Override
     protected void createButtons() {
     	confirmBtn = ButtonUtil.createPrimaryButton("발주 신청", 14, 100, 35); // 파란색 버튼
-    	cancelBtn = ButtonUtil.createWarningButton("취소", 14, 100, 35);     // 빨간색 버튼
+    	cancelBtn = ButtonUtil.createDefaultButton("취소", 14, 100, 35);     // 빨간색 버튼
 
     	cancelBtn.addActionListener(e -> dispose());
 

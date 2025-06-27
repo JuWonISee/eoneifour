@@ -36,6 +36,7 @@ public class PurchaseOrderDAO {
 		sql.append(" FROM shop_purchase_order po ");
 		sql.append(" JOIN shop_user u ON po.requested_by = u.user_id ");
 		sql.append(" JOIN shop_product p ON po.product_id = p.product_id");
+		sql.append(" order by purchase_order_id desc");
 
 		try {
 			pstmt = con.prepareStatement(sql.toString());
@@ -160,7 +161,7 @@ public class PurchaseOrderDAO {
 	    }
 	}
 	
-	public List<PurchaseOrder> serchByKeyword(String keyword){
+	public List<PurchaseOrder> searchByKeyword(String keyword){
 		Connection con = null;
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;

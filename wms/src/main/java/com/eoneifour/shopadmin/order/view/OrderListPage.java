@@ -76,7 +76,7 @@ public class OrderListPage extends AbstractTablePage implements Refreshable {
 			List<Order> searchResults;
 			
 			if (!keyword.isEmpty() || keyword == "고객명 또는 상품명을 입력하세요") {
-				searchResults = orderDAO.serchByKeyword(keyword);
+				searchResults = orderDAO.searchByKeyword(keyword);
 				searchField.setText(null);
 				placeholder();
 			} else {
@@ -242,6 +242,7 @@ public class OrderListPage extends AbstractTablePage implements Refreshable {
 			Order order = orderList.get(i);
 			data[i] = new Object[] {
 				order.getOrderId(), sdf.format(order.getOrderDate()), order.getUserName(), order.getProductName(), order.getQuantity(),
+				FieldUtil.commaFormat(order.getTotalPrice()), order.getStatusName(), "수정", "취소",
 				order.getTotalPrice(), order.getStatusName(), "수정", "취소"
 			};
 		}

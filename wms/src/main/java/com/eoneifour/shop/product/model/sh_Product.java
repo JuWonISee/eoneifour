@@ -8,7 +8,7 @@ public class sh_Product {
 	private int stock_quantity;
 	private int status;
 	private String detail;
-	private sh_SubCategory sub_category; //ERD상에서는 자식이 부모의 pk숫자를 보유하지만 , java에서는 부모를 객체형으로 보유해야함.
+	private sh_SubCategory sub_category; 
 	private sh_TopCategory top_category;
 	
 	public int getProduct_id() {

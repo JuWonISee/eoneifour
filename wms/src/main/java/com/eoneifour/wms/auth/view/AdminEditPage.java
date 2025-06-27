@@ -68,7 +68,7 @@ public class AdminEditPage extends JPanel {
         emailPanel.setOpaque(false);
         emailPanel.setLayout(new BoxLayout(emailPanel, BoxLayout.X_AXIS));
         JLabel emailLabel = new JLabel("이메일");
-        emailField = new JTextField("master@naver.com"); // 기본값 설정
+        emailField = new JTextField("admin@naver.com"); // 기본값 설정
         emailLabel.setPreferredSize(labelSize);
         emailField.setPreferredSize(fieldSize);
         emailPanel.add(emailLabel);
@@ -177,6 +177,9 @@ public class AdminEditPage extends JPanel {
             
             passwordField.setText("");
             confirmField.setText("");
+            
+            mainFrame.admin.setName(name);          
+            mainFrame.setAdminInfo(name);           
             
             mainFrame.showContent("HOME"); // 수정 후 홈으로 이동
         } else {

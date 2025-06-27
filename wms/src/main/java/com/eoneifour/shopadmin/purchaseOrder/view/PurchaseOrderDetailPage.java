@@ -139,7 +139,11 @@ public class PurchaseOrderDetailPage extends JPanel{
 		requesteDateField.setText(purchaseOrder.getRequest_date().toString());
 		userNameField.setText(purchaseOrder.getUser().getName());
 		statusField.setText(purchaseOrder.getStatus());
-		completeDateField.setText(purchaseOrder.getComplete_date().toString());
+		if (purchaseOrder.getComplete_date() != null) {
+			completeDateField.setText(purchaseOrder.getComplete_date().toString());
+		} else {
+			completeDateField.setText("-"); 
+		}
 		
 	}
 	

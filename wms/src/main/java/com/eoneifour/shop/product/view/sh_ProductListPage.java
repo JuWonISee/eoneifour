@@ -17,9 +17,11 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
+import com.eoneifour.common.exception.UserException;
 import com.eoneifour.common.util.FieldUtil;
 import com.eoneifour.shop.product.model.sh_Product;
 import com.eoneifour.shop.product.model.sh_ProductImg;
@@ -70,42 +72,50 @@ public class sh_ProductListPage extends JPanel{
         // 상품 이미지
         JLabel imgLabel = new JLabel();
 
-        sh_ProductImg productImg = sh_productImgDAO.getProductImg(product.getProduct_id());
+        sh_ProductImg productImg;
         
-        //만약 productImg 객체 및 productimg의 filename이 존재할 경우와 존재하지 않을 경우 맵핑
-        String filename = (productImg != null && productImg.getFilename() != null) ? productImg.getFilename() : "";
+		try {
+			productImg = sh_productImgDAO.getProductImg(product.getProduct_id());
+			
+	        //productImg 객체 및 productimg의 filename이 존재할 경우와 존재하지 않을 경우 맵핑
+	        String filename = (productImg != null && productImg.getFilename() != null) ? productImg.getFilename() : "";
 
-        //이미지가 로드됐는지 확인하기 위한 변수
-        boolean imageLoaded = false;
+	        //이미지가 로드됐는지 확인하기 위한 변수
+	        boolean imageLoaded = false;
 
-        //filename이 비어있지 않을 경우 해당 이미지 로딩
-        if (!filename.isEmpty()) {
-            URL imgUrl = getClass().getClassLoader().getResource(filename);
-            if (imgUrl != null) {
-                ImageIcon icon = new ImageIcon(imgUrl);
-                Image img = icon.getImage();
-                if (img != null && img.getWidth(null) > 0) {
-                    Image scaledImg = img.getScaledInstance(140, 140, Image.SCALE_SMOOTH);
-                    imgLabel.setIcon(new ImageIcon(scaledImg));
-                    imageLoaded = true;
-                }
-            }
-        }
+	        //filename이 비어있지 않을 경우 해당 이미지 로딩
+	        if (!filename.isEmpty()) {
+	            URL imgUrl = getClass().getClassLoader().getResource(filename);
+	            if (imgUrl != null) {
+	                ImageIcon icon = new ImageIcon(imgUrl);
+	                Image img = icon.getImage();
+	                if (img != null && img.getWidth(null) > 0) {
+	                    Image scaledImg = img.getScaledInstance(140, 140, Image.SCALE_SMOOTH);
+	                    imgLabel.setIcon(new ImageIcon(scaledImg));
+	                    imageLoaded = true;
+	                }
+	            }
+	        }
 
-        //image가 로드되지 않았을 경우 , No image 부착
-        if (!imageLoaded) {
-            imgLabel.setPreferredSize(new Dimension(140, 190));
-            imgLabel.setOpaque(true);
-            imgLabel.setBackground(Color.LIGHT_GRAY);
-            imgLabel.setText("No Image");
-            imgLabel.setHorizontalAlignment(JLabel.CENTER);
-            imgLabel.setVerticalAlignment(JLabel.CENTER);
-            imgLabel.setForeground(Color.DARK_GRAY);
-            imgLabel.setFont(new Font("맑은 고딕", Font.PLAIN, 14));
-        }
+	        //image가 로드되지 않았을 경우 , No image 부착
+	        if (!imageLoaded) {
+	            imgLabel.setPreferredSize(new Dimension(140, 190));
+	            imgLabel.setOpaque(true);
+	            imgLabel.setBackground(Color.LIGHT_GRAY);
+	            imgLabel.setText("No Image");
+	            imgLabel.setHorizontalAlignment(JLabel.CENTER);
+	            imgLabel.setVerticalAlignment(JLabel.CENTER);
+	            imgLabel.setForeground(Color.DARK_GRAY);
+	            imgLabel.setFont(new Font("맑은 고딕", Font.PLAIN, 14));
+	        }
 
-        imgLabel.setHorizontalAlignment(JLabel.CENTER);
-        imgLabel.setBorder(BorderFactory.createEmptyBorder(15, 0, 50, 0));
+	        imgLabel.setHorizontalAlignment(JLabel.CENTER);
+	        imgLabel.setBorder(BorderFactory.createEmptyBorder(15, 0, 50, 0));
+			
+		} catch (UserException e) {
+			JOptionPane.showMessageDialog(this, "이미지 불러오기 중: " + e.getMessage());
+		}
+        
 
         // 상품 이름
         JLabel nameLabel = new JLabel(product.getName(), JLabel.CENTER);
@@ -159,14 +169,24 @@ public class sh_ProductListPage extends JPanel{
 	
     //상품 전체 리스트 보여주기
     public void showAllProducts() {
-        List<sh_Product> productList = sh_productDAO.getProductList();
-        refreshProductList(productList);
+        List<sh_Product> productList;
+		try {
+			productList = sh_productDAO.getProductList();
+			refreshProductList(productList);
+		} catch (UserException e) {
+			JOptionPane.showMessageDialog(this, "전체 카테고리 상품 불러오기 중 오류 발생 " + e.getMessage());
+		}
+        
     }
     
     //카테고리별 리스트 보여주기
     public void showProductsByCategory(int topCategoryId) {
-        List<sh_Product> productList = sh_productDAO.getProductsByTopCategory(topCategoryId);
-        refreshProductList(productList);
+        try {
+			List<sh_Product> productList = sh_productDAO.getProductsByTopCategory(topCategoryId);
+			refreshProductList(productList);
+		} catch (UserException e) {
+			JOptionPane.showMessageDialog(this, "카테고리 별 상품 불러오기 중 오류 발생 " + e.getMessage());
+		}
     }
     
 }

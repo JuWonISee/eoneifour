@@ -107,6 +107,7 @@ public class sh_ProductDAO {
 
 				subCategory.setTop_category(topCategory);
 				product.setSub_category(subCategory);
+				product.setTop_category(topCategory);
 
 				return product;
 			} else {

@@ -58,6 +58,8 @@ public class ProductUpdatePage extends JPanel {
 	private JButton imgBtn;
 	private JButton listBtn;
 	
+	private UpdateModalDialog u_dialog;
+	
     private int productId;
 
 	private TopCategoryDAO topCategoryDAO;
@@ -154,7 +156,7 @@ public class ProductUpdatePage extends JPanel {
 		formPanel.add(FieldUtil.createField("상품설명", detailField));
 		formPanel.add(Box.createVerticalStrut(12));
 		stockQuantityField = new JTextField(16);
-		formPanel.add(FieldUtil.createField("수량", stockQuantityField));
+		formPanel.add(FieldUtil.createField("재고 수량", stockQuantityField));
 		formPanel.add(Box.createVerticalStrut(12));
 		stockQuantityField.setEditable(false);
 
@@ -197,25 +199,24 @@ public class ProductUpdatePage extends JPanel {
 				JOptionPane.showMessageDialog(this, "사용 가능한 상품명입니다.");
 			}
 		});
-		// 수정 버튼 이벤트 연결 (등록 이벤트 중복 방지)
-		if (updateBtn.getActionListeners().length == 0) {
-			updateBtn.addActionListener(e -> {
-				if (validateForm()) {
-					int result = JOptionPane.showConfirmDialog(
-						this,
-						"정말 수정하시겠습니까?",
-						"수정 확인",
-						JOptionPane.YES_NO_OPTION
-					);
-
-					if (result == JOptionPane.YES_OPTION) {
-						updateProduct();
-						JOptionPane.showMessageDialog(this, "수정이 완료되었습니다.");
-						mainFrame.showContent("PRODUCT_LIST");
-					}
-				}
-			});
-		}
+		
+		//수정버튼 이벤트 연결
+        if (updateBtn.getActionListeners().length == 0) {
+        	updateBtn.addActionListener(e->{
+	        	if (validateForm()) {
+	        		u_dialog = new UpdateModalDialog(mainFrame);
+	        		u_dialog.setVisible(true);
+	        		
+	        		if(u_dialog.isConfirmed()) {
+	        			updateProduct();
+	        			clearForm();
+	        			new NoticeAlert(mainFrame, "수정이 완료되었습니다", "요청 성공").setVisible(true);
+	        			mainFrame.showContent("PRODUCT_LIST");
+	        		}
+	        		
+	        	}
+	        });
+        }
 
 		// 목록 버튼 이벤트
 		listBtn.addActionListener(e -> {
@@ -385,6 +386,29 @@ public class ProductUpdatePage extends JPanel {
 
 	}
 	
+	private void clearForm() {
+	    cb_topcategory.setSelectedIndex(0);
+	    cb_subcategory.removeAllItems();
+	    SubCategory dummy = new SubCategory();
+	    dummy.setName("하위 카테고리를 선택하세요");
+	    dummy.setSub_category_id(0);
+	    cb_subcategory.addItem(dummy);
+
+	    productNameField.setText("");
+	    brandField.setText("");
+	    priceField.setText("");
+	    detailField.setText("");
+	    stockQuantityField.setText("");
+	    imageField.setText("");
+
+	    // 중복확인 상태 초기화
+	    isProductNameChecked = false;
+	    isProductNameDuplicate = false;
+
+	    // 이미지 관련 초기화
+	    files = null;
+	}
+	
 	//오류 메세지 출력
 	private boolean showErrorMessage(String msg) {
 		JOptionPane.showMessageDialog(this, msg);
@@ -401,24 +425,71 @@ public class ProductUpdatePage extends JPanel {
 		String quantity = stockQuantityField.getText();
 		boolean b_quantity = quantity.matches("\\d+");
 		
-		if (cb_topcategory.getSelectedIndex() == 0) return showErrorMessage("상위 카테고리를 선택하세요");
-		if (cb_subcategory.getSelectedIndex() == 0) return showErrorMessage("하위 카테고리를 선택하세요");
+		if (cb_topcategory.getSelectedIndex() == 0) {
+			new NoticeAlert(mainFrame, "상위 카테고리를 선택하세요" , "요청 실패").setVisible(true);
+			return false;
+		} 
 		
-		if(productNameField.getText().trim().isEmpty()) return showErrorMessage("상품명을 입력해주세요");
-        if (!isProductNameChecked ) return showErrorMessage("상품명 중복확인을 해주세요.");
-        if (isProductNameDuplicate ) return showErrorMessage("상품명이 중복됐습니다. 다른 상품명을 입력해주세요.");
-        
-        if(brandField.getText().trim().isEmpty()) return showErrorMessage("브랜드를 입력해주세요");
-        if(priceField.getText().trim().isEmpty()) return showErrorMessage("가격을 입력해주세요");
-        if(detailField.getText().trim().isEmpty()) return showErrorMessage("상품설명을 입력해주세요");
-        if(stockQuantityField.getText().trim().isEmpty()) return showErrorMessage("재고를 입력해주세요");
-        
-        if (imageField.getText().trim().isEmpty()) return showErrorMessage("파일을 최소 1개 이상 선택해주세요");
-        
-        if(b_price == false) return showErrorMessage("가격은 0이상의 정수만 입력하세요.");
-        if(b_quantity == false) return showErrorMessage("재고는 0이상의 정수만 입력하세요.");
+		if (cb_subcategory.getSelectedIndex() == 0){
+			new NoticeAlert(mainFrame, "하위 카테고리를 선택하세요" , "요청 실패").setVisible(true);
+			return false;
+		}  
 		
+		if(productNameField.getText().trim().isEmpty()){
+			new NoticeAlert(mainFrame, "상품명을 입력해주세요" , "요청 실패").setVisible(true);
+			return false;
+		}
+		
+		
+        if (!isProductNameChecked ){
+			new NoticeAlert(mainFrame, "상품명 중복확인을 해주세요." , "요청 실패").setVisible(true);
+			return false;
+		}
+        
+        if (isProductNameDuplicate ){
+			new NoticeAlert(mainFrame, "상품명이 중복됐습니다. 다른 상품명을 입력해주세요." , "요청 실패").setVisible(true);
+			return false;
+		}
+        
+        if(brandField.getText().trim().isEmpty()){
+			new NoticeAlert(mainFrame, "브랜드를 입력해주세요" , "요청 실패").setVisible(true);
+			return false;
+		}
+        	
+        if(priceField.getText().trim().isEmpty()) {
+			new NoticeAlert(mainFrame, "가격을 입력해주세요" , "요청 실패").setVisible(true);
+			return false;
+		}
+        	
+        if(detailField.getText().trim().isEmpty()){
+			new NoticeAlert(mainFrame, "상품설명을 입력해주세요" , "요청 실패").setVisible(true);
+			return false;
+		}
+        	
+        if(stockQuantityField.getText().trim().isEmpty()){
+			new NoticeAlert(mainFrame, "재고를 입력해주세요" , "요청 실패").setVisible(true);
+			return false;
+		}
+        	
+        
+        if (imageField.getText().trim().isEmpty()) {
+			new NoticeAlert(mainFrame, "파일을 최소 1개 이상 선택해주세요" , "요청 실패").setVisible(true);
+			return false;
+		}
+        	
+        
+        if(b_price == false) {
+			new NoticeAlert(mainFrame, "가격은 0이상의 정수만 입력하세요." , "요청 실패").setVisible(true);
+			return false;
+		}
+        	
+        if(b_quantity == false){
+			new NoticeAlert(mainFrame, "재고는 0이상의 정수만 입력하세요." , "요청 실패").setVisible(true);
+			return false;
+		}
+        			
         return true;
+		
 	}
 
 }
