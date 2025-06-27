@@ -150,7 +150,7 @@ public class InBoundOrderDAO {
 		ResultSet rs = null;
 
 		// 입고상태가 1번(입고대기중)
-		String sql = "SELECT s, z, x, y FROM stock_product WHERE status = 1 ORDER BY time ASC LIMIT 1";
+		String sql = "SELECT s, z, x, y FROM stock_product WHERE stock_status = 1 ORDER BY time ASC LIMIT 1";
 		try {
 			pstmt = conn.prepareStatement(sql);
 			rs = pstmt.executeQuery();
