@@ -5,6 +5,8 @@ import javax.swing.*;
 import com.eoneifour.common.util.Refreshable;
 
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 모든 메인 프레임 화면 공통 기본 구조 - 상단, 좌측, 중앙 영역 자동 배치 - 자식 클래스에서 상단/좌측 패널 만들어서 넘기면 됨
@@ -21,7 +23,8 @@ public abstract class AbstractMainFrame extends JFrame {
 
 //    변수 추가
 	public JPanel contentCardPanel;
-
+	// 메뉴 버튼 리스트 변수 추가(@hw)
+	public List<JButton> menuButtons = new ArrayList<>();
 	public AbstractMainFrame(String title) {
 		// 상단 패널 (필요 없으면 null return)
 		topPanel = createTopPanel();

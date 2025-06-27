@@ -12,10 +12,12 @@ import com.eoneifour.common.util.ButtonUtil;
 
 public class MypageMenuPanel extends JPanel {
 	private ShopMainFrame mainFrame;
+	private List<JButton> menuButtons;
 	
 	public MypageMenuPanel(ShopMainFrame mainFrame) {
 		this.mainFrame = mainFrame;
-		List<JButton> menuButtons = new ArrayList<>();
+		this.menuButtons = mainFrame.menuButtons;
+
 		setLayout(new FlowLayout(FlowLayout.CENTER, 40, 10));
 		setBackground(Color.WHITE);
 		
@@ -42,4 +44,3 @@ public class MypageMenuPanel extends JPanel {
 	    return btn;
 	}
 }
-

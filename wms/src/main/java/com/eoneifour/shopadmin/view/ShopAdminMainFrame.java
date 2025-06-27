@@ -34,9 +34,6 @@ import com.eoneifour.shopadmin.user.view.UserUpdatePage;
  * 쇼핑몰 관리자 메인 프레임 - 상속받은 상단바,좌측바 만들어서 넘기면 됨 - 각 메뉴별 페이지 등록
  * 
  * @author 혜원
- *
- *         병합 중, productPage들의 접근지정자를 default에서 public으로 수정하였습니다.
- * @author JH
  */
 
 public class ShopAdminMainFrame extends AbstractMainFrame {
@@ -57,8 +54,6 @@ public class ShopAdminMainFrame extends AbstractMainFrame {
 	public OrderDetailPage orderDetailPage;
 	public OrderUpdatePage orderUpdatePage;
 	
-	List<JButton> menuButtons = new ArrayList<>();
-
     public ShopAdminMainFrame() {
         super("쇼핑몰 메인 (관리자)"); // 타이틀 설정
         
