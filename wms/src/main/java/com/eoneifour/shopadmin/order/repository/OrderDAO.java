@@ -147,8 +147,19 @@ public class OrderDAO {
 		sql.append("where orders_id = ?");
 		Connection conn = db.getConnection();
 		PreparedStatement pstmt = null; 
+		ResultSet rs = null;
 		
 		try {
+			//주문준비중만 취소할 수 있도록
+			String checkSql = "SELECT status FROM shop_orders WHERE orders_id = ?";
+			pstmt = conn.prepareStatement(checkSql);
+			pstmt.setInt(1, orderId);
+			rs = pstmt.executeQuery();
+			if (rs.next()) {
+				int status = rs.getInt("status");
+				if (status != 0) throw new UserException("해당 주문은 더 이상 취소할 수 없습니다.");
+			}
+			
 			pstmt = conn.prepareStatement(sql.toString());
 			pstmt.setString(1, address);
 			pstmt.setString(2, addressDetail);
@@ -160,7 +171,7 @@ public class OrderDAO {
 			e.printStackTrace();
 			throw new UserException("주문 수정 중 오류가 발생했습니다.", e);
 		} finally {
-			db.release(pstmt);
+			db.release(pstmt, rs);
 		}
 	}
 	
@@ -171,6 +182,16 @@ public class OrderDAO {
 		ResultSet rs = null;
 		
 		try {
+			//주문준비중만 취소할 수 있도록
+			String checkSql = "SELECT status FROM shop_orders WHERE orders_id = ?";
+			pstmt = conn.prepareStatement(checkSql);
+			pstmt.setInt(1, orderId);
+			rs = pstmt.executeQuery();
+			if (rs.next()) {
+				int status = rs.getInt("status");
+				if (status != 0) throw new UserException("해당 주문은 더 이상 취소할 수 없습니다.");
+			}
+			
 			// 주문상품 조회
 			String selectSql = "select product_id, quantity from shop_order_item where orders_id = ?";
 	        pstmt = conn.prepareStatement(selectSql);
@@ -316,6 +337,5 @@ public class OrderDAO {
 	        db.release(pstmt, rs);
 	    }
 	}
-	
 	
 }

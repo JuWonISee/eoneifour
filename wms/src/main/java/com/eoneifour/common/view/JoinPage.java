@@ -143,16 +143,14 @@ public class JoinPage extends JFrame {
     			user.setAddressDetail(addressDetailField.getText());
     			user.setRole(0); // 회원가입은 사용자 고정
     			userDAO.insertUser(user);
+    			JOptionPane.showMessageDialog(this, "회원가입이 완료되었습니다.");
+    			dispose();
+    			new LoginPage().setVisible(true);
         	} catch (UserException e) {
         		JOptionPane.showMessageDialog(this, e.getMessage());
         		e.printStackTrace();
     		}
-    		
-    		JOptionPane.showMessageDialog(this, "회원가입이 완료되었습니다.");
-    		dispose();
-    		new LoginPage().setVisible(true);
     	}
-    	
     }
     
     // 폼 유효성 검사

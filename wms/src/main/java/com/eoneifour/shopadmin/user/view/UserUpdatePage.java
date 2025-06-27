@@ -110,16 +110,10 @@ public class UserUpdatePage extends JPanel{
         updateBtn = ButtonUtil.createPrimaryButton("저장", 15, 120, 40);
         listBtn = ButtonUtil.createDefaultButton("목록", 15, 120, 40);
         
-        // 수정 버튼 이벤트 (등록 이벤트 중복 방지)
-        if (updateBtn.getActionListeners().length == 0) {
-        	updateBtn.addActionListener(e->{
-	        	if(validateForm()) {
-	        		updateUser();
-	        		JOptionPane.showMessageDialog(this, "수정이 완료되었습니다.");
-	        		mainFrame.showContent("USER_LIST");
-	        	}
-	        });
-        }
+        // 수정 버튼 이벤트
+    	updateBtn.addActionListener(e->{
+        	if(validateForm()) updateUser();
+        });
         
         // 목록 버튼 이벤트
         listBtn.addActionListener(e-> mainFrame.showContent("USER_LIST"));
@@ -147,6 +141,9 @@ public class UserUpdatePage extends JPanel{
 			user.setRole(roleCombo.getSelectedIndex());
 			
 			userDAO.updateUser(user);
+			
+			JOptionPane.showMessageDialog(this, "수정이 완료되었습니다.");
+    		mainFrame.showContent("USER_LIST");
     	} catch (UserException e) {
     		JOptionPane.showMessageDialog(this, e.getMessage());
     		e.printStackTrace();

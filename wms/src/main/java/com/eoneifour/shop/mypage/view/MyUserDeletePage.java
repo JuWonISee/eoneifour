@@ -115,7 +115,7 @@ public class MyUserDeletePage extends JPanel {
         int confirm = JOptionPane.showConfirmDialog(this, "정말 탈퇴하시겠습니까?", "회원 탈퇴", JOptionPane.YES_NO_OPTION);
         if (confirm == JOptionPane.YES_OPTION) {
         	userDAO.deleteUser(mainFrame.userId); // 탈퇴 처리
-            JOptionPane.showMessageDialog(this, "탈퇴가 완료되었습니다.");
+            JOptionPane.showMessageDialog(this, "탈퇴 처리가 완료되었습니다.");
             SessionUtil.clear();
             mainFrame.dispose();
             new LoginPage().setVisible(true);
