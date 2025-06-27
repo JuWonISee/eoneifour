@@ -4,83 +4,76 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.eoneifour.common.exception.UserException;
 import com.eoneifour.common.util.DBManager;
-import com.eoneifour.shopadmin.product.model.Product;
-import com.eoneifour.wms.iobound.model.InBoundOrder;
 import com.eoneifour.wms.iobound.model.StockProduct;
 
 public class InBoundOrderDAO {
 	DBManager db = DBManager.getInstance();
-	Connection conn = db.getConnection();
 
-	// 발주 리스트 조회
-	public List<InBoundOrder> getOrderList() {
-		String sql = "SELECT po.purchase_order_id, p.name " + "FROM shop_product p "
-				+ "JOIN shop_purchase_order po ON p.product_id = po.product_id " + "WHERE po.status = ?";
+	// 페이지 새로고침시 '입고대기'인 제품 출력 (status 1 줘야함 );
+	public List<StockProduct> selectByStatus(int status) {
+		Connection conn = db.getConnection();
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+
+		String sql = "SELECT stock_product_id, product_name, s, z, x, y FROM stock_product WHERE stock_status = ?";
+		List<StockProduct> list = new ArrayList<>();
+
+		try {
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1, status);
+			rs = pstmt.executeQuery();
+			while (rs.next()) {
+				StockProduct stockProduct = new StockProduct();
+				stockProduct.setStockprodutId(rs.getInt("stock_product_id"));
+				stockProduct.setProductName(rs.getString("product_name"));
+				stockProduct.setS(rs.getInt("s"));
+				stockProduct.setZ(rs.getInt("z"));
+				stockProduct.setX(rs.getInt("x"));
+				stockProduct.setY(rs.getInt("y"));
+				list.add(stockProduct);
+			}
+
+			return list;
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw new UserException(Integer.toString(e.getErrorCode()));
+		} finally {
+			db.release(pstmt, rs);
+		}
+	}
+
+	// 입고물품 키워드 검색
+	public List<StockProduct> searchByProductName(String keyword, int status) {
+		String sql = "SELECT * FROM stock_product WHERE stock_status = ? AND product_name LIKE ?";
 
 		Connection conn = db.getConnection();
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 
 		try {
-			List<InBoundOrder> list = new ArrayList<>();
-			pstmt = conn.prepareStatement(sql);
-			pstmt.setString(1, "창고도착");
-			rs = pstmt.executeQuery();
-
-			while (rs.next()) {
-				Product product = new Product();
-				product.setName(rs.getString("name"));
-
-				InBoundOrder inBoundOrder = new InBoundOrder();
-				inBoundOrder.setPurchase_order_id(rs.getInt("purchase_order_id"));
-
-				inBoundOrder.setProduct(product);
-
-				list.add(inBoundOrder);
-			}
-			return list;
-
-		} catch (SQLException e) {
-			e.printStackTrace();
-			throw new UserException(Integer.toString(e.getErrorCode()));
-		} finally {
-			db.release(pstmt, rs);
-		}
-	}
-
-	// 발주 리스트 중 키워드 검색
-	public List<InBoundOrder> searchByProductName(String keyword) {
-		String sql = "SELECT p.name FROM shop_product p "
-				+ "JOIN shop_purchase_order po ON p.product_id = po.product_id "
-				+ "WHERE po.status = ? AND p.name LIKE ?";
-
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-
-		try {
-			List<InBoundOrder> list = new ArrayList<>();
-			pstmt = conn.prepareStatement(sql);
-			pstmt.setString(1, "창고도착");
+			List<StockProduct> list = new ArrayList<>();
+			pstmt = conn.prepareStatement(sql.toString());
+			pstmt.setInt(1, status);
 			pstmt.setString(2, "%" + keyword + "%"); // 와일드카드 검색
 
 			rs = pstmt.executeQuery();
 
 			while (rs.next()) {
-				Product product = new Product();
-				product.setName(rs.getString("name"));
+				StockProduct stockProduct = new StockProduct();
+				stockProduct.setStockprodutId(rs.getInt("stock_product_id"));
+				stockProduct.setProductName(rs.getString("product_name"));
 
-				InBoundOrder inBoundOrder = new InBoundOrder();
-				inBoundOrder.setProduct(product);
-
-				list.add(inBoundOrder);
+				list.add(stockProduct);
 			}
+
 			return list;
+
 		} catch (SQLException e) {
 			e.printStackTrace();
 			throw new UserException(Integer.toString(e.getErrorCode()));
@@ -89,96 +82,107 @@ public class InBoundOrderDAO {
 		}
 	}
 
-	//
-	public int processInbound(int orderId) throws UserException {
-		PreparedStatement pstmtUpdate = null;
-		PreparedStatement pstmtSelect = null;
-		PreparedStatement pstmtInsert = null;
+	// 하차 버튼 클릭시 insert
+	public void insertByList(List<StockProduct> stockProduct) throws UserException {
+		Connection conn = db.getConnection();
 		ResultSet rs = null;
+		PreparedStatement pstmt = null;
+
+		StringBuffer sql = new StringBuffer();
+		sql.append(
+				"INSERT INTO stock_product(product_id, product_name, product_brand, s, z, x, y, stock_status, detail)");
+		sql.append(" VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
 		try {
-			// 1. 트랙잭션 시작
 			conn.setAutoCommit(false);
+			pstmt = conn.prepareStatement(sql.toString());
 
-			// 2. 상품정보 조회 Query
-			String selectSql = "SELECT p.product_id, p.name, p.brand_name, p.detail, po.quantity";
-			selectSql += " FROM shop_product p JOIN shop_purchase_order po";
-			selectSql += " ON p.product_id = po.product_id WHERE po.purchase_order_id = ?";
+			for (StockProduct sp : stockProduct) {
+				pstmt.setInt(1, sp.getProductId());
+				pstmt.setString(2, sp.getProductName());
+				pstmt.setString(3, sp.getProductBrand());
+				pstmt.setInt(4, sp.getS());
+				pstmt.setInt(5, sp.getZ());
+				pstmt.setInt(6, sp.getX());
+				pstmt.setInt(7, sp.getY());
+				pstmt.setInt(8, 0);
+				pstmt.setString(9, sp.getDetail());
 
-			pstmtSelect = conn.prepareStatement(selectSql);
-			pstmtSelect.setInt(1, orderId);
-			rs = pstmtSelect.executeQuery();
-
-			// 3. 입고 테이블에 INSERT Query
-			String insertSql = "INSERT INTO stock_product(product_id, product_name, product_brand, detail, s, z, x, y, stock_status)";
-			insertSql += " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)";
-			pstmtInsert = conn.prepareStatement(insertSql);
-
-			// 4. 모델 객체에 set 및 INSERT Query에 바인딩
-			while (rs.next()) {
-				StockProduct stockProduct = new StockProduct();
-				stockProduct.setProductId(rs.getInt("product_id"));
-				stockProduct.setProductName(rs.getString("name"));
-				stockProduct.setProductBrand(rs.getString("brand_name"));
-				stockProduct.setDetail(rs.getString("detail"));
-				stockProduct.setS(1);
-				stockProduct.setZ(2);
-				stockProduct.setX(3);
-				stockProduct.setY(4);
-				stockProduct.setStockStatus(0);
-
-				pstmtInsert.setInt(1, stockProduct.getProductId());
-				pstmtInsert.setString(2, stockProduct.getProductName());
-				pstmtInsert.setString(3, stockProduct.getProductBrand());
-				pstmtInsert.setString(4, stockProduct.getDetail());
-				pstmtInsert.setInt(5, stockProduct.getS());
-				pstmtInsert.setInt(6, stockProduct.getZ());
-				pstmtInsert.setInt(7, stockProduct.getX());
-				pstmtInsert.setInt(8, stockProduct.getY());
-				pstmtInsert.setInt(9, stockProduct.getStockStatus());
-
-				pstmtInsert.executeUpdate();
+				// 모든 쿼리문을 메모리에 저장해두었다가 한번에 보내기
+				pstmt.addBatch();
 			}
-
-			// 5 . 발주 테이블 UPDATE (창고도착 -> 입고완료)
-			String updateSql = "UPDATE shop_purchase_order SET status = ?, complete_date = ? WHERE purchase_order_id = ?";
-			pstmtUpdate = conn.prepareStatement(updateSql);
-			pstmtUpdate.setString(1, "입고완료");
-			pstmtUpdate.setTimestamp(2, new Timestamp(System.currentTimeMillis()));
-			pstmtUpdate.setInt(3, orderId);
-
-			int updateResult = pstmtUpdate.executeUpdate();
-
-			// 모든 작업이 성공하면 커밋
-			conn.commit();
-
-			return updateResult; // 업데이트된 행 수 반환
+			// 저장된 쿼리 실행
+			pstmt.executeBatch();
+			conn.setAutoCommit(true);
 
 		} catch (SQLException e) {
-			// 오류 발생 시 롤백
-			try {
-				if (conn != null) {
-					conn.rollback();
-				}
-			} catch (SQLException rollbackEx) {
-				rollbackEx.printStackTrace();
-			}
-			e.printStackTrace();
-			throw new UserException(Integer.toString(e.getErrorCode()));
+			throw new UserException("insert 실패", e);
 		} finally {
-			// 자동 커밋 다시 활성화
-			try {
-				if (conn != null)
-					conn.setAutoCommit(true);
-				db.release(pstmtSelect, rs);
-				db.release(pstmtInsert);
-				db.release(pstmtUpdate);
-			} catch (SQLException e) {
-				throw new UserException(Integer.toString(e.getErrorCode()));
-			}
-			db.release(pstmtUpdate);
-			db.release(pstmtSelect);
-			db.release(pstmtInsert);
+			db.release(pstmt);
 		}
+	}
+
+	// 입고 위치 업데이트
+	public void updateStatusWithPosition(int id, int statusNum, int s, int z, int x, int y) {
+		Connection conn = db.getConnection();
+		PreparedStatement pstmt = null;
+
+		String sql = "UPDATE stock_product SET stock_status = ?, s = ?, z = ?, x = ?, y = ? WHERE stock_product_id = ?";
+		try {
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1, statusNum);
+			pstmt.setInt(2, s);
+			pstmt.setInt(3, z);
+			pstmt.setInt(4, x);
+			pstmt.setInt(5, y);
+			pstmt.setInt(6, id);
+
+			pstmt.executeUpdate();
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw new UserException("입고 위치 업데이트 실패", e);
+		} finally {
+			db.release(pstmt);
+		}
+	}
+
+	// 시간 순으로 정렬해서 포지션 리턴
+	public int[] getPositionByASC() {
+	    Connection conn = db.getConnection();
+	    PreparedStatement pstmt = null;
+	    ResultSet rs = null;
+
+	    String sql = "SELECT stock_product_id, s, z, x, y FROM stock_product WHERE stock_status = 1 ORDER BY time ASC LIMIT 1";
+
+	    try {
+	        pstmt = conn.prepareStatement(sql);
+	        rs = pstmt.executeQuery();
+
+	        if (rs.next()) {
+	            int stockProductId = rs.getInt("stock_product_id");
+	            int[] pos = new int[4];
+	            pos[0] = rs.getInt("s");
+	            pos[1] = rs.getInt("z");
+	            pos[2] = rs.getInt("x");
+	            pos[3] = rs.getInt("y");
+
+	            // 상태 업데이트 쿼리
+	            String updateSql = "UPDATE stock_product SET stock_status = 2 WHERE stock_product_id = ?";
+	            PreparedStatement updateStmt = conn.prepareStatement(updateSql);
+	            updateStmt.setInt(1, stockProductId);
+	            updateStmt.executeUpdate();
+	            updateStmt.close();
+
+	            return pos;
+	        }
+
+	        return new int[0];
+
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	        throw new UserException("위치값 가져오기 또는 상태 변경 중 오류", e);
+	    } finally {
+	        db.release(pstmt, rs);
+	    }
 	}
 }
