@@ -103,7 +103,7 @@ public class ProductListPage extends AbstractTablePage implements Refreshable {
 			}
 
 			if (searchResults.isEmpty()) {
-				JOptionPane.showMessageDialog(null, "해당 제품이 없습니다.", "Info", JOptionPane.INFORMATION_MESSAGE);
+				new NoticeAlert(mainFrame, "해당 제품이 없습니다.", "Info").setVisible(true);
 				searchResults = productDAO.getProductList();
 				searchField.setText(null);
 				placeholder();

@@ -25,6 +25,7 @@ import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
+import com.eoneifour.common.exception.UserException;
 import com.eoneifour.common.util.ButtonUtil;
 import com.eoneifour.common.util.FieldUtil;
 import com.eoneifour.shopadmin.product.model.Product;
@@ -209,9 +210,6 @@ public class ProductUpdatePage extends JPanel {
 	        		
 	        		if(u_dialog.isConfirmed()) {
 	        			updateProduct();
-	        			clearForm();
-	        			new NoticeAlert(mainFrame, "수정이 완료되었습니다", "요청 성공").setVisible(true);
-	        			mainFrame.showContent("PRODUCT_LIST");
 	        		}
 	        		
 	        	}
@@ -355,33 +353,44 @@ public class ProductUpdatePage extends JPanel {
 	
 
 	public void updateProduct() {
-		Product product = new Product();
-		ProductImgDAO productImgDAO = new ProductImgDAO();
-		ProductImg productImg = new ProductImg();
+		try {
+			Product product = new Product();
+			ProductImgDAO productImgDAO = new ProductImgDAO();
+			ProductImg productImg = new ProductImg();
 
-		product.setProduct_id(productId);
-		product.setSub_category((SubCategory) cb_subcategory.getSelectedItem());
-		product.setName(productNameField.getText());
-		product.setBrand_name(brandField.getText());
-		product.setPrice(Integer.parseInt(priceField.getText()));
-		product.setDetail(detailField.getText());
-		
-		productDAO.updateProduct(product);
-		if(files != null && files.length >0) {
-			for (int i = 0; i < files.length; i++) {
-				File file = files[i]; 
-				productImg.setProduct(product); 
-				productImg.setFilename(file.getAbsolutePath()); 
-				
-				//update만 계속 돌게 되면 맨 마지막 파일만 남으므로
-				//0번째 index만 update , 그 이후는 insert
-				if(i==0) {
-					productImgDAO.updateProductImg(productImg);
-				}else {
-					productImgDAO.insertProductImg(productImg);
+			product.setProduct_id(productId);
+			product.setSub_category((SubCategory) cb_subcategory.getSelectedItem());
+			product.setName(productNameField.getText());
+			product.setBrand_name(brandField.getText());
+			product.setPrice(Integer.parseInt(priceField.getText()));
+			product.setDetail(detailField.getText());
+			
+			productDAO.updateProduct(product);
+			if(files != null && files.length >0) {
+				for (int i = 0; i < files.length; i++) {
+					File file = files[i]; 
+					productImg.setProduct(product); 
+					productImg.setFilename(file.getAbsolutePath()); 
+					
+					//update만 계속 돌게 되면 맨 마지막 파일만 남으므로
+					//0번째 index만 update , 그 이후는 insert
+					if(i==0) {
+						productImgDAO.updateProductImg(productImg);
+					}else {
+						productImgDAO.insertProductImg(productImg);
+					}
+					
 				}
-				
 			}
+			
+			
+			clearForm();
+			new NoticeAlert(mainFrame, "수정이 완료되었습니다", "요청 성공").setVisible(true);
+			mainFrame.showContent("PRODUCT_LIST");
+			
+		} catch (UserException e) {
+			JOptionPane.showMessageDialog(this, e.getMessage());
+			e.printStackTrace();
 		}
 
 	}

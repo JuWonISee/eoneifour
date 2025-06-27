@@ -179,6 +179,8 @@ public class sh_ProductDetailPage extends JPanel {
 		        totalLabel.setText("총 금액 " + FieldUtil.commaFormat(qty * currentProduct.getPrice()) + "원");
 		    }
 		});
+		
+
 
 		// 총 금액
 		totalLabel = new JLabel("총 금액 ");
@@ -195,10 +197,12 @@ public class sh_ProductDetailPage extends JPanel {
         if (orderBtn.getActionListeners().length == 0) {
         	orderBtn.addActionListener(e->{
         		if (validateqty()) {
-        	        String errorMsg = "정말 이 주소로 주문하시겠습니까?\n"
-        	        		  + SessionUtil.getLoginUser().getAddress() + " "
-        	        		  + SessionUtil.getLoginUser().getAddressDetail();
-        	        		  
+        	        String errorMsg = 
+      	        	"주소 : " 
+        	        +SessionUtil.getLoginUser().getAddress() + " " +SessionUtil.getLoginUser().getAddressDetail()
+        	        +"\n"
+        	        + "정말 이 주소로 주문하시겠습니까?";
+	  
         		    o_dialog = new OrderModalDialog(mainFrame, errorMsg);
         		    o_dialog.setVisible(true);
 
@@ -216,7 +220,11 @@ public class sh_ProductDetailPage extends JPanel {
 	        });
         }
 		
-
+		//주문수량을 키보드로 변경하였을 경우 , 엔터를 눌러도 주문 가능하도록 Key 이벤트 추가
+		qtyValue.addActionListener(e -> {
+			orderBtn.doClick(); //
+		});
+        
 		// 목록 버튼 생성 및 클릭 이벤트 연결
 		JButton backBtn = new JButton("목록"); 
 		backBtn.setBounds(210, 500, 120, 40);
@@ -332,6 +340,7 @@ public class sh_ProductDetailPage extends JPanel {
 	                "최대 주문 가능 수량: " + currentProduct.getStock_quantity() + "개";
 	        
 	        new NoticeAlert(mainFrame, errorMsg, "요청 실패").setVisible(true);
+	        qtyValue.setText(String.valueOf(currentProduct.getStock_quantity()));
 	        return false;
 	    }
 
@@ -353,6 +362,8 @@ public class sh_ProductDetailPage extends JPanel {
 			orders.setDelivery_address_detail(detailAddress);
 
 			sh_ordersDAO.insertOrder(orders);
+			
+			
 			
 		} catch (UserException e) {
 			JOptionPane.showMessageDialog(this, e.getMessage());
