@@ -241,7 +241,7 @@ public class InboundOrderPage extends AbstractTablePage implements Refreshable {
 		for (int i = 0; i < stockProducts.size(); i++) {
 			StockProduct stock = stockProducts.get(i);
 			String pos = stock.getS() + "-" + stock.getZ() + "-" + stock.getX() + "-" + stock.getY();
-			data[i] = new Object[] { stock.getStockprodutId(), stock.getProductName(), pos, "입고" };
+			data[i] = new Object[] { stock.getStockProductId(), stock.getProductName(), pos, "입고" };
 		}
 
 		return data;

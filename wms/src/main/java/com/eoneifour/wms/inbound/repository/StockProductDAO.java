@@ -40,7 +40,7 @@ public class StockProductDAO {
 			rs = pstmt.executeQuery();
 			rs.next();
 			
-			stockProduct.setStockprodutId(rs.getInt("stock_product_id"));	
+			stockProduct.setStockProductId(rs.getInt("stock_product_id"));	
 			stockProduct.setProductId(rs.getInt("product_id"));
 			stockProduct.setProductName(rs.getString("product_name"));
 			stockProduct.setProductBrand(rs.getString("product_brand"));

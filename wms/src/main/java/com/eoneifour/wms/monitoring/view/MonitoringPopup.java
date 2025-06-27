@@ -31,10 +31,10 @@ public class MonitoringPopup extends JFrame {
         }
     }
     
-//    public static void main(String[] args) {
-//        SwingUtilities.invokeLater(() -> {
-//            // mainFrame은 실제 앱에서는 연동되지만 테스트 목적이라면 null 또는 더미로
-//            new MonitoringPopup(null); 
-//        });
-//    }
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            // mainFrame은 실제 앱에서는 연동되지만 테스트 목적이라면 null 또는 더미로
+            new MonitoringPopup(null); 
+        });
+    }
 }

@@ -324,7 +324,7 @@ public class MainFrame extends AbstractMainFrame {
 		new Thread(() -> {
 			try {
 				while (true) {
-					Thread.sleep(5000); // 9초대기
+					Thread.sleep(5000); // 5초대기
 					if (cd.selectById(301) == 1) {
 						System.out.println("컨베이어에 이미 제품이 적재되어 있습니다.");
 						continue;
