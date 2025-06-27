@@ -79,7 +79,7 @@ public class UserListPage extends AbstractTablePage implements Refreshable {
 			List<User> searchResults;
 			
 			if (!keyword.isEmpty() || keyword == "회원명 또는 이메일을 입력하세요") {
-				searchResults = userDAO.serchByKeyword(keyword);
+				searchResults = userDAO.searchByKeyword(keyword);
 				searchField.setText(null);
 				placeholder();
 			} else {

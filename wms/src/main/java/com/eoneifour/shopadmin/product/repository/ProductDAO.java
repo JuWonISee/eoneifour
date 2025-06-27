@@ -329,7 +329,7 @@ public class ProductDAO {
 		}
 	}
 	
-	public List<Product> serchByKeyword(String keyword){
+	public List<Product> searchByKeyword(String keyword){
 		Connection con = null;
 		PreparedStatement pstmt = null;
 		List<Product> list = new ArrayList<>();

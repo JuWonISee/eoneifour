@@ -265,7 +265,7 @@ public class OrderDAO {
 		}
 	}
 	
-	public List<Order> serchByKeyword(String keyword) {
+	public List<Order> searchByKeyword(String keyword) {
 		StringBuffer sql = new StringBuffer();
 		sql.append("select o.orders_id, o.order_date, o.total_price, o.status, u.name as user_name, p.name as product_name, oi.quantity, oi.price ");
 		sql.append("from shop_orders o join shop_user u on o.user_id = u.user_id join shop_order_item oi on o.orders_id = oi.orders_id join shop_product p on oi.product_id = p.product_id ");
@@ -306,4 +306,36 @@ public class OrderDAO {
 			db.release(pstmt, rs);
 		}
 	}
+	
+	//상품 상태전환할 때, 주문진행중인 상품이 있는 지 확인 (해당 상품id를 입력해서 주문진행건이 있는지 없는지 검색)
+	public boolean hasUndeliveredOrders(int productId) {
+	    StringBuffer sql = new StringBuffer();
+	    sql.append("SELECT COUNT(*) AS cnt ");
+	    sql.append("FROM shop_orders o ");
+	    sql.append("JOIN shop_order_item oi ON o.orders_id = oi.orders_id ");
+	    sql.append("WHERE oi.product_id = ? ");
+	    sql.append("AND o.status != 2");  // 배송완료가 아닌 경우만
+
+	    Connection conn = db.getConnection();
+	    PreparedStatement pstmt = null;
+	    ResultSet rs = null;
+
+	    try {
+	        pstmt = conn.prepareStatement(sql.toString());
+	        pstmt.setInt(1, productId);
+	        rs = pstmt.executeQuery();
+
+	        if (rs.next()) {
+	            int count = rs.getInt("cnt");
+	            return count > 0;
+	        }
+	        return false;
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	        throw new UserException("주문 상태 확인 중 오류 발생", e);
+	    } finally {
+	        db.release(pstmt, rs);
+	    }
+	}
+	
 }
