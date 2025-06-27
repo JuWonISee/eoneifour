@@ -64,6 +64,7 @@ public class OutBoundOrderPage extends AbstractTablePage implements Refreshable 
         });
         westPanel.add(outboundAllBtn);
         topPanel.add(westPanel, BorderLayout.WEST);
+        
 
         searchField = new JTextField("상품명을 입력하세요(공백 : 전체검색)");
         searchField.setPreferredSize(new Dimension(200, 30));
@@ -152,7 +153,7 @@ public class OutBoundOrderPage extends AbstractTablePage implements Refreshable 
                 position, // 출고위치 표시
                 "출고"
             };
-        }
+         }
         return data;
     }
 
@@ -165,7 +166,7 @@ public class OutBoundOrderPage extends AbstractTablePage implements Refreshable 
     }
 
     public void refresh() {
-        outboundList = outBoundOrderDAO.selectByStatus(4);
+        outboundList = outBoundOrderDAO.selectByStatus(5);
         model.setDataVector(toTableData(outboundList), cols);
         applyStyle();
     }

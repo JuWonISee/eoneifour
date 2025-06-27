@@ -14,13 +14,13 @@ import com.eoneifour.wms.iobound.model.StockProduct;
 public class InBoundOrderDAO {
 	DBManager db = DBManager.getInstance();
 
-	// 페이지 새로고침시 '입고대기'인 제품 출력 (status 1 줘야함  );
+	// 페이지 새로고침시 '입고대기'인 제품 출력 (status 1 줘야함 );
 	public List<StockProduct> selectByStatus(int status) {
 		Connection conn = db.getConnection();
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 
-		String sql = "SELECT stock_product_id, product_name FROM stock_product WHERE stock_status = ?";
+		String sql = "SELECT stock_product_id, product_name, s, z, x, y FROM stock_product WHERE stock_status = ?";
 		List<StockProduct> list = new ArrayList<>();
 
 		try {
@@ -31,7 +31,10 @@ public class InBoundOrderDAO {
 				StockProduct stockProduct = new StockProduct();
 				stockProduct.setStockprodutId(rs.getInt("stock_product_id"));
 				stockProduct.setProductName(rs.getString("product_name"));
-
+				stockProduct.setS(rs.getInt("s"));
+				stockProduct.setZ(rs.getInt("z"));
+				stockProduct.setX(rs.getInt("x"));
+				stockProduct.setY(rs.getInt("y"));
 				list.add(stockProduct);
 			}
 
@@ -104,12 +107,12 @@ public class InBoundOrderDAO {
 				pstmt.setInt(7, sp.getY());
 				pstmt.setInt(8, 0);
 				pstmt.setString(9, sp.getDetail());
-				
+
 				// 모든 쿼리문을 메모리에 저장해두었다가 한번에 보내기
 				pstmt.addBatch();
 			}
 			// 저장된 쿼리 실행
-			pstmt.executeBatch(); 
+			pstmt.executeBatch();
 			conn.setAutoCommit(true);
 
 		} catch (SQLException e) {
@@ -118,29 +121,68 @@ public class InBoundOrderDAO {
 			db.release(pstmt);
 		}
 	}
-	
+
 	// 입고 위치 업데이트
 	public void updateStatusWithPosition(int id, int statusNum, int s, int z, int x, int y) {
-	    Connection conn = db.getConnection();
-	    PreparedStatement pstmt = null;
+		Connection conn = db.getConnection();
+		PreparedStatement pstmt = null;
 
-	    try {
-	        String sql = "UPDATE stock_product SET stock_status = ?, s = ?, z = ?, x = ?, y = ? WHERE stock_product_id = ?";
-	        pstmt = conn.prepareStatement(sql);
-	        pstmt.setInt(1, statusNum);
-	        pstmt.setInt(2, s);
-	        pstmt.setInt(3, z);
-	        pstmt.setInt(4, x);
-	        pstmt.setInt(5, y);
-	        pstmt.setInt(6, id);
+		String sql = "UPDATE stock_product SET stock_status = ?, s = ?, z = ?, x = ?, y = ? WHERE stock_product_id = ?";
+		try {
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1, statusNum);
+			pstmt.setInt(2, s);
+			pstmt.setInt(3, z);
+			pstmt.setInt(4, x);
+			pstmt.setInt(5, y);
+			pstmt.setInt(6, id);
 
-	        pstmt.executeUpdate();
-	    } catch (SQLException e) {
-	        e.printStackTrace();
-	        throw new UserException("입고 위치 업데이트 실패", e);
-	    } finally {
-	        db.release(pstmt);
-	    }
+			pstmt.executeUpdate();
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw new UserException("입고 위치 업데이트 실패", e);
+		} finally {
+			db.release(pstmt);
+		}
 	}
 
+	// 시간 순으로 정렬해서 포지션 리턴
+	public int[] getPositionByASC() {
+	    Connection conn = db.getConnection();
+	    PreparedStatement pstmt = null;
+	    ResultSet rs = null;
+
+	    String sql = "SELECT stock_product_id, s, z, x, y FROM stock_product WHERE stock_status = 1 ORDER BY time ASC LIMIT 1";
+
+	    try {
+	        pstmt = conn.prepareStatement(sql);
+	        rs = pstmt.executeQuery();
+
+	        if (rs.next()) {
+	            int stockProductId = rs.getInt("stock_product_id");
+	            int[] pos = new int[4];
+	            pos[0] = rs.getInt("s");
+	            pos[1] = rs.getInt("z");
+	            pos[2] = rs.getInt("x");
+	            pos[3] = rs.getInt("y");
+
+	            // 상태 업데이트 쿼리
+	            String updateSql = "UPDATE stock_product SET stock_status = 2 WHERE stock_product_id = ?";
+	            PreparedStatement updateStmt = conn.prepareStatement(updateSql);
+	            updateStmt.setInt(1, stockProductId);
+	            updateStmt.executeUpdate();
+	            updateStmt.close();
+
+	            return pos;
+	        }
+
+	        return new int[0];
+
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	        throw new UserException("위치값 가져오기 또는 상태 변경 중 오류", e);
+	    } finally {
+	        db.release(pstmt, rs);
+	    }
+	}
 }

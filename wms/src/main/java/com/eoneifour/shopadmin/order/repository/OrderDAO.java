@@ -147,8 +147,19 @@ public class OrderDAO {
 		sql.append("where orders_id = ?");
 		Connection conn = db.getConnection();
 		PreparedStatement pstmt = null; 
+		ResultSet rs = null;
 		
 		try {
+			//주문준비중만 취소할 수 있도록
+			String checkSql = "SELECT status FROM shop_orders WHERE orders_id = ?";
+			pstmt = conn.prepareStatement(checkSql);
+			pstmt.setInt(1, orderId);
+			rs = pstmt.executeQuery();
+			if (rs.next()) {
+				int status = rs.getInt("status");
+				if (status != 0) throw new UserException("해당 주문은 더 이상 취소할 수 없습니다.");
+			}
+			
 			pstmt = conn.prepareStatement(sql.toString());
 			pstmt.setString(1, address);
 			pstmt.setString(2, addressDetail);
@@ -160,7 +171,7 @@ public class OrderDAO {
 			e.printStackTrace();
 			throw new UserException("주문 수정 중 오류가 발생했습니다.", e);
 		} finally {
-			db.release(pstmt);
+			db.release(pstmt, rs);
 		}
 	}
 	
@@ -171,6 +182,16 @@ public class OrderDAO {
 		ResultSet rs = null;
 		
 		try {
+			//주문준비중만 취소할 수 있도록
+			String checkSql = "SELECT status FROM shop_orders WHERE orders_id = ?";
+			pstmt = conn.prepareStatement(checkSql);
+			pstmt.setInt(1, orderId);
+			rs = pstmt.executeQuery();
+			if (rs.next()) {
+				int status = rs.getInt("status");
+				if (status != 0) throw new UserException("해당 주문은 더 이상 취소할 수 없습니다.");
+			}
+			
 			// 주문상품 조회
 			String selectSql = "select product_id, quantity from shop_order_item where orders_id = ?";
 	        pstmt = conn.prepareStatement(selectSql);
@@ -244,7 +265,7 @@ public class OrderDAO {
 		}
 	}
 	
-	public List<Order> serchByKeyword(String keyword) {
+	public List<Order> searchByKeyword(String keyword) {
 		StringBuffer sql = new StringBuffer();
 		sql.append("select o.orders_id, o.order_date, o.total_price, o.status, u.name as user_name, p.name as product_name, oi.quantity, oi.price ");
 		sql.append("from shop_orders o join shop_user u on o.user_id = u.user_id join shop_order_item oi on o.orders_id = oi.orders_id join shop_product p on oi.product_id = p.product_id ");
@@ -286,5 +307,35 @@ public class OrderDAO {
 		}
 	}
 	
+	//상품 상태전환할 때, 주문진행중인 상품이 있는 지 확인 (해당 상품id를 입력해서 주문진행건이 있는지 없는지 검색)
+	public boolean hasUndeliveredOrders(int productId) {
+	    StringBuffer sql = new StringBuffer();
+	    sql.append("SELECT COUNT(*) AS cnt ");
+	    sql.append("FROM shop_orders o ");
+	    sql.append("JOIN shop_order_item oi ON o.orders_id = oi.orders_id ");
+	    sql.append("WHERE oi.product_id = ? ");
+	    sql.append("AND o.status != 2");  // 배송완료가 아닌 경우만
+
+	    Connection conn = db.getConnection();
+	    PreparedStatement pstmt = null;
+	    ResultSet rs = null;
+
+	    try {
+	        pstmt = conn.prepareStatement(sql.toString());
+	        pstmt.setInt(1, productId);
+	        rs = pstmt.executeQuery();
+
+	        if (rs.next()) {
+	            int count = rs.getInt("cnt");
+	            return count > 0;
+	        }
+	        return false;
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	        throw new UserException("주문 상태 확인 중 오류 발생", e);
+	    } finally {
+	        db.release(pstmt, rs);
+	    }
+	}
 	
 }

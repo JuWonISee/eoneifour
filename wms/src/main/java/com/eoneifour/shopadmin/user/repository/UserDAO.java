@@ -205,7 +205,7 @@ public class UserDAO {
 	    }
 	}
 
-	public List<User> serchByKeyword(String keyword){
+	public List<User> searchByKeyword(String keyword){
 		String sql = "select * from shop_user where status = 0 and (name like ? or email like ?)";
 		
 		Connection conn = db.getConnection();

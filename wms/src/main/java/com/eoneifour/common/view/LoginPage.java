@@ -79,6 +79,9 @@ public class LoginPage extends JFrame {
 
         loginPanel.add(buttonPanel);
         add(loginPanel);
+        
+        emailField.addActionListener(e -> loginUser());
+        passwordField.addActionListener(e -> loginUser());
     }
     
     private void loginUser() {
@@ -92,7 +95,6 @@ public class LoginPage extends JFrame {
     			SessionUtil.setLoginUser(user);
     			if(user.getRole() == 1) new ShopAdminMainFrame();
     			else new ShopMainFrame();
-    			
     			dispose(); // 로그인 창 닫기
 			} catch (UserException e) {
     			JOptionPane.showMessageDialog(this, e.getMessage());

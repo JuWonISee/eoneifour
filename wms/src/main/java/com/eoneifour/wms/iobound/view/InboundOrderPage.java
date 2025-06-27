@@ -11,7 +11,12 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -52,7 +57,7 @@ public class InboundOrderPage extends AbstractTablePage implements Refreshable {
 	private PurchaseOrderDAO purchaseOrderDAO;
 	private InBoundOrderDAO inBoundOrderDAO;
 	private RackDAO rackDAO;
-	
+
 	private String[] cols = { "ID", "상품명", "입고위치", "작업" };
 
 	JTextField searchField;
@@ -159,7 +164,7 @@ public class InboundOrderPage extends AbstractTablePage implements Refreshable {
 			inBoundOrderDAO.insertByList(waitingUnloadList);
 			for (PurchaseOrder purchaseOrder : purchaseList) {
 				int id = purchaseOrder.getPurchase_order_id();
-				purchaseOrderDAO.updateStatus(id, "완료");
+				purchaseOrderDAO.updateStatus(id, "입고완료");
 			}
 			refresh();
 		});
@@ -209,16 +214,18 @@ public class InboundOrderPage extends AbstractTablePage implements Refreshable {
 				// 작업 버튼 클릭시 입고 프로세스 진행
 				if (col == table.getColumn("작업").getModelIndex()) {
 
-					// stock_product 테이블의 status 변경
+					// 테이블에서 위치값 받아 온후 파싱하기
 					String posStr = (String) model.getValueAt(row, 2);
 					int[] position = Arrays.stream(posStr.split("-")).mapToInt(Integer::parseInt).toArray();
 
+					// 파싱한 위치값 입력하기
 					int s = position[0];
 					int z = position[1];
 					int x = position[2];
 					int y = position[3];
 
 					inBoundOrderDAO.updateStatusWithPosition(id, 1, s, z, x, y);
+					rackDAO.updateRackStatus(s, z, x, y, 1); // status = 1로 사용중 처리
 					JOptionPane.showMessageDialog(mainFrame, "입고처리가 완료되었습니다", "Success!",
 							JOptionPane.INFORMATION_MESSAGE);
 					refresh();
@@ -230,14 +237,13 @@ public class InboundOrderPage extends AbstractTablePage implements Refreshable {
 	// 테이블로 데이터로 변환
 	private Object[][] toTableData(List<StockProduct> stockProducts) {
 		Object[][] data = new Object[stockProducts.size()][cols.length];
-		List<String> positions = calcPosition(stockProducts);
 
 		for (int i = 0; i < stockProducts.size(); i++) {
-			String pos = positions.get(i);
-			StockProduct order = stockProducts.get(i);
-			data[i] = new Object[] { order.getStockprodutId(), // ID 숨김
-					order.getProductName(), positions.get(i), "입고" };
+			StockProduct stock = stockProducts.get(i);
+			String pos = stock.getS() + "-" + stock.getZ() + "-" + stock.getX() + "-" + stock.getY();
+			data[i] = new Object[] { stock.getStockprodutId(), stock.getProductName(), pos, "입고" };
 		}
+
 		return data;
 	}
 
@@ -279,70 +285,99 @@ public class InboundOrderPage extends AbstractTablePage implements Refreshable {
 
 	}
 
-	// 발주테이블에 접근하여 전체 발주 리스트 받아오기.
 	public int purchaseToStock() {
-		purchaseList = new ArrayList<>();
 		purchaseList = purchaseOrderDAO.searchByStatus("창고도착");
 		waitingUnloadList = new ArrayList<>();
 
-		int size = purchaseList.size();
-		int quantity = 0;
-		for (int i = 0; i < size; i++) {
-			PurchaseOrder po = purchaseList.get(i);
-			quantity = po.getQuantity();
-			for (int j = 0; j < quantity; j++) {
-				StockProduct stockProduct = new StockProduct();
-				stockProduct.setProductId(po.getProduct().getProduct_id());
-				stockProduct.setProductBrand(po.getProduct().getBrand_name());
-				stockProduct.setProductName(po.getProduct().getName());
-				stockProduct.setDetail(po.getProduct().getDetail());
-				waitingUnloadList.add(stockProduct);
+		List<StockProduct> stockList = new ArrayList<>();
+		int totalQuantity = 0;
+
+		for (PurchaseOrder po : purchaseList) {
+			for (int j = 0; j < po.getQuantity(); j++) {
+				StockProduct stock = new StockProduct();
+				stock.setProductId(po.getProduct().getProduct_id());
+				stock.setProductBrand(po.getProduct().getBrand_name());
+				stock.setProductName(po.getProduct().getName());
+				stock.setDetail(po.getProduct().getDetail());
+				stockList.add(stock);
 			}
 		}
-		return size;
+
+		totalQuantity = stockList.size();
+
+		// 위치 할당: 상품 수 만큼 랙 좌표 받아오기
+		List<String> positions = calcPosition(stockList);
+		if (positions.size() == 1 && positions.get(0).equals("-1")) {
+			JOptionPane.showMessageDialog(null, "랙 공간이 부족합니다. 관리자에게 문의하세요.");
+			return 0;
+		}
+
+		for (int i = 0; i < totalQuantity; i++) {
+			String[] pos = positions.get(i).split("-");
+			StockProduct stock = stockList.get(i);
+			stock.setS(Integer.parseInt(pos[0]));
+			stock.setZ(Integer.parseInt(pos[1]));
+			stock.setX(Integer.parseInt(pos[2]));
+			stock.setY(Integer.parseInt(pos[3]));
+		}
+		waitingUnloadList.addAll(stockList);
+
+		return totalQuantity;
 	}
 
 	public List<String> calcPosition(List<StockProduct> waitingUnloadList) {
-		List<Rack> emptyRacks = new RackDAO().selectByRackStatus(0);
+		List<Rack> emptyRacks = rackDAO.selectByRackStatus(0);
 		int needRack = waitingUnloadList.size();
 
-		int x = 1, y = 1;
-		int maxX = 7, maxY = 7;
-		int[] sArr = { 1, 2 };
-		int[] zArr = { 1, 2 };
+		if (emptyRacks.size() < needRack)
+			return List.of("-1");
 
-		int sIndex = 0;
+		// 모든 랙 위치 문자열: S-Z-X-Y
+		List<String> allPositions = emptyRacks.stream()
+				.map(r -> r.getS() + "-" + r.getZ() + "-" + r.getX() + "-" + r.getY()).collect(Collectors.toList());
+
+		// 정렬 기준: S-Z-X-Y
+		allPositions.sort(Comparator.comparing((String pos) -> Integer.parseInt(pos.split("-")[1])) // Z 먼저
+				.thenComparing(pos -> Integer.parseInt(pos.split("-")[0])) // S 교차
+				.thenComparing(pos -> Integer.parseInt(pos.split("-")[2])) // X
+				.thenComparing(pos -> Integer.parseInt(pos.split("-")[3]))); // Y
+
+		// 가능한 Z 값 추출
+		Set<String> zSet = emptyRacks.stream().map(r -> String.valueOf(r.getZ()))
+				.collect(Collectors.toCollection(LinkedHashSet::new));
+		List<String> zList = new ArrayList<>(zSet);
+
 		int zIndex = 0;
+		int sToggle = 0; // 0 -> S=1, 1 -> S=2
 
-		List<String> positions = new ArrayList<>();
+		List<String> assigned = new ArrayList<>();
 
-		for (int i = 0; i < needRack; i++) {
-			if (y > maxY) {
-				// 초과 시 메시지를 담은 하나짜리 리스트 반환
-				return List.of("랙 여유 공간이 없습니다");
+		while (assigned.size() < needRack && !allPositions.isEmpty()) {
+			String currentZ = zList.get(zIndex);
+			String currentS = sToggle == 0 ? "1" : "2";
+
+			Optional<String> match = allPositions.stream().filter(pos -> {
+				String[] parts = pos.split("-");
+				return parts[0].equals(currentS) && parts[1].equals(currentZ);
+			}).findFirst();
+
+			if (match.isPresent()) {
+				assigned.add(match.get());
+				allPositions.remove(match.get());
 			}
 
-			int s = sArr[sIndex];
-			int z = zArr[zIndex];
-			positions.add(s + "-" + z + "-" + x + "-" + y);
-
-			sIndex++;
-			if (sIndex >= sArr.length) {
-				sIndex = 0;
-				zIndex++;
-			}
-			if (zIndex >= zArr.length) {
-				zIndex = 0;
-				x++;
-			}
-			if (x > maxX) {
-				x = 1;
-				y++;
+			// 다음: S toggle → 다음 Z
+			sToggle = (sToggle + 1) % 2;
+			if (sToggle == 0) {
+				zIndex = (zIndex + 1) % zList.size();
 			}
 		}
 
-		return positions;
+		if (assigned.size() < needRack) {
+			return List.of("-1");
+		}
 
+		return assigned;
 	}
 
 }

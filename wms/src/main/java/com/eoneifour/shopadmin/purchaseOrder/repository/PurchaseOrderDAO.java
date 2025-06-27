@@ -4,6 +4,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,6 +36,7 @@ public class PurchaseOrderDAO {
 		sql.append(" FROM shop_purchase_order po ");
 		sql.append(" JOIN shop_user u ON po.requested_by = u.user_id ");
 		sql.append(" JOIN shop_product p ON po.product_id = p.product_id");
+		sql.append(" order by purchase_order_id desc");
 
 		try {
 			pstmt = con.prepareStatement(sql.toString());
@@ -158,7 +161,7 @@ public class PurchaseOrderDAO {
 	    }
 	}
 	
-	public List<PurchaseOrder> serchByKeyword(String keyword){
+	public List<PurchaseOrder> searchByKeyword(String keyword){
 		Connection con = null;
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
@@ -267,12 +270,15 @@ public class PurchaseOrderDAO {
 	public void updateStatus(int id, String status) {
 		Connection conn = dbManager.getConnection();
 		PreparedStatement pstmt = null;
-
+		
+		
 		try {
-			String sql = "UPDATE shop_purchase_order SET status = ? WHERE purchase_order_id = ?";
+			String sql = "UPDATE shop_purchase_order SET status = ?, complete_date = ? WHERE purchase_order_id = ?";
+			LocalDateTime now = LocalDateTime.now();
 			pstmt = conn.prepareStatement(sql);
 			pstmt.setString(1, status);
-			pstmt.setInt(2, id);
+			pstmt.setTimestamp(2, Timestamp.valueOf(now));
+			pstmt.setInt(3, id);
 
 			pstmt.executeUpdate();
 		} catch (SQLException e) {
