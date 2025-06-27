@@ -141,9 +141,9 @@ public class RackInboundStatusPage extends JPanel {
         for (Rack rack : rackList) {
             if (rack.getS() == s && rack.getZ() == z && rack.getX() == row && rack.getY() == col) {
                 switch (rack.getRack_status()) {
-                    case 1 -> btn.setBackground(new Color(0xFA8EE5));
-                    case 2 -> btn.setBackground(new Color(0x2196F3));
-                    case 3 -> btn.setBackground(new Color(0xFF9800));
+                    case 2 -> btn.setBackground(new Color(0xFA8EE5));
+                    case 3 -> btn.setBackground(new Color(0x2196F3));
+                    case 4 -> btn.setBackground(new Color(0xFF9800));
                     default -> btn.setBackground(Color.LIGHT_GRAY);
                 }
                 return;

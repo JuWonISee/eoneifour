@@ -8,7 +8,7 @@ public class MonitoringPopup extends JFrame {
 
     private MonitoringPopup(MainFrame mainFrame) {
         setTitle("📦 창고 모니터링");
-        setSize(1330, 850);
+        setSize(1330, 800);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         add(new MonitoringPage(mainFrame));
@@ -23,18 +23,18 @@ public class MonitoringPopup extends JFrame {
         setVisible(true);
     }
 
-//    public static void showPopup(MainFrame mainFrame) {
-//        if (instance == null) {
-//            instance = new MonitoringPopup(mainFrame);
-//        } else {
-//            instance.toFront();
-//        }
-//    }
-    
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            // mainFrame은 실제 앱에서는 연동되지만 테스트 목적이라면 null 또는 더미로
-            new MonitoringPopup(null); 
-        });
+    public static void showPopup(MainFrame mainFrame) {
+        if (instance == null) {
+            instance = new MonitoringPopup(mainFrame);
+        } else {
+            instance.toFront();
+        }
     }
+    
+//    public static void main(String[] args) {
+//        SwingUtilities.invokeLater(() -> {
+//            // mainFrame은 실제 앱에서는 연동되지만 테스트 목적이라면 null 또는 더미로
+//            new MonitoringPopup(null); 
+//        });
+//    }
 }
