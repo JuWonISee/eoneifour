@@ -159,7 +159,7 @@ public class InboundOrderPage extends AbstractTablePage implements Refreshable {
 			inBoundOrderDAO.insertByList(waitingUnloadList);
 			for (PurchaseOrder purchaseOrder : purchaseList) {
 				int id = purchaseOrder.getPurchase_order_id();
-				purchaseOrderDAO.updateStatus(id, "완료");
+				purchaseOrderDAO.updateStatus(id, "입고완료");
 			}
 			refresh();
 		});

@@ -153,7 +153,7 @@ public class OutBoundOrderPage extends AbstractTablePage implements Refreshable 
                 position, // 출고위치 표시
                 "출고"
             };
-        }
+         }
         return data;
     }
 
@@ -166,7 +166,7 @@ public class OutBoundOrderPage extends AbstractTablePage implements Refreshable 
     }
 
     public void refresh() {
-        outboundList = outBoundOrderDAO.selectByStatus(4);
+        outboundList = outBoundOrderDAO.selectByStatus(5);
         model.setDataVector(toTableData(outboundList), cols);
         applyStyle();
     }

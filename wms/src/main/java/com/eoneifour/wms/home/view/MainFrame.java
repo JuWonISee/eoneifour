@@ -31,8 +31,10 @@ import com.eoneifour.wms.auth.view.AdminLoginPage;
 import com.eoneifour.wms.auth.view.AdminRegistPage;
 import com.eoneifour.wms.common.config.Config;
 import com.eoneifour.wms.inbound.view.RackInboundStatusPage;
+import com.eoneifour.wms.inboundrate.repository.RackDAO;
 import com.eoneifour.wms.inboundrate.view.AllInboundRatePage;
 import com.eoneifour.wms.inboundrate.view.StackerInboundRate;
+import com.eoneifour.wms.iobound.repository.InBoundOrderDAO;
 import com.eoneifour.wms.iobound.view.InboundOrderPage;
 import com.eoneifour.wms.iobound.view.OutBoundOrderPage;
 import com.eoneifour.wms.iobound.view.lookupProduct;
@@ -47,11 +49,10 @@ public class MainFrame extends AbstractMainFrame {
 	JLabel dbStatusLabel;
 	DBManager db;
 	public AdminEditPage adminEditPage;
-	
-	
+
 	public Admin admin;
 	JLabel adminInfoLabel;
-	
+
 	public MainFrame() {
 		super("WMS 메인(관리자)"); // 타이틀 설정
 
@@ -103,12 +104,11 @@ public class MainFrame extends AbstractMainFrame {
 		contentCardPanel.add(new AllInboundRatePage(this), "ALL_INBOUND_RATE");
 		contentCardPanel.add(new StackerInboundRate(this), "STACKER_INBOUND_RATE");
 		contentCardPanel.add(new RackInboundStatusPage(this), "RACK_INBOUND_STATUS");
-		
-		
-		//완 로그인 페이지
+
+		// 완 로그인 페이지
 		adminEditPage = new AdminEditPage(this);
-		
-		contentCardPanel.add(new AdminLoginPage(this), "ADMIN_LOGIN"); 
+
+		contentCardPanel.add(new AdminLoginPage(this), "ADMIN_LOGIN");
 		contentCardPanel.add(new AdminRegistPage(this), "ADMIN_REGISTER");
 		contentCardPanel.add(new AdminDeletePage(this), "ADMIN_DELETE");
 		contentCardPanel.add(adminEditPage, "ADMIN_EDIT");
@@ -212,7 +212,7 @@ public class MainFrame extends AbstractMainFrame {
 
 			menuPanel.add(Box.createVerticalStrut(20)); // 간격 추가
 			menuPanel.add(button);
-		
+
 		}
 		//
 		menuPanel.add(Box.createVerticalGlue()); // 아래 공간 채우기
@@ -234,26 +234,26 @@ public class MainFrame extends AbstractMainFrame {
 				JButton button = new JButton(Config.PAGENAME[i][j]);
 				ButtonUtil.styleMenuButton(button);
 				final String PAGEKEY = Config.PAGEKEYS[i][j];
-				
+
 				button.addActionListener(e -> showContent(PAGEKEY));
 				button.setAlignmentX(JButton.CENTER_ALIGNMENT);
 				groupPanel.add(button);
-				
+
 				/***
-				 * 팝업으로 띄울시 이곳에다가 추가 
+				 * 팝업으로 띄울시 이곳에다가 추가
 				 */
-				if(PAGEKEY.equals("MONITORING")) {
-			        button.addMouseListener(new MouseAdapter() {
-			        	@Override
-			        	public void mouseClicked(MouseEvent e) {
+				if (PAGEKEY.equals("MONITORING")) {
+					button.addMouseListener(new MouseAdapter() {
+						@Override
+						public void mouseClicked(MouseEvent e) {
 //			        		MonitoringPopup.showPopup(MainFrame.this); // 팝업만 실행
-			        	}
+						}
 					});
-			    }
+				}
 			}
 			menuCardPanel.add(groupPanel, groupKey);
 		}
-		
+
 	}
 
 	// 메인 카테고리 버튼 클릭에 대응되는 세부 카테고리 패널
@@ -273,16 +273,35 @@ public class MainFrame extends AbstractMainFrame {
 			dbStatus.setForeground(Color.RED);
 		}
 	}
-	
-	//관리자 로그인 시, 해당관리자의 정보를 상단 영역에 출력하기 위한 메서드 정의 (by Wan)
+
+	// 관리자 로그인 시, 해당관리자의 정보를 상단 영역에 출력하기 위한 메서드 정의 (by Wan)
 	public void setAdminInfo(String name) {
 		adminInfoLabel.setText(name + "님, 안녕하세요");
+	}
+
+	public void autoLoadingConveyor() {
+		new Thread(() -> {
+			try {
+				while (true) {
+					InBoundOrderDAO io = new InBoundOrderDAO();
+					int[] pos = io.getPositionByASC();
+					if (pos.length > 1) {
+						RackDAO rd = new RackDAO();
+						rd.updateRackStatus(pos[0], pos[1], pos[2], pos[3], 1);
+					}
+					Thread.sleep(3000); // 3초대기
+
+				}
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+
+			}
+		}).start();
 	}
 
 	// DB 연결
 	public void connectDB() {
 		db = DBManager.getInstance();
 	}
-	
-	
+
 }

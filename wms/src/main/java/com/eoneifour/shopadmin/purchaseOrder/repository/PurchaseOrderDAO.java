@@ -4,6 +4,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -267,12 +269,15 @@ public class PurchaseOrderDAO {
 	public void updateStatus(int id, String status) {
 		Connection conn = dbManager.getConnection();
 		PreparedStatement pstmt = null;
-
+		
+		
 		try {
-			String sql = "UPDATE shop_purchase_order SET status = ? WHERE purchase_order_id = ?";
+			String sql = "UPDATE shop_purchase_order SET status = ?, complete_date = ? WHERE purchase_order_id = ?";
+			LocalDateTime now = LocalDateTime.now();
 			pstmt = conn.prepareStatement(sql);
 			pstmt.setString(1, status);
-			pstmt.setInt(2, id);
+			pstmt.setTimestamp(2, Timestamp.valueOf(now));
+			pstmt.setInt(3, id);
 
 			pstmt.executeUpdate();
 		} catch (SQLException e) {
