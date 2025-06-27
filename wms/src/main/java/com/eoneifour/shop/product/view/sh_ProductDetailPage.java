@@ -191,7 +191,7 @@ public class sh_ProductDetailPage extends JPanel {
 		orderBtn.setBackground(new Color(0, 120, 215));
 		orderBtn.setForeground(Color.WHITE);
 		orderBtn.setFont(new Font("맑은 고딕", Font.BOLD, 14));
-		// 주문 버튼 이벤트 연결 (등록 이벤트 중복 방지)
+		// 주문 버튼 이벤트 연결 (등록 이벤트 중복 방지 , 수량 유효성 검사)
         if (orderBtn.getActionListeners().length == 0) {
         	orderBtn.addActionListener(e->{
         		if (validateqty()) {

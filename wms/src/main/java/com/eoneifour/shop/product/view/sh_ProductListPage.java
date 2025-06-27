@@ -113,7 +113,7 @@ public class sh_ProductListPage extends JPanel{
 	        imgLabel.setBorder(BorderFactory.createEmptyBorder(15, 0, 50, 0));
 			
 		} catch (UserException e) {
-			JOptionPane.showMessageDialog(this, "이미지 불러오기 중: " + e.getMessage());
+			JOptionPane.showMessageDialog(this, "이미지 불러오기 중 오류발생 " + e.getMessage());
 		}
         
 
@@ -157,7 +157,6 @@ public class sh_ProductListPage extends JPanel{
             //패널별 클릭 이벤트
             productPanel.addMouseListener(new MouseAdapter() {
                 public void mouseClicked(MouseEvent e) {
-                    System.out.println(productId);
                     mainFrame.sh_productDetailPage.setProduct(productId);
                     mainFrame.showPage("SH_PRODUCT_DETAIL", "PRODUCT_MENU");
                 }
