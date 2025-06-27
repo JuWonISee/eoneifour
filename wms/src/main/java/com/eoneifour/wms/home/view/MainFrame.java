@@ -38,6 +38,7 @@ import com.eoneifour.wms.iobound.repository.InBoundOrderDAO;
 import com.eoneifour.wms.iobound.view.InboundOrderPage;
 import com.eoneifour.wms.iobound.view.OutBoundOrderPage;
 import com.eoneifour.wms.iobound.view.lookupProduct;
+import com.eoneifour.wms.monitoring.repository.ConveyorDAO;
 
 /**
  * - 사이드 메뉴바, 상단 메뉴바 구현. - 상태바에 DB 상태 표시. (추후 클래스 분리해야 함.)
@@ -62,7 +63,7 @@ public class MainFrame extends AbstractMainFrame {
 
 		// DB연결
 		updateDBstatus(dbStatusLabel);
-
+		autoLoadingConveyor();
 		// 정해진 시간 간격으로 ActionEvent(ActionListener의 actionPerformed()) 를 발생시키는 메서드.
 		// 5초 간격마다 DB 연결 상태 체크.
 		new Timer(5000, e -> updateDBstatus(dbStatusLabel)).start();
@@ -283,18 +284,20 @@ public class MainFrame extends AbstractMainFrame {
 		new Thread(() -> {
 			try {
 				while (true) {
+					Thread.sleep(9000); // 3초대기
 					InBoundOrderDAO io = new InBoundOrderDAO();
+					ConveyorDAO cd = new ConveyorDAO();
+					if (cd.selectById(301) == 1) {
+						System.out.println("컨베이어에 이미 제품이 적재되어 있습니다.");
+						continue;
+					}
 					int[] pos = io.getPositionByASC();
 					if (pos.length > 1) {
-						RackDAO rd = new RackDAO();
-						rd.updateRackStatus(pos[0], pos[1], pos[2], pos[3], 1);
+						cd.updateOnProductByIdWithPos(pos[0], pos[1], pos[2], pos[3]);
 					}
-					Thread.sleep(3000); // 3초대기
-
 				}
 			} catch (InterruptedException e) {
 				e.printStackTrace();
-
 			}
 		}).start();
 	}
