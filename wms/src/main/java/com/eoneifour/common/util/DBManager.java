@@ -17,7 +17,7 @@ public class DBManager {
             Class.forName("com.mysql.cj.jdbc.Driver");
             con = DriverManager.getConnection(PrivateConfig.URL, PrivateConfig.USER, PrivateConfig.PASS);
         } catch (ClassNotFoundException e) {
-            e.printStackTrace();
+            e.printStackTrace();          
         } catch (SQLException e) {
 			e.printStackTrace();
 		}

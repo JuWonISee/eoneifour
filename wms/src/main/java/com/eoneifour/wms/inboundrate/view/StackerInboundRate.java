@@ -35,15 +35,17 @@ public class StackerInboundRate extends JPanel implements Refreshable{
     private DefaultPieDataset createDataset(int stackerNum) {
         DefaultPieDataset dataset = new DefaultPieDataset();
         
-        int in             = rackDAO.selectRackStatusCnt(2, stackerNum);
-        int waitOut     = rackDAO.selectRackStatusCnt(3, stackerNum);
+        int in             = rackDAO.selectRackStatusCnt(3, stackerNum);
+        int waitOut     = rackDAO.selectRackStatusCnt(4, stackerNum);
         int emptyCELL = rackDAO.selectRackStatusCnt(0, stackerNum);
-        int inIng         = rackDAO.selectRackStatusCnt(1, stackerNum);
+        int inIng         = rackDAO.selectRackStatusCnt(2, stackerNum);
+        int waitIn       = rackDAO.selectRackStatusCnt(1, stackerNum);
         
         if (in > 0)             { dataset.setValue("입고"     	, in); }
         if (waitOut > 0)     { dataset.setValue("출고 대기", waitOut); }
         if (emptyCELL > 0) { dataset.setValue("공 CELL"	, emptyCELL); }
         if (inIng > 0)         { dataset.setValue("입고중"   	, inIng); }
+        if (waitIn > 0)       { dataset.setValue("입고 대기"	, waitIn); }
         
         return dataset;
     }
@@ -69,6 +71,7 @@ public class StackerInboundRate extends JPanel implements Refreshable{
                 case "출고 대기"	: plot.setSectionPaint(key, new Color(0xFF9800))	; break;
                 case "공 CELL"	: plot.setSectionPaint(key, new Color(0x4CAF50))	; break;
                 case "입고중"   	: plot.setSectionPaint(key, new Color(0xFA8EE5))	; break;
+                case "입고대기" 	: plot.setSectionPaint(key, Color.GRAY)				; break;                
                 default: plot.setSectionPaint(key, Color.GRAY);
             }
         }
@@ -109,6 +112,7 @@ public class StackerInboundRate extends JPanel implements Refreshable{
         legendPanel.add(createLegendItem(new Color(0x4CAF50), "공 CELL"));
         legendPanel.add(createLegendItem(new Color(0xFF9800), "출고 대기"));
         legendPanel.add(createLegendItem(new Color(0xFA8EE5), "입고중"));
+        legendPanel.add(createLegendItem(Color.GRAY, "입고 대기"));
 
         return legendPanel;
     }

@@ -27,7 +27,8 @@ public class AllInboundRatePage extends JPanel implements Refreshable{
 			new Color(0x4CAF50), // 공Cell
 			new Color(0x2196F3), // 입고
 			new Color(0xFF9800), // 출고대기
-			new Color(0xFA8EE5)  // 입고중
+			new Color(0xFA8EE5), // 입고중
+			Color.GRAY              // 입고대기
 	};
 
 	private static final Font FONT_TITLE      = new Font("맑은 고딕", Font.BOLD, 28);
@@ -49,9 +50,10 @@ public class AllInboundRatePage extends JPanel implements Refreshable{
 	private CategoryDataset createDataset() {
 		DefaultCategoryDataset dataset = new DefaultCategoryDataset();
 		dataset.addValue(rackDAO.selectRackStatusCnt(0), "공Cell"	 , "");
-		dataset.addValue(rackDAO.selectRackStatusCnt(2), "입고"	 , "");
-		dataset.addValue(rackDAO.selectRackStatusCnt(1), "입고중"	 , "");
-		dataset.addValue(rackDAO.selectRackStatusCnt(3), "출고대기", "");
+		dataset.addValue(rackDAO.selectRackStatusCnt(3), "입고"	 , "");
+		dataset.addValue(rackDAO.selectRackStatusCnt(2), "입고중"	 , "");
+		dataset.addValue(rackDAO.selectRackStatusCnt(4), "출고대기", "");
+		dataset.addValue(rackDAO.selectRackStatusCnt(1), "입고대기", "");
 		
 		return dataset;
 	}
@@ -72,7 +74,7 @@ public class AllInboundRatePage extends JPanel implements Refreshable{
 	private void customizeLegendItems() {
 	    LegendItemCollection legendItems = new LegendItemCollection();
 
-	    String[] labels = { "공Cell", "입고", "출고대기", "입고중" };
+	    String[] labels = { "공Cell", "입고", "출고대기", "입고중", "입고대기" };
 	    
 	    for (int i = 0; i < labels.length; i++) {
 	        Shape shape = new Rectangle(25, 25); // 사각형 크기 (폭, 높이)

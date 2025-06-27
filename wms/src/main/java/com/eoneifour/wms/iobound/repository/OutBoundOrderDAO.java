@@ -1,111 +1,106 @@
 package com.eoneifour.wms.iobound.repository;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.eoneifour.common.exception.UserException;
 import com.eoneifour.common.util.DBManager;
-import com.eoneifour.shopadmin.product.model.Product;
-import com.eoneifour.wms.iobound.model.InBoundOrder;
+import com.eoneifour.wms.iobound.model.StockProduct;
 
 public class OutBoundOrderDAO {
-	DBManager db = DBManager.getInstance();
-	Connection conn = db.getConnection();
 
-	public List<InBoundOrder> getOrderList() {
-		String sql = "SELECT po.purchase_order_id, p.name " + "FROM shop_product p "
-				+ "JOIN shop_purchase_order po ON p.product_id = po.product_id " + "WHERE po.status = ?";
+    DBManager db = DBManager.getInstance();
 
-		Connection conn = db.getConnection();
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
+    // 출고대기(4) 상태 상품 조회
+    public List<StockProduct> selectByStatus(int status) {
+        List<StockProduct> list = new ArrayList<>();	
+        String sql = "SELECT stock_product_id, product_name, s, z, x, y FROM stock_product WHERE stock_status = ? ORDER BY time ASC";
 
-		try {
-			List<InBoundOrder> list = new ArrayList<>();
-			pstmt = conn.prepareStatement(sql);
-			pstmt.setString(1, "창고도착");
-			rs = pstmt.executeQuery();
+        Connection conn = db.getConnection();
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
 
-			while (rs.next()) {
-				Product product = new Product();
-				product.setName(rs.getString("name"));
+        try {
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setInt(1, status);
+            rs = pstmt.executeQuery();
 
-				InBoundOrder inBoundOrder = new InBoundOrder();
-				inBoundOrder.setPurchase_order_id(rs.getInt("purchase_order_id"));
+            while (rs.next()) {
+                StockProduct sp = new StockProduct();
+                sp.setStockprodutId(rs.getInt("stock_product_id"));
+                sp.setProductName(rs.getString("product_name"));
+                sp.setS(rs.getInt("s"));
+                sp.setZ(rs.getInt("z"));
+                sp.setX(rs.getInt("x"));
+                sp.setY(rs.getInt("y"));
 
-				inBoundOrder.setProduct(product);
+                list.add(sp);
+            }
 
-				list.add(inBoundOrder);
-			}
-			return list;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new UserException("출고 리스트 조회 실패", e);
+        } finally {
+            db.release(pstmt, rs);
+        }
 
-		} catch (SQLException e) {
-			e.printStackTrace();
-			throw new UserException("입고 목록 조회 중 오류 발생", e);
-		} finally {
-			db.release(pstmt, rs);
-		}
-	}
+        return list;
+    }
 
-	public List<InBoundOrder> searchByProductName(String keyword) {
-		String sql = "SELECT p.name FROM shop_product p "
-				+ "JOIN shop_purchase_order po ON p.product_id = po.product_id "
-				+ "WHERE po.status = ? AND p.name LIKE ?";
+    // 상품명 + 출고대기 조건으로 검색
+    public List<StockProduct> searchByProductName(String keyword, int status) {
+        List<StockProduct> list = new ArrayList<>();
+        String sql = "SELECT stock_product_id, product_name, s, z, x, y FROM stock_product WHERE stock_status = ? AND product_name LIKE ?";
 
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
+        Connection conn = db.getConnection();
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
 
-		try {
-			List<InBoundOrder> list = new ArrayList<>();
-			pstmt = conn.prepareStatement(sql);
-			pstmt.setString(1, "창고도착");
-			pstmt.setString(2, "%" + keyword + "%"); // 와일드카드 검색
+        try {
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setInt(1, status);
+            pstmt.setString(2, "%" + keyword + "%");
+            rs = pstmt.executeQuery();
 
-			rs = pstmt.executeQuery();
+            while (rs.next()) {
+                StockProduct sp = new StockProduct();
+                sp.setStockprodutId(rs.getInt("stock_product_id"));
+                sp.setProductName(rs.getString("product_name"));
+                sp.setS(rs.getInt("s"));
+                sp.setZ(rs.getInt("z"));
+                sp.setX(rs.getInt("x"));
+                sp.setY(rs.getInt("y"));
 
-			while (rs.next()) {
-				Product product = new Product();
-				product.setName(rs.getString("name"));
+                list.add(sp);
+            }
 
-				InBoundOrder inBoundOrder = new InBoundOrder();
-				inBoundOrder.setProduct(product);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new UserException("출고 검색 실패", e);
+        } finally {
+            db.release(pstmt, rs);
+        }
 
-				list.add(inBoundOrder);
-			}
-			return list;
-		} catch (SQLException e) {
-			e.printStackTrace();
-			throw new UserException("상품 검색 중 오류 발생", e);
-		} finally {
-			db.release(pstmt, rs);
-		}
-	}
+        return list;
+    }
 
-	public int inBound(int orderId) {
-		int result = 0;
+    // 출고 상태 업데이트 (보통 5 = 출고 중 or 6 = 출고 완료)
+    public void updateStatus(int id, int statusNum) {
+        Connection conn = db.getConnection();
+        PreparedStatement pstmt = null;
 
-		String sql = "UPDATE shop_purchase_order SET status = ?, complete_date = ? WHERE purchase_order_id = ?";
-		PreparedStatement pstmt = null;
-
-		try {
-			pstmt = conn.prepareStatement(sql);
-			pstmt.setString(1, "입고완료");
-			pstmt.setTimestamp(2, new Timestamp(System.currentTimeMillis()));
-			pstmt.setInt(3, orderId);
-
-			result = pstmt.executeUpdate();
-			return result;
-		} catch (SQLException e) {
-			e.printStackTrace();
-			throw new UserException("입고 처리 중 오류 발생", e);
-		} finally {
-			db.release(pstmt);
-		}
-
-	}
+        try {
+            String sql = "UPDATE stock_product SET stock_status = ? WHERE stock_product_id = ?";
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setInt(1, statusNum);
+            pstmt.setInt(2, id);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new UserException("출고 상태 업데이트 실패", e);
+        } finally {
+            db.release(pstmt);
+        }
+    }
 }
