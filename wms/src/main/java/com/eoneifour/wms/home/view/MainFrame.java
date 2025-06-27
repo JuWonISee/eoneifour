@@ -40,11 +40,10 @@ import com.eoneifour.wms.iobound.repository.InBoundOrderDAO;
 import com.eoneifour.wms.iobound.view.InboundOrderPage;
 import com.eoneifour.wms.iobound.view.OutBoundOrderPage;
 import com.eoneifour.wms.iobound.view.lookupProduct;
-<<<<<<< HEAD
+
 import com.eoneifour.wms.monitoring.view.MonitoringPopup;
-=======
+
 import com.eoneifour.wms.monitoring.repository.ConveyorDAO;
->>>>>>> 4f59b8588a43cd53df5d8dc80b005fb10f549d01
 
 /**
  * - 사이드 메뉴바, 상단 메뉴바 구현. - 상태바에 DB 상태 표시. (추후 클래스 분리해야 함.)
