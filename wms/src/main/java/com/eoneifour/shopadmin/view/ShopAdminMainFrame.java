@@ -167,6 +167,7 @@ public class ShopAdminMainFrame extends AbstractMainFrame {
 		menuBar.add(purchaseBtn);
 
 		return menuBar;
+	}
 	
 	// 메뉴에 들어가는 버튼들 공통 로직
 	private JButton createMenuButton(String title, String pageKey, List<JButton> menuButtons) {

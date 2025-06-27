@@ -4,6 +4,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,7 +32,7 @@ public class PurchaseOrderDAO {
 		StringBuffer sql = new StringBuffer();
 		sql.append("select po.purchase_order_id, p.name AS product_name, po.quantity, ");
 		sql.append(" po.request_date, u.name AS requested_by_name, po.status, ");
-		sql.append(" po.complete_date, po.requested_by, po.product_id ");
+		sql.append(" po.complete_date, po.requested_by, po.product_id, p.brand_name AS brand_name");
 		sql.append(" FROM shop_purchase_order po ");
 		sql.append(" JOIN shop_user u ON po.requested_by = u.user_id ");
 		sql.append(" JOIN shop_product p ON po.product_id = p.product_id");
@@ -47,6 +49,7 @@ public class PurchaseOrderDAO {
 				
 				purchaseOrder.setPurchase_order_id(rs.getInt("purchase_order_id"));
 				product.setName(rs.getString("product_name"));
+				product.setBrand_name(rs.getString("brand_name"));
 				purchaseOrder.setQuantity(rs.getInt("quantity"));
 				purchaseOrder.setRequest_date(rs.getDate("request_date"));
 				user.setName(rs.getString("requested_by_name"));
@@ -64,7 +67,6 @@ public class PurchaseOrderDAO {
 		} finally {
 			dbManager.release(pstmt, rs);
 		}
-
 	}
 	
 	// 발주 ID 기준으로 발주 1건 조회
@@ -209,6 +211,80 @@ public class PurchaseOrderDAO {
 			throw new UserException("발주 목록 조회 중 오류 발생", e);
 		} finally {
 			dbManager.release(pstmt, rs);
+		}
+	}
+	
+	// 상태값으로 리스트 검색 @author 재환
+		public List<PurchaseOrder> searchByStatus(String status) {
+			Connection con = null;
+			PreparedStatement pstmt = null;
+			ResultSet rs = null;
+
+			List<PurchaseOrder> list = new ArrayList<>();
+
+			con = dbManager.getConnection();
+
+			StringBuffer sql = new StringBuffer();
+			sql.append("select po.purchase_order_id, p.name AS product_name, po.quantity, ");
+			sql.append(" po.request_date, u.name AS requested_by_name, po.status, ");
+			sql.append(" po.complete_date, po.requested_by, po.product_id, p.brand_name as brand_name");
+			sql.append(" FROM shop_purchase_order po ");
+			sql.append(" JOIN shop_user u ON po.requested_by = u.user_id ");
+			sql.append(" JOIN shop_product p ON po.product_id = p.product_id");
+			sql.append(" WHERE po.status = ?");
+
+			try {
+				pstmt = con.prepareStatement(sql.toString());
+				pstmt.setString(1, status);
+				rs = pstmt.executeQuery();
+
+				while (rs.next()) {
+					PurchaseOrder purchaseOrder = new PurchaseOrder();
+					User user = new User();
+					Product product = new Product();
+					
+					purchaseOrder.setPurchase_order_id(rs.getInt("purchase_order_id"));
+					product.setProduct_id(rs.getInt("product_id"));
+					product.setName(rs.getString("product_name"));
+					product.setBrand_name(rs.getString("brand_name"));
+					purchaseOrder.setQuantity(rs.getInt("quantity"));
+					purchaseOrder.setRequest_date(rs.getDate("request_date"));
+					user.setName(rs.getString("requested_by_name"));
+					purchaseOrder.setStatus(rs.getString("status"));
+					purchaseOrder.setComplete_date(rs.getDate("complete_date"));
+					purchaseOrder.setProduct(product);
+					purchaseOrder.setUser(user);
+					
+					list.add(purchaseOrder);
+				}
+				return list;
+			} catch (SQLException e) {
+				e.printStackTrace();
+				throw new UserException("발주 목록 조회 중 오류 발생", e);
+			} finally {
+				dbManager.release(pstmt, rs);
+			}
+		}
+	
+	// 상태값 업데이트 @author 재환
+	public void updateStatus(int id, String status) {
+		Connection conn = dbManager.getConnection();
+		PreparedStatement pstmt = null;
+		
+		
+		try {
+			String sql = "UPDATE shop_purchase_order SET status = ?, complete_date = ? WHERE purchase_order_id = ?";
+			LocalDateTime now = LocalDateTime.now();
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setString(1, status);
+			pstmt.setTimestamp(2, Timestamp.valueOf(now));
+			pstmt.setInt(3, id);
+
+			pstmt.executeUpdate();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			dbManager.release(pstmt);
 		}
 	}
 	

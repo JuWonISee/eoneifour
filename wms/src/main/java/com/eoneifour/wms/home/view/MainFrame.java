@@ -33,11 +33,14 @@ import com.eoneifour.wms.auth.view.AdminLoginPage;
 import com.eoneifour.wms.auth.view.AdminRegistPage;
 import com.eoneifour.wms.common.config.Config;
 import com.eoneifour.wms.inbound.view.RackInboundStatusPage;
+import com.eoneifour.wms.inboundrate.repository.RackDAO;
 import com.eoneifour.wms.inboundrate.view.AllInboundRatePage;
 import com.eoneifour.wms.inboundrate.view.StackerInboundRate;
+import com.eoneifour.wms.iobound.repository.InBoundOrderDAO;
 import com.eoneifour.wms.iobound.view.InboundOrderPage;
 import com.eoneifour.wms.iobound.view.OutBoundOrderPage;
 import com.eoneifour.wms.iobound.view.lookupProduct;
+import com.eoneifour.wms.monitoring.repository.ConveyorDAO;
 
 /**
  * - 사이드 메뉴바, 상단 메뉴바 구현. - 상태바에 DB 상태 표시. (추후 클래스 분리해야 함.)
@@ -52,9 +55,10 @@ public class MainFrame extends AbstractMainFrame {
 	JPanel leftPane;
 	
 	
+
 	public Admin admin;
 	JLabel adminInfoLabel;
-	
+
 	public MainFrame() {
 		super("WMS 메인(관리자)"); // 타이틀 설정
 
@@ -64,7 +68,7 @@ public class MainFrame extends AbstractMainFrame {
 
 		// DB연결
 		updateDBstatus(dbStatusLabel);
-
+		autoLoadingConveyor();
 		// 정해진 시간 간격으로 ActionEvent(ActionListener의 actionPerformed()) 를 발생시키는 메서드.
 		// 5초 간격마다 DB 연결 상태 체크.
 		new Timer(5000, e -> updateDBstatus(dbStatusLabel)).start();
@@ -122,8 +126,14 @@ public class MainFrame extends AbstractMainFrame {
 		contentCardPanel.add(new AllInboundRatePage(this), "ALL_INBOUND_RATE");
 		contentCardPanel.add(new StackerInboundRate(this), "STACKER_INBOUND_RATE");
 		contentCardPanel.add(new RackInboundStatusPage(this), "RACK_INBOUND_STATUS");
-		
-		
+
+		// 완 로그인 페이지
+		adminEditPage = new AdminEditPage(this);
+
+		contentCardPanel.add(new AdminLoginPage(this), "ADMIN_LOGIN");
+		contentCardPanel.add(new AdminRegistPage(this), "ADMIN_REGISTER");
+		contentCardPanel.add(new AdminDeletePage(this), "ADMIN_DELETE");
+		contentCardPanel.add(adminEditPage, "ADMIN_EDIT");
 
 		createSubMenu();
 		// 초기 화면을 홈 화면으로 고정하기 위한 메서드.
@@ -238,7 +248,7 @@ public class MainFrame extends AbstractMainFrame {
 
 			menuPanel.add(Box.createVerticalStrut(20)); // 간격 추가
 			menuPanel.add(button);
-		
+
 		}
 		//
 		menuPanel.add(Box.createVerticalGlue()); // 아래 공간 채우기
@@ -260,26 +270,26 @@ public class MainFrame extends AbstractMainFrame {
 				JButton button = new JButton(Config.PAGENAME[i][j]);
 				ButtonUtil.styleMenuButton(button);
 				final String PAGEKEY = Config.PAGEKEYS[i][j];
-				
+
 				button.addActionListener(e -> showContent(PAGEKEY));
 				button.setAlignmentX(JButton.CENTER_ALIGNMENT);
 				groupPanel.add(button);
-				
+
 				/***
-				 * 팝업으로 띄울시 이곳에다가 추가 
+				 * 팝업으로 띄울시 이곳에다가 추가
 				 */
-				if(PAGEKEY.equals("MONITORING")) {
-			        button.addMouseListener(new MouseAdapter() {
-			        	@Override
-			        	public void mouseClicked(MouseEvent e) {
+				if (PAGEKEY.equals("MONITORING")) {
+					button.addMouseListener(new MouseAdapter() {
+						@Override
+						public void mouseClicked(MouseEvent e) {
 //			        		MonitoringPopup.showPopup(MainFrame.this); // 팝업만 실행
-			        	}
+						}
 					});
-			    }
+				}
 			}
 			menuCardPanel.add(groupPanel, groupKey);
 		}
-		
+
 	}
 
 	// 메인 카테고리 버튼 클릭에 대응되는 세부 카테고리 패널
@@ -299,10 +309,32 @@ public class MainFrame extends AbstractMainFrame {
 			dbStatus.setForeground(Color.RED);
 		}
 	}
-	
-	//관리자 로그인 시, 해당관리자의 정보를 상단 영역에 출력하기 위한 메서드 정의 (by Wan)
+
+	// 관리자 로그인 시, 해당관리자의 정보를 상단 영역에 출력하기 위한 메서드 정의 (by Wan)
 	public void setAdminInfo(String name) {
 		adminInfoLabel.setText(name);
+	}
+
+	public void autoLoadingConveyor() {
+		new Thread(() -> {
+			try {
+				while (true) {
+					Thread.sleep(9000); // 3초대기
+					InBoundOrderDAO io = new InBoundOrderDAO();
+					ConveyorDAO cd = new ConveyorDAO();
+					if (cd.selectById(301) == 1) {
+						System.out.println("컨베이어에 이미 제품이 적재되어 있습니다.");
+						continue;
+					}
+					int[] pos = io.getPositionByASC();
+					if (pos.length > 1) {
+						cd.updateOnProductByIdWithPos(pos[0], pos[1], pos[2], pos[3]);
+					}
+				}
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}).start();
 	}
 
 	// DB 연결
