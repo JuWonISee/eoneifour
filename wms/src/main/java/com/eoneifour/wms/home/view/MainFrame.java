@@ -287,21 +287,13 @@ public class MainFrame extends AbstractMainFrame {
 				/***
 				 * 팝업으로 띄울시 이곳에다가 추가
 				 */
-<<<<<<< HEAD
+
 				if(PAGEKEY.equals("MONITORING")) {
 			        button.addMouseListener(new MouseAdapter() {
 			        	@Override
 			        	public void mouseClicked(MouseEvent e) {
 			        		MonitoringPopup.showPopup(MainFrame.this); // 팝업만 실행
 			        	}
-=======
-				if (PAGEKEY.equals("MONITORING")) {
-					button.addMouseListener(new MouseAdapter() {
-						@Override
-						public void mouseClicked(MouseEvent e) {
-//			        		MonitoringPopup.showPopup(MainFrame.this); // 팝업만 실행
-						}
->>>>>>> 4f59b8588a43cd53df5d8dc80b005fb10f549d01
 					});
 				}
 			}
