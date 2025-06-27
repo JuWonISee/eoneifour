@@ -30,7 +30,6 @@ import com.eoneifour.common.util.ButtonUtil;
 import com.eoneifour.common.util.Refreshable;
 import com.eoneifour.common.util.SessionUtil;
 import com.eoneifour.common.util.TableUtil;
-import com.eoneifour.shopadmin.product.model.Product;
 import com.eoneifour.shopadmin.user.model.User;
 import com.eoneifour.shopadmin.user.repository.UserDAO;
 import com.eoneifour.shopadmin.view.ShopAdminMainFrame;
@@ -160,11 +159,9 @@ public class UserListPage extends AbstractTablePage implements Refreshable {
                 				userDAO.deleteUser(userId);
                 				refresh();
                 				JOptionPane.showMessageDialog(null, userName + "님이 삭제 처리되었습니다.");
-                				
                 			} catch (UserException e2) {
                 				JOptionPane.showMessageDialog(null, e2.getMessage(), "오류", JOptionPane.ERROR_MESSAGE);
                 			}
-                			
                 		}
                 	}
                 } else { // 회원 상세
@@ -178,7 +175,6 @@ public class UserListPage extends AbstractTablePage implements Refreshable {
         table.addMouseMotionListener(new MouseMotionAdapter() {
             @Override
             public void mouseMoved(MouseEvent e) {
-                int row = table.rowAtPoint(e.getPoint());
                 int col = table.columnAtPoint(e.getPoint());
 
                 String columnName = table.getColumnName(col);
@@ -222,7 +218,7 @@ public class UserListPage extends AbstractTablePage implements Refreshable {
 		return data;
 	}
 	
-	//검색 TextField에 placeholder 효과 주기 (forcus 이벤트 활용)
+	//검색 TextField에 placeholder 효과 주기 (focus 이벤트 활용)
 	public void placeholder() {
 		searchField.addFocusListener(new FocusAdapter() {
 		    public void focusGained(FocusEvent e) {
