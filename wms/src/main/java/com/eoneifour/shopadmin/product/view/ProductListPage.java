@@ -30,6 +30,7 @@ import com.eoneifour.common.util.FieldUtil;
 import com.eoneifour.common.util.Refreshable;
 import com.eoneifour.common.util.SessionUtil;
 import com.eoneifour.common.util.TableUtil;
+import com.eoneifour.shopadmin.order.repository.OrderDAO;
 import com.eoneifour.shopadmin.product.model.Product;
 import com.eoneifour.shopadmin.product.repository.ProductDAO;
 import com.eoneifour.shopadmin.purchaseOrder.repository.PurchaseOrderDAO;
@@ -43,11 +44,13 @@ public class ProductListPage extends AbstractTablePage implements Refreshable {
 	private ProductRegistPage productRegistPage;
 	private ProductDetailPage productDetailPage;
 	private ProductUpdatePage productUpdatePage;
-	private PurchaseModalDialog dialog;
+	private PurchaseModalDialog p_dialog;
+	private StatusModalDialog s_dialog;
 	private JTextField searchField;
 
 	private ProductDAO productDAO;
 	private PurchaseOrderDAO purchaseOrderDAO;
+	private OrderDAO orderDAO;
 	private List<Product> productList;
 	private String[] cols = { "상품번호", "카테고리", "브랜드", "상품명", "가격", "재고수량", "품절상태", "발주요청", "수정" , "상태변경"};
 
@@ -59,6 +62,7 @@ public class ProductListPage extends AbstractTablePage implements Refreshable {
 		this.productUpdatePage = mainFrame.productUpdatePage;
 		this.productDAO = new ProductDAO();
 		this.purchaseOrderDAO = new PurchaseOrderDAO();
+		this.orderDAO = new OrderDAO();
 		initTopPanel();
 		initTable();
 		applyTableStyle();
@@ -146,10 +150,11 @@ public class ProductListPage extends AbstractTablePage implements Refreshable {
 
 		table = new JTable(model);
 
-		// 테이블 컬럼 스타일 적용 (품절, 비활성 : 빨강 / 발주요청 : 회색 / 수정 : 파랑)
+		// 테이블 컬럼 스타일 적용 (재고수량0개, 품절, 비활성 : 빨강 / 발주요청 : 오렌지 / 수정 : 파랑)
+		TableUtil.applyConditionalTextRenderer(table, "재고수량", "0 개", Color.RED);
 		TableUtil.applyConditionalTextRenderer(table, "품절상태", "품절", Color.RED);
 		TableUtil.applyConditionalTextRenderer(table, "상태변경", "비활성", Color.RED);
-		TableUtil.applyColorTextRenderer(table, "발주요청", Color.DARK_GRAY);
+		TableUtil.applyColorTextRenderer(table, "발주요청", Color.ORANGE);
 		TableUtil.applyColorTextRenderer(table, "수정", new Color(25, 118, 210));
 
 		// 발주요청, 상세 , 수정 , 활성화 이벤트 연결
@@ -169,8 +174,13 @@ public class ProductListPage extends AbstractTablePage implements Refreshable {
 					mainFrame.productUpdatePage.setProduct(productId);
 					mainFrame.showContent("PRODUCT_UPDATE");
 				} else if (col == table.getColumn("상태변경").getModelIndex()) {
-					// 상품 삭제 로직 (삭제 시 , db delete가 아닌 , product 의 status 를 전환 (0 : 활성 , 1 : 비활성)
-					switchProductStatus(productId);
+					// 상품 상태변경 로직 (삭제 시 , db delete가 아닌 , product 의 status 를 전환 (0 : 활성 , 1 : 비활성)
+					if(orderDAO.hasUndeliveredOrders(productId)) { // 주문상품에 존재하고 , 배송완료가 아니면 
+						new NoticeAlert(mainFrame, "주문진행중인 상품이 존재합니다", "상태 전환 실패").setVisible(true);
+					}else {
+						switchProductStatus(productId);
+					}
+					
 				} else {
 					// 상품 상세 로직
 					mainFrame.productDetailPage.setProduct(productId);
@@ -207,9 +217,10 @@ public class ProductListPage extends AbstractTablePage implements Refreshable {
 	
 	public void applyStyle() {
 		TableUtil.applyDefaultTableStyle(table);
+		TableUtil.applyConditionalTextRenderer(table, "재고수량", "0 개", Color.RED);
 		TableUtil.applyConditionalTextRenderer(table, "품절상태", "품절", Color.RED);
 		TableUtil.applyConditionalTextRenderer(table, "상태변경", "비활성", Color.RED);
-		TableUtil.applyColorTextRenderer(table, "발주요청", Color.DARK_GRAY);
+		TableUtil.applyColorTextRenderer(table, "발주요청", Color.ORANGE);
 		TableUtil.applyColorTextRenderer(table, "수정", new Color(25, 118, 210));
 	}
 
@@ -221,8 +232,8 @@ public class ProductListPage extends AbstractTablePage implements Refreshable {
 			Product product = productList.get(i);
 
 			data[i] = new Object[] { product.getProduct_id(), product.getSub_category().getTop_category().getName(),
-					product.getBrand_name(), product.getName(), FieldUtil.commaFormat(product.getPrice()), FieldUtil.commaFormat(product.getStock_quantity()),
-					(product.getStock_quantity()) == 0 ? "품절" : "판매중", 
+					product.getBrand_name(), product.getName(), FieldUtil.commaFormat(product.getPrice())+" 원", FieldUtil.commaFormat(product.getStock_quantity())+" 개",
+					(product.getStock_quantity()) == 0 ? "품절" : "판매중",  
 					"발주요청", "수정",(product.getStatus() == 0) ? "활성" : "비활성" };
 		}
 
@@ -231,12 +242,17 @@ public class ProductListPage extends AbstractTablePage implements Refreshable {
 
 	// 상품 삭제 로직
 	public void switchProductStatus(int ProductId) {
-		int result = JOptionPane.showConfirmDialog(this, "상품 상태를 변경하시겠습니까?", "확인", JOptionPane.YES_NO_OPTION);
-
-		if (result == JOptionPane.YES_OPTION) {
-			productDAO.switchProductStatus(ProductId);
-			JOptionPane.showMessageDialog(this, "상품상태가 변경되었습니다.");
-			refresh();
+		s_dialog = new StatusModalDialog(mainFrame);
+		s_dialog.setVisible(true);
+		if (s_dialog.isConfirmed()) {
+			try {
+				productDAO.switchProductStatus(ProductId);
+				new NoticeAlert(mainFrame, "상품 상태가 변경되었습니다", "요청 성공").setVisible(true);
+				refresh();
+			} catch (UserException e) {
+				JOptionPane.showMessageDialog(this, "상품 상태 변경 중 오류 발생: " + e.getMessage());
+				e.printStackTrace();
+			}
 		}
 	}
 
@@ -245,14 +261,14 @@ public class ProductListPage extends AbstractTablePage implements Refreshable {
 		Product product = productDAO.getProduct(productId);
 		User loginUser = SessionUtil.getLoginUser();
 		userId = loginUser.getUserId();
-		dialog = new PurchaseModalDialog(mainFrame, product);
-		dialog.setVisible(true);
+		p_dialog = new PurchaseModalDialog(mainFrame, product);
+		p_dialog.setVisible(true);
 
-		if (dialog.isConfirmed()) {
-			int quantity = dialog.getQuantity();
+		if (p_dialog.isConfirmed()) {
+			int quantity = p_dialog.getQuantity();
 	        try {
 	            purchaseOrderDAO.insertPurchase(productId, quantity, userId );
-	            JOptionPane.showMessageDialog(this, "발주가 요청되었습니다. 수량: " + quantity);
+	            new NoticeAlert(mainFrame, "발주가 요청되었습니다. 수량: " + quantity, "요청 성공").setVisible(true);
 	            refresh();
 	        } catch (UserException e) {
 	            JOptionPane.showMessageDialog(this, "발주 요청 중 오류 발생: " + e.getMessage());

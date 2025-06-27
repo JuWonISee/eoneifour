@@ -64,7 +64,7 @@ public class sh_OrderCompletePage extends JPanel{
         JButton orderListBtn = ButtonUtil.createPrimaryButton("주문내역 보기", 14, 160, 40);
         JButton homeBtn = ButtonUtil.createDefaultButton("홈으로", 14, 120, 40);
         
-        orderListBtn.addActionListener(e->mainFrame.showPage("MY_ORDER_LIST", "PRODUCT_MENU"));
+        orderListBtn.addActionListener(e->mainFrame.showPage("MY_ORDER_LIST", "MYPAGE_MENU"));
         homeBtn.addActionListener(e->mainFrame.showPage("SH_PRODUCT_LIST", "PRODUCT_MENU"));
 
         buttonPanel.add(orderListBtn);

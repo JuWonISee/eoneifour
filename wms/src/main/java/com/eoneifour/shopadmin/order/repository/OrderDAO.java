@@ -286,5 +286,36 @@ public class OrderDAO {
 		}
 	}
 	
+	//상품 상태전환할 때, 주문진행중인 상품이 있는 지 확인 (해당 상품id를 입력해서 주문진행건이 있는지 없는지 검색)
+	public boolean hasUndeliveredOrders(int productId) {
+	    StringBuffer sql = new StringBuffer();
+	    sql.append("SELECT COUNT(*) AS cnt ");
+	    sql.append("FROM shop_orders o ");
+	    sql.append("JOIN shop_order_item oi ON o.orders_id = oi.orders_id ");
+	    sql.append("WHERE oi.product_id = ? ");
+	    sql.append("AND o.status != 2");  // 배송완료가 아닌 경우만
+
+	    Connection conn = db.getConnection();
+	    PreparedStatement pstmt = null;
+	    ResultSet rs = null;
+
+	    try {
+	        pstmt = conn.prepareStatement(sql.toString());
+	        pstmt.setInt(1, productId);
+	        rs = pstmt.executeQuery();
+
+	        if (rs.next()) {
+	            int count = rs.getInt("cnt");
+	            return count > 0;
+	        }
+	        return false;
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	        throw new UserException("주문 상태 확인 중 오류 발생", e);
+	    } finally {
+	        db.release(pstmt, rs);
+	    }
+	}
+	
 	
 }

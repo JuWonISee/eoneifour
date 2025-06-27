@@ -31,6 +31,7 @@ import com.eoneifour.shop.product.repository.sh_OrdersDAO;
 import com.eoneifour.shop.product.repository.sh_ProductDAO;
 import com.eoneifour.shop.product.repository.sh_ProductImgDAO;
 import com.eoneifour.shop.view.ShopMainFrame;
+import com.eoneifour.shopadmin.product.view.NoticeAlert;
 
 public class sh_ProductDetailPage extends JPanel {
 	private ShopMainFrame mainFrame;
@@ -47,6 +48,9 @@ public class sh_ProductDetailPage extends JPanel {
 	private JButton minusBtn;
 	private JButton plusBtn;
 	private JLabel totalLabel;
+	
+	//
+	private OrderModalDialog o_dialog;
 	//현재 상품 정보
 	private int productId;
 	private sh_Product currentProduct;
@@ -191,23 +195,22 @@ public class sh_ProductDetailPage extends JPanel {
         if (orderBtn.getActionListeners().length == 0) {
         	orderBtn.addActionListener(e->{
         		if (validateqty()) {
-        		    JLabel msgLabel = new JLabel("<html>정말 이 주소로 주문하시겠습니까?<br>" 
-        		        + SessionUtil.getLoginUser().getAddress() + " "
-        		        + SessionUtil.getLoginUser().getAddressDetail() + "</html>");
-        		    msgLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        	        String errorMsg = "정말 이 주소로 주문하시겠습니까?\n"
+        	        		  + SessionUtil.getLoginUser().getAddress() + " "
+        	        		  + SessionUtil.getLoginUser().getAddressDetail();
+        	        		  
+        		    o_dialog = new OrderModalDialog(mainFrame, errorMsg);
+        		    o_dialog.setVisible(true);
 
-        		    int result = JOptionPane.showConfirmDialog(
-        		        this,
-        		        msgLabel,
-        		        "주문확인",
-        		        JOptionPane.YES_NO_OPTION,
-        		        JOptionPane.PLAIN_MESSAGE  // 아이콘 제거
-        		    );
-
-        		    if (result == JOptionPane.YES_OPTION) {
-        		        insertOrder();
-        		        insertOrderItem();
-        		        mainFrame.showPage("SH_ORDER_COMPLETE", "PRODUCT_MENU");
+        		    if (o_dialog.isConfirmed()) {
+        		        try {
+							insertOrder();
+							insertOrderItem();
+							mainFrame.showPage("SH_ORDER_COMPLETE", "PRODUCT_MENU");
+						} catch (UserException e1) {
+							JOptionPane.showMessageDialog(this, "상품 주문 중 오류 발생" + e1.getMessage());
+							e1.printStackTrace();
+						}
         		    }
         		}
 	        });
@@ -244,51 +247,60 @@ public class sh_ProductDetailPage extends JPanel {
 	}
 	
 	public void loadProduct() {
-		//좌측 패널 현재 product 이미지 출력
-		currentImg = new sh_ProductImgDAO().getProductImg(productId);
-		//현 상품의 이미지 출력 전 , 전 상품의 이미지가 들어있던 라벨 초기화 
-	    imgLabel.setIcon(null);
-	    imgLabel.setText(""); 
-	    imgLabel.setOpaque(false); // 기본 배경 제거
 		
-		//파일 객체 및 제대로 된 경로가 있는지 없는지 확인.
-		String filename = (currentImg != null && currentImg.getFilename() != null) ? currentImg.getFilename() : "";	
-        //이미지가 로드됐는지 확인하기 위한 변수
-        boolean imageLoaded = false;
-        
-        //filename이 비어있지 않을 경우 해당 이미지 로딩
-        if (!filename.isEmpty()) {
-            URL imgUrl = getClass().getClassLoader().getResource(filename);
-            if (imgUrl != null) {
-                ImageIcon icon = new ImageIcon(imgUrl);
-                Image img = icon.getImage();
-                if (img != null && img.getWidth(null) > 0) {
-                    Image scaledImg = img.getScaledInstance(450, 450, Image.SCALE_SMOOTH);
-                    imgLabel.setIcon(new ImageIcon(scaledImg));
-                    imageLoaded = true;
-                }
-            }
-        }
+		try {
+			//좌측 패널 현재 product 이미지 출력
+			currentImg = new sh_ProductImgDAO().getProductImg(productId);
+			//현 상품의 이미지 출력 전 , 전 상품의 이미지가 들어있던 라벨 초기화 
+			imgLabel.setIcon(null);
+			imgLabel.setText(""); 
+			imgLabel.setOpaque(false); // 기본 배경 제거
+			
+			//파일 객체 및 제대로 된 경로가 있는지 없는지 확인.
+			String filename = (currentImg != null && currentImg.getFilename() != null) ? currentImg.getFilename() : "";	
+			//이미지가 로드됐는지 확인하기 위한 변수
+			boolean imageLoaded = false;
+			
+			//filename이 비어있지 않을 경우 해당 이미지 로딩
+			if (!filename.isEmpty()) {
+			    URL imgUrl = getClass().getClassLoader().getResource(filename);
+			    if (imgUrl != null) {
+			        ImageIcon icon = new ImageIcon(imgUrl);
+			        Image img = icon.getImage();
+			        if (img != null && img.getWidth(null) > 0) {
+			            Image scaledImg = img.getScaledInstance(450, 450, Image.SCALE_SMOOTH);
+			            imgLabel.setIcon(new ImageIcon(scaledImg));
+			            imageLoaded = true;
+			        }
+			    }
+			}
 
-        //image가 로드되지 않았을 경우 , No image 부착
-        if (!imageLoaded) {
-            imgLabel.setPreferredSize(new Dimension(450, 450));
-            imgLabel.setOpaque(true);
-            imgLabel.setBackground(Color.LIGHT_GRAY);
-            imgLabel.setText("No Image");
-            imgLabel.setHorizontalAlignment(JLabel.CENTER);
-            imgLabel.setVerticalAlignment(JLabel.CENTER);
-            imgLabel.setForeground(Color.DARK_GRAY);
-            imgLabel.setFont(new Font("맑은 고딕", Font.PLAIN, 14));
-        }
+			//image가 로드되지 않았을 경우 , No image 부착
+			if (!imageLoaded) {
+			    imgLabel.setPreferredSize(new Dimension(450, 450));
+			    imgLabel.setOpaque(true);
+			    imgLabel.setBackground(Color.LIGHT_GRAY);
+			    imgLabel.setText("No Image");
+			    imgLabel.setHorizontalAlignment(JLabel.CENTER);
+			    imgLabel.setVerticalAlignment(JLabel.CENTER);
+			    imgLabel.setForeground(Color.DARK_GRAY);
+			    imgLabel.setFont(new Font("맑은 고딕", Font.PLAIN, 14));
+			}
+		} catch (UserException e) {
+			JOptionPane.showMessageDialog(this, "이미지 불러오기 중 오류 발생 " + e.getMessage());
+		}
 		
 		//우측 패널 현재 product 값 입력
-		currentProduct = new sh_ProductDAO().getProduct(productId);
-		categoryLabel.setText(currentProduct.getTop_category().getName() + " > " + currentProduct.getSub_category().getName());
-		
-		brandLabel.setText(currentProduct.getBrand_name());
-		nameLabel.setText(currentProduct.getName());
-		priceLabel.setText(FieldUtil.commaFormat(currentProduct.getPrice()));
+		try {
+			currentProduct = new sh_ProductDAO().getProduct(productId);
+			categoryLabel.setText(currentProduct.getTop_category().getName() + " > " + currentProduct.getSub_category().getName());
+			
+			brandLabel.setText(currentProduct.getBrand_name());
+			nameLabel.setText(currentProduct.getName());
+			priceLabel.setText(FieldUtil.commaFormat(currentProduct.getPrice()));
+		} catch (UserException e) {
+			JOptionPane.showMessageDialog(this, "상품 불러오기 중 오류 발생 " + e.getMessage());
+		}
 		
 		currentQty = 1;
 		qtyValue.setText("1");
@@ -301,29 +313,29 @@ public class sh_ProductDetailPage extends JPanel {
 
 	    // 숫자 형식 확인
 	    if (!qtyText.matches("\\d+")) {
-	        return showErrorMessage("주문수량은 숫자만 입력 가능합니다.");
+	    	new NoticeAlert(mainFrame, "주문수량은 숫자만 입력 가능합니다.", "요청 실패").setVisible(true);
+	    	return false;
 	    }
 
 	    int qty = Integer.parseInt(qtyText);
 
 	    // 0 이상 확인
 	    if (qty <= 0) {
-	        return showErrorMessage("주문수량은 1개 이상이어야 합니다.");
+	    	new NoticeAlert(mainFrame, "주문수량은 1개 이상이어야 합니다." , "요청 실패").setVisible(true);
+	    	return false;
 	    }
 
 	    // 재고 수량 초과 여부
 	    if (qty > currentProduct.getStock_quantity()) {
+	    	
 	        String errorMsg = "현재 보유 재고보다 주문 수량이 많습니다.\n" +
 	                "최대 주문 가능 수량: " + currentProduct.getStock_quantity() + "개";
-	        return showErrorMessage(errorMsg);
+	        
+	        new NoticeAlert(mainFrame, errorMsg, "요청 실패").setVisible(true);
+	        return false;
 	    }
 
 	    return true;
-	}
-	
-	private boolean showErrorMessage(String msg) {
-		JOptionPane.showMessageDialog(this, msg);
-		return false;
 	}
 	
 	public void insertOrder() {

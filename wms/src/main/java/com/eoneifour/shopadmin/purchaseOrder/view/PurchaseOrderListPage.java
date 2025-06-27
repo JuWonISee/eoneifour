@@ -37,7 +37,7 @@ public class PurchaseOrderListPage extends AbstractTablePage implements Refresha
 
 	private PurchaseOrderDAO purchaseOrderDAO;
 	private List<PurchaseOrder> purchaseOrderList;
-	private String[] cols = { "발주번호", "상품명", "요청수량", "요청일자", "요청자", "처리상태 ", "처리일자"};
+	private String[] cols = { "발주번호", "상품명", "요청수량", "요청일자", "요청자", "처리상태", "처리일자"};
 
 	public PurchaseOrderListPage(ShopAdminMainFrame mainFrame) {
 		super(mainFrame);
@@ -156,7 +156,7 @@ public class PurchaseOrderListPage extends AbstractTablePage implements Refresha
 		for (int i = 0; i < purchaseOrderList.size(); i++) {
 			PurchaseOrder purchaseOrder = purchaseOrderList.get(i);
 			data[i] = new Object[] { purchaseOrder.getPurchase_order_id(), purchaseOrder.getProduct().getName(),
-					FieldUtil.commaFormat(purchaseOrder.getQuantity()), purchaseOrder.getRequest_date(), purchaseOrder.getUser().getName(),
+					FieldUtil.commaFormat(purchaseOrder.getQuantity())+" 개", purchaseOrder.getRequest_date(), purchaseOrder.getUser().getName(),
 					purchaseOrder.getStatus(), purchaseOrder.getComplete_date()};
 		}
 
@@ -165,6 +165,7 @@ public class PurchaseOrderListPage extends AbstractTablePage implements Refresha
 	
 	public void applyStyle() {
 		TableUtil.applyDefaultTableStyle(table);
+		TableUtil.applyConditionalTextRenderer(table, "처리상태", "입고완료", new Color(25, 118, 210));
 	}
 	
 	//검색 TextField에 placeholder 효과 주기 (forcus 이벤트 활용)
