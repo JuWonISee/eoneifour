@@ -1,9 +1,23 @@
 package com.eoneifour.wms.iobound.view;
 
-import java.awt.*;
-import java.awt.event.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.ArrayList;
 import java.util.List;
-import javax.swing.*;
+
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JTable;
+import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
 
 import com.eoneifour.common.frame.AbstractTablePage;
@@ -16,176 +30,178 @@ import com.eoneifour.wms.iobound.repository.OutBoundOrderDAO;
 
 public class OutBoundOrderPage extends AbstractTablePage implements Refreshable {
 
-    private MainFrame mainFrame;
-    private OutBoundOrderDAO outBoundOrderDAO;
-    private List<StockProduct> outboundList;
-    private String[] cols = { "ID", "상품명", "출고위치", "작업" };
-    private JTextField searchField;
+	private MainFrame mainFrame;
+	private OutBoundOrderDAO outBoundOrderDAO;
+	private List<StockProduct> outboundList;
+	private String[] cols = { "ID", "상품명", "출고위치", "작업" };
+	private JTextField searchField;
 
-    public OutBoundOrderPage(MainFrame mainFrame) {
-        super(mainFrame);
-        this.mainFrame = mainFrame;
-        this.outBoundOrderDAO = new OutBoundOrderDAO();
+	JPanel topPanel;
+	JPanel westPanel;
+	JLabel title;
+	JButton outboundAllBtn;
+	JButton searchBtn;
 
-        initTopPanel();
-        initTable();
-        applyTableStyle();
-    }
+	public OutBoundOrderPage(MainFrame mainFrame) {
+		super(mainFrame);
+		this.mainFrame = mainFrame;
+		this.outBoundOrderDAO = new OutBoundOrderDAO();
 
-    public void initTopPanel() {
-        JPanel topPanel = new JPanel(new BorderLayout());
-        JPanel westPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        westPanel.setOpaque(false);
+		initTopPanel();
+		initTable();
+		applyTableStyle();
+	}
 
-        JLabel title = new JLabel("출고 대기 물품");
-        title.setFont(new Font("맑은 고딕", Font.BOLD, 20));
-        westPanel.add(title);
+	public void initTopPanel() {
+		// 생성 영역
+		topPanel = new JPanel(new BorderLayout());
+		westPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		title = new JLabel("출고 대기 물품");
+		outboundAllBtn = new JButton("일괄 출고");
+		searchField = new JTextField("상품명을 입력하세요(공백 : 전체검색)");
+		searchBtn = ButtonUtil.createPrimaryButton("검색", 20, 100, 30);
 
-        JButton outboundAllBtn = new JButton("일괄 출고");
-        outboundAllBtn.setFont(new Font("맑은 고딕", Font.BOLD, 17));
-        outboundAllBtn.setBorderPainted(false);
-        outboundAllBtn.addActionListener(e -> {
-            int result = JOptionPane.showConfirmDialog(
-                null,
-                "모든 상품을 출고 처리하시겠습니까?",
-                "일괄 출고 확인",
-                JOptionPane.YES_NO_OPTION,
-                JOptionPane.QUESTION_MESSAGE
-            );
+		// 디자인 영역
+		title.setFont(new Font("맑은 고딕", Font.BOLD, 20));
+		outboundAllBtn.setFont(new Font("맑은 고딕", Font.BOLD, 17));
+		outboundAllBtn.setBorderPainted(false);
+		searchField.setPreferredSize(new Dimension(200, 30));
+		searchField.setForeground(Color.GRAY);
+		searchBtn.setBorderPainted(false);
+		westPanel.setOpaque(false);
+		westPanel.add(title);
 
-            if (result == JOptionPane.YES_OPTION) {
-                for (int i = 0; i < model.getRowCount(); i++) {
-                    int stockId = (int) model.getValueAt(i, 0);
-                    outBoundOrderDAO.updateStatus(stockId, 5); // 출고 중
-                }
-                JOptionPane.showMessageDialog(null, "일괄 출고가 완료되었습니다.");
-                refresh();
-            }
-        });
-        westPanel.add(outboundAllBtn);
-        topPanel.add(westPanel, BorderLayout.WEST);
-        
+		// 부착 영역
+		JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+		rightPanel.setOpaque(false);
+		rightPanel.add(searchField);
+		rightPanel.add(searchBtn);
+		westPanel.add(outboundAllBtn);
+		topPanel.add(westPanel, BorderLayout.WEST);
+		topPanel.add(rightPanel, BorderLayout.EAST);
+		add(topPanel, BorderLayout.NORTH);
 
-        searchField = new JTextField("상품명을 입력하세요(공백 : 전체검색)");
-        searchField.setPreferredSize(new Dimension(200, 30));
-        searchField.setForeground(Color.GRAY);
-        placeholder(); // placeholder 이벤트 설정
+		// 이벤트 영역
+		outboundAllBtn.addActionListener(e -> {
+			int result = JOptionPane.showConfirmDialog(null, "모든 상품을 출고 처리하시겠습니까?", "일괄 출고 확인",
+					JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
 
-        JButton searchBtn = ButtonUtil.createPrimaryButton("검색", 20, 100, 30);
-        searchBtn.setBorderPainted(false);
-        searchBtn.addActionListener(e -> {
-            String keyword = searchField.getText().trim();
-            List<StockProduct> searchList;
+			if (result == JOptionPane.YES_OPTION) {
+				for (int i = 0; i < model.getRowCount(); i++) {
+					int stockId = (int) model.getValueAt(i, 0);
+					outBoundOrderDAO.releaseProductById(stockId);
+				}
+				JOptionPane.showMessageDialog(null, "일괄 출고가 완료되었습니다.");
+				refresh();
+			}
+		});
 
-            if (!keyword.isEmpty() && !keyword.equals("상품명을 입력하세요(공백 : 전체검색)")) {
-                searchList = outBoundOrderDAO.searchByProductName(keyword, 4);
-                searchField.setText("");
-                placeholder();
-            } else {
-                searchList = outBoundOrderDAO.selectByStatus(4);
-                searchField.setText("");
-                placeholder();
-            }
+		placeholder(); // placeholder 이벤트 설정
 
-            if (searchList.isEmpty()) {
-                JOptionPane.showMessageDialog(null, "해당 제품이 없습니다.", "Info", JOptionPane.INFORMATION_MESSAGE);
-                searchField.setText("");
-                placeholder();
-                refresh();
-                return;
-            }
+		searchBtn.addActionListener(e -> {
+			String keyword = searchField.getText().trim();
+			List<StockProduct> searchList;
 
-            model.setDataVector(toTableData(searchList), cols);
-            applyStyle();
-        });
+			if (!keyword.isEmpty() && !keyword.equals("상품명을 입력하세요(공백 : 전체검색)")) {
+				searchList = outBoundOrderDAO.searchByProductName(keyword, 3);
+				searchField.setText(null);
+				placeholder();
+			} else {
+				// keyword가 비어있을 경우 전체 목록 다시 조회
+				searchList = outBoundOrderDAO.getOutBoundList();
+				searchField.setText(null);
+				placeholder();
+			}
 
-        searchField.addActionListener(e -> searchBtn.doClick());
+			if (searchList.isEmpty()) {
+				JOptionPane.showMessageDialog(null, "해당 제품이 없습니다.", "Info", JOptionPane.INFORMATION_MESSAGE);
+				searchField.setText(null);
+				placeholder();
+			}
 
-        JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        rightPanel.setOpaque(false);
-        rightPanel.add(searchField);
-        rightPanel.add(searchBtn);
-        topPanel.add(rightPanel, BorderLayout.EAST);
+			model.setDataVector(toTableData(searchList), cols);
+			applyStyle();
+		});
 
-        add(topPanel, BorderLayout.NORTH);
-    }
+		searchField.addActionListener(e -> searchBtn.doClick());
+	}
 
-    @Override
-    public void initTable() {
-        outboundList = outBoundOrderDAO.selectByStatus(4);
+	@Override
+	public void initTable() {
+		outboundList = outBoundOrderDAO.getOutBoundList();
 
-        model = new DefaultTableModel(toTableData(outboundList), cols) {
-            public boolean isCellEditable(int row, int column) {
-                return false;
-            }
-        };
+		model = new DefaultTableModel(toTableData(outboundList), cols) {
+			public boolean isCellEditable(int row, int column) {
+				return false;
+			}
+		};
 
-        table = new JTable(model);
-        table.setRowHeight(36);
-        table.getColumn("ID").setMinWidth(0);
-        table.getColumn("ID").setMaxWidth(0);
-        table.getColumn("ID").setPreferredWidth(0);
+		table = new JTable(model);
+		table.setRowHeight(36);
+		table.getColumn("ID").setMinWidth(0);
+		table.getColumn("ID").setMaxWidth(0);
+		table.getColumn("ID").setPreferredWidth(0);
 
-        table.addMouseListener(new MouseAdapter() {
-            public void mouseClicked(MouseEvent e) {
-                int row = table.rowAtPoint(e.getPoint());
-                int col = table.columnAtPoint(e.getPoint());
+		table.addMouseListener(new MouseAdapter() {
+			public void mouseClicked(MouseEvent e) {
+				int row = table.rowAtPoint(e.getPoint());
+				int col = table.columnAtPoint(e.getPoint());
 
-                if (col == table.getColumn("작업").getModelIndex()) {
-                    int id = (int) table.getValueAt(row, 0);
-                    outBoundOrderDAO.updateStatus(id, 5); // 출고 중으로 상태 변경
-                    JOptionPane.showMessageDialog(mainFrame, "출고지시가 완료되었습니다.", "Success!", JOptionPane.INFORMATION_MESSAGE);
-                    refresh();
-                }
-            }
-        });
-    }
+				if (col == table.getColumn("작업").getModelIndex()) {
+					int id = (int) table.getValueAt(row, 0);
 
-    private Object[][] toTableData(List<StockProduct> list) {
-        Object[][] data = new Object[list.size()][cols.length];
-        for (int i = 0; i < list.size(); i++) {
-            StockProduct sp = list.get(i);
-            String position = sp.getS() + "-" + sp.getZ() + "-" + sp.getX() + "-" + sp.getY();
+					List<StockProduct> list = new ArrayList<>();
+					outBoundOrderDAO.releaseProductById(id); // 출고 완료 상태 변경
 
-            data[i] = new Object[] {
-                sp.getStockprodutId(),
-                sp.getProductName(),
-                position, // 출고위치 표시
-                "출고"
-            };
-         }
-        return data;
-    }
+					JOptionPane.showMessageDialog(mainFrame, "출고지시가 완료되었습니다.", "Success!",
+							JOptionPane.INFORMATION_MESSAGE);
+					refresh();
+				}
+			}
+		});
+	}
 
-    private void applyStyle() {
-        TableUtil.applyDefaultTableStyle(table);
-        TableUtil.applyColorTextRenderer(table, "작업", new Color(25, 118, 210));
-        table.getColumn("ID").setMinWidth(0);
-        table.getColumn("ID").setMaxWidth(0);
-        table.getColumn("ID").setPreferredWidth(0);
-    }
+	private Object[][] toTableData(List<StockProduct> list) {
+		Object[][] data = new Object[list.size()][cols.length];
+		for (int i = 0; i < list.size(); i++) {
+			StockProduct sp = list.get(i);
+			String position = sp.getS() + "-" + sp.getZ() + "-" + sp.getX() + "-" + sp.getY();
 
-    public void refresh() {
-        outboundList = outBoundOrderDAO.selectByStatus(5);
-        model.setDataVector(toTableData(outboundList), cols);
-        applyStyle();
-    }
+			data[i] = new Object[] { sp.getStockProductId(), sp.getProductName(), position, // 출고위치 표시
+					"출고" };
+		}
+		return data;
+	}
 
-    public void placeholder() {
-        searchField.addFocusListener(new FocusAdapter() {
-            public void focusGained(FocusEvent e) {
-                if (searchField.getText().equals("상품명을 입력하세요(공백 : 전체검색)")) {
-                    searchField.setText("");
-                    searchField.setForeground(Color.BLACK);
-                }
-            }
+	private void applyStyle() {
+		TableUtil.applyDefaultTableStyle(table);
+		TableUtil.applyColorTextRenderer(table, "작업", new Color(25, 118, 210));
+		table.getColumn("ID").setMinWidth(0);
+		table.getColumn("ID").setMaxWidth(0);
+		table.getColumn("ID").setPreferredWidth(0);
+	}
 
-            public void focusLost(FocusEvent e) {
-                if (searchField.getText().isEmpty()) {
-                    searchField.setForeground(Color.GRAY);
-                    searchField.setText("상품명을 입력하세요(공백 : 전체검색)");
-                }
-            }
-        });
-    }
+	public void refresh() {
+		outboundList = outBoundOrderDAO.getOutBoundList();
+		model.setDataVector(toTableData(outboundList), cols);
+		applyStyle();
+	}
+
+	public void placeholder() {
+		searchField.addFocusListener(new FocusAdapter() {
+			public void focusGained(FocusEvent e) {
+				if (searchField.getText().equals("상품명을 입력하세요(공백 : 전체검색)")) {
+					searchField.setText("");
+					searchField.setForeground(Color.BLACK);
+				}
+			}
+
+			public void focusLost(FocusEvent e) {
+				if (searchField.getText().isEmpty()) {
+					searchField.setForeground(Color.GRAY);
+					searchField.setText("상품명을 입력하세요(공백 : 전체검색)");
+				}
+			}
+		});
+	}
 }
