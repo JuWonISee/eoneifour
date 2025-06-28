@@ -9,26 +9,26 @@ import java.util.List;
 
 import com.eoneifour.common.exception.UserException;
 import com.eoneifour.common.util.DBManager;
-import com.eoneifour.wms.iobound.model.StockProduct;
+import com.eoneifour.wms.iobound.model.selectAll;
 
 public class InBoundOrderDAO {
 	DBManager db = DBManager.getInstance();
 
-	// 페이지 새로고침시 '입고대기'인 제품 출력 (status 1 줘야함 );
-	public List<StockProduct> selectByStatus(int status) {
+	// 페이지 새로고침시 '입고대기'인 제품 출력 (status 0 줘야함 );
+	public List<selectAll> selectByStatus(int status) {
+		String sql = "SELECT stock_product_id, product_name, s, z, x, y FROM stock_product WHERE stock_status = ?";
+		List<selectAll> list = new ArrayList<>();
+
 		Connection conn = db.getConnection();
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
-
-		String sql = "SELECT stock_product_id, product_name, s, z, x, y FROM stock_product WHERE stock_status = ?";
-		List<StockProduct> list = new ArrayList<>();
 
 		try {
 			pstmt = conn.prepareStatement(sql);
 			pstmt.setInt(1, status);
 			rs = pstmt.executeQuery();
 			while (rs.next()) {
-				StockProduct stockProduct = new StockProduct();
+				selectAll stockProduct = new selectAll();
 				stockProduct.setStockProductId(rs.getInt("stock_product_id"));
 				stockProduct.setProductName(rs.getString("product_name"));
 				stockProduct.setS(rs.getInt("s"));
@@ -49,26 +49,27 @@ public class InBoundOrderDAO {
 	}
 
 	// 입고물품 키워드 검색
-	public List<StockProduct> searchByProductName(String keyword, int status) {
-		String sql = "SELECT * FROM stock_product WHERE stock_status = ? AND product_name LIKE ? ORDER BY stock_time ASC LIMIT 1";
+	public List<selectAll> searchByProductName(String keyword, int status) {
+		String sql = "SELECT stock_product_id, product_name, s, z, x, y  FROM stock_product WHERE stock_status = ? AND product_name LIKE ?";
+		List<selectAll> list = new ArrayList<>();
 
 		Connection conn = db.getConnection();
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 
 		try {
-			List<StockProduct> list = new ArrayList<>();
-			pstmt = conn.prepareStatement(sql.toString());
+			pstmt = conn.prepareStatement(sql);
 			pstmt.setInt(1, status);
-			pstmt.setString(2, "%" + keyword + "%"); // 와일드카드 검색
-
+			pstmt.setString(2, "%" +keyword+"%");
 			rs = pstmt.executeQuery();
-
 			while (rs.next()) {
-				StockProduct stockProduct = new StockProduct();
+				selectAll stockProduct = new selectAll();
 				stockProduct.setStockProductId(rs.getInt("stock_product_id"));
 				stockProduct.setProductName(rs.getString("product_name"));
-
+				stockProduct.setS(rs.getInt("s"));
+				stockProduct.setZ(rs.getInt("z"));
+				stockProduct.setX(rs.getInt("x"));
+				stockProduct.setY(rs.getInt("y"));
 				list.add(stockProduct);
 			}
 
@@ -83,7 +84,7 @@ public class InBoundOrderDAO {
 	}
 
 	// 하차 버튼 클릭시 insert
-	public void insertByList(List<StockProduct> stockProduct) throws UserException {
+	public void insertByList(List<selectAll> stockProduct) throws UserException {
 		Connection conn = db.getConnection();
 		ResultSet rs = null;
 		PreparedStatement pstmt = null;
@@ -97,7 +98,7 @@ public class InBoundOrderDAO {
 			conn.setAutoCommit(false);
 			pstmt = conn.prepareStatement(sql.toString());
 
-			for (StockProduct sp : stockProduct) {
+			for (selectAll sp : stockProduct) {
 				pstmt.setInt(1, sp.getProductId());
 				pstmt.setString(2, sp.getProductName());
 				pstmt.setString(3, sp.getProductBrand());
@@ -148,41 +149,106 @@ public class InBoundOrderDAO {
 
 	// 시간 순으로 정렬해서 포지션 리턴
 	public int[] getPositionByASC() {
-	    Connection conn = db.getConnection();
-	    PreparedStatement pstmt = null;
-	    ResultSet rs = null;
+		Connection conn = db.getConnection();
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
 
-	    String sql = "SELECT stock_product_id, s, z, x, y FROM stock_product WHERE stock_status = 1 ORDER BY stock_time ASC LIMIT 1";
+		String sql = "SELECT stock_product_id, s, z, x, y FROM stock_product WHERE stock_status = 1 ORDER BY stock_time ASC LIMIT 1";
 
-	    try {
-	        pstmt = conn.prepareStatement(sql);
-	        rs = pstmt.executeQuery();
+		try {
+			pstmt = conn.prepareStatement(sql);
+			rs = pstmt.executeQuery();
 
-	        if (rs.next()) {
-	            int stockProductId = rs.getInt("stock_product_id");
-	            int[] pos = new int[4];
-	            pos[0] = rs.getInt("s");
-	            pos[1] = rs.getInt("z");
-	            pos[2] = rs.getInt("x");
-	            pos[3] = rs.getInt("y");
+			if (rs.next()) {
+				int stockProductId = rs.getInt("stock_product_id");
+				int[] pos = new int[4];
+				pos[0] = rs.getInt("s");
+				pos[1] = rs.getInt("z");
+				pos[2] = rs.getInt("x");
+				pos[3] = rs.getInt("y");
 
-	            // 상태 업데이트 쿼리
-	            String updateSql = "UPDATE stock_product SET stock_status = 2 WHERE stock_product_id = ?";
-	            PreparedStatement updateStmt = conn.prepareStatement(updateSql);
-	            updateStmt.setInt(1, stockProductId);
-	            updateStmt.executeUpdate();
-	            updateStmt.close();
+				// 상태 업데이트 쿼리
+				String updateSql = "UPDATE stock_product SET stock_status = 2 WHERE stock_product_id = ?";
+				PreparedStatement updateStmt = conn.prepareStatement(updateSql);
+				updateStmt.setInt(1, stockProductId);
+				updateStmt.executeUpdate();
+				updateStmt.close();
 
-	            return pos;
-	        }
+				return pos;
+			}
 
-	        return new int[0];
+			return new int[0];
 
-	    } catch (SQLException e) {
-	        e.printStackTrace();
-	        throw new UserException("위치값 가져오기 또는 상태 변경 중 오류", e);
-	    } finally {
-	        db.release(pstmt, rs);
-	    }
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw new UserException("위치값 가져오기 또는 상태 변경 중 오류", e);
+		} finally {
+			db.release(pstmt, rs);
+		}
 	}
+
+	public List<selectAll> selectGroupedProductCount(int status) {
+		Connection conn = db.getConnection();
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		List<selectAll> list = new ArrayList<>();
+
+		String sql = "SELECT product_name, COUNT(*) AS total_quantity " + "FROM stock_product WHERE stock_status = ? "
+				+ "GROUP BY product_name";
+
+		try {
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1, status);
+			rs = pstmt.executeQuery();
+
+			while (rs.next()) {
+				selectAll sp = new selectAll();
+				sp.setProductName(rs.getString("product_name"));
+				sp.setQuantity(rs.getInt("total_quantity")); // 🔧 필드명 다르면 setTotalCount(...)로
+				list.add(sp);
+			}
+			return list;
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw new UserException("상품명 기준 그룹 수량 조회 실패", e);
+		} finally {
+			db.release(pstmt, rs);
+		}
+	}
+	
+	public List<selectAll> selectGroupedProductCount(String keyword, int status) {
+		Connection conn = db.getConnection();
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		List<selectAll> list = new ArrayList<>();
+
+		String sql = "SELECT product_name, COUNT(*) AS total_quantity " + "FROM stock_product WHERE stock_status = ? AND product_name LIKE ?"
+				+ "GROUP BY product_name";
+
+		try {
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1, status);
+			pstmt.setString(2, "%"+keyword+"%");
+			rs = pstmt.executeQuery();
+
+			while (rs.next()) {
+				selectAll sp = new selectAll();
+				sp.setProductName(rs.getString("product_name"));
+				sp.setQuantity(rs.getInt("total_quantity")); // 🔧 필드명 다르면 setTotalCount(...)로
+				list.add(sp);
+			}
+			return list;
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw new UserException("상품명 기준 그룹 수량 조회 실패", e);
+		} finally {
+			db.release(pstmt, rs);
+		}
+	}
+	
+	
+	
+
 }

@@ -9,24 +9,24 @@ import java.util.List;
 
 import com.eoneifour.common.exception.UserException;
 import com.eoneifour.common.util.DBManager;
-import com.eoneifour.wms.iobound.model.StockProduct;
+import com.eoneifour.wms.iobound.model.selectAll;
 
 public class OutBoundOrderDAO {
 	DBManager db = DBManager.getInstance();
 
-	public List<StockProduct> selectAll() {
+	public List<selectAll> selectAll() {
 		Connection conn = db.getConnection();
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 
 		String sql = "SELECT * FROM stock_prdouct WHERE stock_status = 3";
-		List<StockProduct> list = new ArrayList<>();
+		List<selectAll> list = new ArrayList<>();
 
 		try {
 			pstmt = conn.prepareStatement(sql);
 			rs = pstmt.executeQuery();
 			while (rs.next()) {
-				StockProduct stockProduct = new StockProduct();
+				selectAll stockProduct = new selectAll();
 				stockProduct.setStockProductId(0);
 				stockProduct.setProductId(0);
 				stockProduct.setProductName(sql);
@@ -47,8 +47,8 @@ public class OutBoundOrderDAO {
 		return list;
 	}
 
-	public List<StockProduct> getOutBoundList() {
-		List<StockProduct> list = new ArrayList<>();
+	public List<selectAll> getOutBoundList() {
+		List<selectAll> list = new ArrayList<>();
 		Connection conn = db.getConnection();
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
@@ -67,7 +67,50 @@ public class OutBoundOrderDAO {
 			rs = pstmt.executeQuery();
 
 			while (rs.next()) {
-				StockProduct sp = new StockProduct();
+				selectAll sp = new selectAll();
+				sp.setStockProductId(rs.getInt("stock_product_id"));
+				sp.setProductName(rs.getString("product_name"));
+				sp.setS(rs.getInt("s"));
+				sp.setZ(rs.getInt("z"));
+				sp.setX(rs.getInt("x"));
+				sp.setY(rs.getInt("y"));
+				sp.setStock_time(rs.getTimestamp("stock_time"));
+				list.add(sp);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw new UserException("출고 목록 조회 실패", e);
+		} finally {
+			db.release(pstmt, rs);
+		}
+
+		return list;
+	}
+	
+	public List<selectAll> searchByProductName(String keyword) {
+		List<selectAll> list = new ArrayList<>();
+		Connection conn = db.getConnection();
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+
+		try {
+			StringBuffer sql = new StringBuffer();
+			sql.append("WITH Filtered AS (")
+			   .append(" SELECT stock_product_id, product_name, s, z, x, y, stock_time, stock_status")
+			   .append(" FROM stock_product WHERE stock_status = 3), ")
+			   .append("Ranked AS (")
+			   .append(" SELECT *, ROW_NUMBER() OVER (PARTITION BY product_name ORDER BY stock_time ASC) AS rn,")
+			   .append(" SUM(1) OVER (PARTITION BY product_name) AS stock_3_count FROM Filtered) ")
+			   .append("SELECT stock_product_id, product_name, s, z, x, y, stock_time FROM Ranked ")
+			   .append("WHERE stock_3_count > 4 AND rn > 4 AND product_name LIKE ? ")
+			   .append("ORDER BY product_name, stock_time;");
+
+			pstmt = conn.prepareStatement(sql.toString());
+			pstmt.setString(1, "%" + keyword + "%");
+			rs = pstmt.executeQuery();
+
+			while (rs.next()) {
+				selectAll sp = new selectAll();
 				sp.setStockProductId(rs.getInt("stock_product_id"));
 				sp.setProductName(rs.getString("product_name"));
 				sp.setS(rs.getInt("s"));
@@ -162,44 +205,6 @@ public class OutBoundOrderDAO {
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
-		}
-	}
-
-	// 입고물품 키워드 검색
-	public List<StockProduct> searchByProductName(String keyword, int status) {
-		String sql = "SELECT * FROM stock_product WHERE stock_status = ? AND product_name LIKE ?";
-
-		Connection conn = db.getConnection();
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-
-		try {
-			List<StockProduct> list = new ArrayList<>();
-			pstmt = conn.prepareStatement(sql.toString());
-			pstmt.setInt(1, status);
-			pstmt.setString(2, "%" + keyword + "%"); // 와일드카드 검색
-
-			rs = pstmt.executeQuery();
-
-			while (rs.next()) {
-				StockProduct stockProduct = new StockProduct();
-				stockProduct.setStockProductId(rs.getInt("stock_product_id"));
-				stockProduct.setProductName(rs.getString("product_name"));
-				stockProduct.setS(rs.getInt("s"));
-				stockProduct.setZ(rs.getInt("z"));
-				stockProduct.setX(rs.getInt("x"));
-				stockProduct.setY(rs.getInt("y"));
-				stockProduct.setStock_time(rs.getTimestamp("stock_time"));
-				list.add(stockProduct);
-			}
-
-			return list;
-
-		} catch (SQLException e) {
-			e.printStackTrace();
-			throw new UserException(Integer.toString(e.getErrorCode()));
-		} finally {
-			db.release(pstmt, rs);
 		}
 	}
 

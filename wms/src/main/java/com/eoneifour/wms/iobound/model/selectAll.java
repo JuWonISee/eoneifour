@@ -2,7 +2,7 @@ package com.eoneifour.wms.iobound.model;
 
 import java.sql.Timestamp;
 
-public class StockProduct {
+public class selectAll {
 	private int stockProductId;
 	private int productId;
 	private String productName;
@@ -15,12 +15,22 @@ public class StockProduct {
 	private String detail;
 	private Timestamp stock_time;
 
+	private int quantity; // 또는 totalQuantity
+
+	public int getQuantity() {
+		return quantity;
+	}
+
+	public void setQuantity(int quantity) {
+		this.quantity = quantity;
+	}
+
 	public int getStockProductId() {
-	    return stockProductId;
+		return stockProductId;
 	}
 
 	public void setStockProductId(int stockProductId) {
-	    this.stockProductId = stockProductId;
+		this.stockProductId = stockProductId;
 	}
 
 	public int getProductId() {

@@ -4,6 +4,8 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Image;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -17,6 +19,7 @@ import javax.swing.JTextField;
 
 import com.eoneifour.common.frame.AbstractMainFrame;
 import com.eoneifour.common.util.ButtonUtil;
+import com.eoneifour.common.util.ImgUtil;
 import com.eoneifour.wms.auth.model.Admin;
 import com.eoneifour.wms.auth.repository.AdminDAO;
 import com.eoneifour.wms.home.view.MainFrame;
@@ -29,7 +32,8 @@ import com.eoneifour.wms.home.view.MainFrame;
 public class AdminRegistPage extends JPanel {
 
     private AbstractMainFrame mainFrame; // 메인 프레임 참조
-
+	private Image backgroundImage;
+	
     // 입력 필드들
     private JTextField emailField, nameField;
     private JPasswordField passwordField, confirmField;
@@ -50,7 +54,8 @@ public class AdminRegistPage extends JPanel {
 
         // 전체 패널 레이아웃 설정
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-        setBackground(Color.WHITE);
+		ImgUtil imgUtil = new ImgUtil();
+		backgroundImage = imgUtil.getImage("images/homeImage2.png", 1280, 800);
 
         // 중앙 입력 박스 설정
         JPanel box = new JPanel();
@@ -228,5 +233,13 @@ public class AdminRegistPage extends JPanel {
         confirmField.setText("");
         emailChecked = false;
     }
+    
+	@Override
+	protected void paintComponent(Graphics g) {
+		if(backgroundImage != null) {
+			// 패널 크기에 맞게 이미지 늘려 그리기
+			g.drawImage(backgroundImage, 0, 0, getWidth(), getHeight(), this);
+		}
+	}
 }
 

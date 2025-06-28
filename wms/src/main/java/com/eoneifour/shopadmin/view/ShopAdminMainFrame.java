@@ -177,7 +177,7 @@ public class ShopAdminMainFrame extends AbstractMainFrame {
 	        showContent(pageKey);
 	        ButtonUtil.applyMenuActiveStyle(menuButtons, btn);
 	    });
-//	    menuButtons.add(btn);
+	    menuButtons.add(btn);
 	    return btn;
 	}
 

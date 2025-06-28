@@ -10,12 +10,12 @@ import java.util.List;
 import com.eoneifour.common.exception.UserException;
 import com.eoneifour.common.util.DBManager;
 import com.eoneifour.wms.inboundrate.model.Rack;
-import com.eoneifour.wms.iobound.model.StockProduct;
+import com.eoneifour.wms.iobound.model.selectAll;
 
 public class StockProductDAO {
 	DBManager db = DBManager.getInstance();
 	
-	public StockProduct selectInfo(int s, int z, int x, int y) {
+	public selectAll selectInfo(int s, int z, int x, int y) {
 		Connection conn = db.getConnection();
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
@@ -28,7 +28,7 @@ public class StockProductDAO {
 		sql.append("    and x = ?          		");
 		sql.append("    and y = ?          		");
 		
-		StockProduct stockProduct = new StockProduct();
+		selectAll stockProduct = new selectAll();
 		
 		try {
 			pstmt = conn.prepareStatement(sql.toString());

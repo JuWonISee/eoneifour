@@ -5,7 +5,7 @@ import com.eoneifour.wms.home.view.MainFrame;
 import com.eoneifour.wms.inbound.repository.StockProductDAO;
 import com.eoneifour.wms.inboundrate.model.Rack;
 import com.eoneifour.wms.inboundrate.repository.RackDAO;
-import com.eoneifour.wms.iobound.model.StockProduct;
+import com.eoneifour.wms.iobound.model.selectAll;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -122,7 +122,7 @@ public class RackInboundStatusPage extends JPanel {
     }
 
     private void setCellInfoAreaText(int s, int z, int x, int y) {
-        StockProduct stockProduct = stockProductDAO.selectInfo(s, z, x, y);
+        selectAll stockProduct = stockProductDAO.selectInfo(s, z, x, y);
 
         if (stockProduct != null) {
             cellInfoArea.setText(
