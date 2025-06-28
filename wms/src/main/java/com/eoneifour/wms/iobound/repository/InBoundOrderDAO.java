@@ -29,7 +29,7 @@ public class InBoundOrderDAO {
 			rs = pstmt.executeQuery();
 			while (rs.next()) {
 				StockProduct stockProduct = new StockProduct();
-				stockProduct.setStockprodutId(rs.getInt("stock_product_id"));
+				stockProduct.setStockProductId(rs.getInt("stock_product_id"));
 				stockProduct.setProductName(rs.getString("product_name"));
 				stockProduct.setS(rs.getInt("s"));
 				stockProduct.setZ(rs.getInt("z"));
@@ -50,7 +50,7 @@ public class InBoundOrderDAO {
 
 	// 입고물품 키워드 검색
 	public List<StockProduct> searchByProductName(String keyword, int status) {
-		String sql = "SELECT * FROM stock_product WHERE stock_status = ? AND product_name LIKE ?";
+		String sql = "SELECT * FROM stock_product WHERE stock_status = ? AND product_name LIKE ? ORDER BY stock_time ASC LIMIT 1";
 
 		Connection conn = db.getConnection();
 		PreparedStatement pstmt = null;
@@ -66,7 +66,7 @@ public class InBoundOrderDAO {
 
 			while (rs.next()) {
 				StockProduct stockProduct = new StockProduct();
-				stockProduct.setStockprodutId(rs.getInt("stock_product_id"));
+				stockProduct.setStockProductId(rs.getInt("stock_product_id"));
 				stockProduct.setProductName(rs.getString("product_name"));
 
 				list.add(stockProduct);
@@ -152,7 +152,7 @@ public class InBoundOrderDAO {
 	    PreparedStatement pstmt = null;
 	    ResultSet rs = null;
 
-	    String sql = "SELECT stock_product_id, s, z, x, y FROM stock_product WHERE stock_status = 1 ORDER BY time ASC LIMIT 1";
+	    String sql = "SELECT stock_product_id, s, z, x, y FROM stock_product WHERE stock_status = 1 ORDER BY stock_time ASC LIMIT 1";
 
 	    try {
 	        pstmt = conn.prepareStatement(sql);

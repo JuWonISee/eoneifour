@@ -1,6 +1,9 @@
 package com.eoneifour.wms.iobound.repository;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,98 +12,211 @@ import com.eoneifour.common.util.DBManager;
 import com.eoneifour.wms.iobound.model.StockProduct;
 
 public class OutBoundOrderDAO {
+	DBManager db = DBManager.getInstance();
 
-    DBManager db = DBManager.getInstance();
+	public List<StockProduct> selectAll() {
+		Connection conn = db.getConnection();
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
 
-    // 출고대기(4) 상태 상품 조회
-    public List<StockProduct> selectByStatus(int status) {
-        List<StockProduct> list = new ArrayList<>();	
-        String sql = "SELECT stock_product_id, product_name, s, z, x, y FROM stock_product WHERE stock_status = ? ORDER BY time ASC";
+		String sql = "SELECT * FROM stock_prdouct WHERE stock_status = 3";
+		List<StockProduct> list = new ArrayList<>();
 
-        Connection conn = db.getConnection();
-        PreparedStatement pstmt = null;
-        ResultSet rs = null;
+		try {
+			pstmt = conn.prepareStatement(sql);
+			rs = pstmt.executeQuery();
+			while (rs.next()) {
+				StockProduct stockProduct = new StockProduct();
+				stockProduct.setStockProductId(0);
+				stockProduct.setProductId(0);
+				stockProduct.setProductName(sql);
+				stockProduct.setProductBrand(sql);
+				stockProduct.setS(0);
+				stockProduct.setZ(0);
+				stockProduct.setX(0);
+				stockProduct.setY(0);
+				stockProduct.setStockStatus(0);
+				stockProduct.setDetail(sql);
+				list.add(stockProduct);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			db.release(pstmt);
+		}
+		return list;
+	}
 
-        try {
-            pstmt = conn.prepareStatement(sql);
-            pstmt.setInt(1, status);
-            rs = pstmt.executeQuery();
+	public List<StockProduct> getOutBoundList() {
+		List<StockProduct> list = new ArrayList<>();
+		Connection conn = db.getConnection();
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
 
-            while (rs.next()) {
-                StockProduct sp = new StockProduct();
-                sp.setStockprodutId(rs.getInt("stock_product_id"));
-                sp.setProductName(rs.getString("product_name"));
-                sp.setS(rs.getInt("s"));
-                sp.setZ(rs.getInt("z"));
-                sp.setX(rs.getInt("x"));
-                sp.setY(rs.getInt("y"));
+		try {
+			StringBuffer sql = new StringBuffer();
+			sql.append("WITH Filtered AS (")
+					.append(" SELECT stock_product_id, product_name, s, z, x, y, stock_time, stock_status")
+					.append(" FROM stock_product WHERE stock_status = 3), ").append("Ranked AS (")
+					.append(" SELECT *, ROW_NUMBER() OVER (PARTITION BY product_name ORDER BY stock_time ASC) AS rn,")
+					.append(" SUM(1) OVER (PARTITION BY product_name) AS stock_3_count FROM Filtered) ")
+					.append("SELECT stock_product_id, product_name, s, z, x, y, stock_time FROM Ranked ")
+					.append("WHERE stock_3_count > 4 AND rn > 4 ").append("ORDER BY product_name, stock_time;");
 
-                list.add(sp);
-            }
+			pstmt = conn.prepareStatement(sql.toString());
+			rs = pstmt.executeQuery();
 
-        } catch (SQLException e) {
-            e.printStackTrace();
-            throw new UserException("출고 리스트 조회 실패", e);
-        } finally {
-            db.release(pstmt, rs);
-        }
+			while (rs.next()) {
+				StockProduct sp = new StockProduct();
+				sp.setStockProductId(rs.getInt("stock_product_id"));
+				sp.setProductName(rs.getString("product_name"));
+				sp.setS(rs.getInt("s"));
+				sp.setZ(rs.getInt("z"));
+				sp.setX(rs.getInt("x"));
+				sp.setY(rs.getInt("y"));
+				sp.setStock_time(rs.getTimestamp("stock_time"));
+				list.add(sp);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw new UserException("출고 목록 조회 실패", e);
+		} finally {
+			db.release(pstmt, rs);
+		}
 
-        return list;
-    }
+		return list;
+	}
 
-    // 상품명 + 출고대기 조건으로 검색
-    public List<StockProduct> searchByProductName(String keyword, int status) {
-        List<StockProduct> list = new ArrayList<>();
-        String sql = "SELECT stock_product_id, product_name, s, z, x, y FROM stock_product WHERE stock_status = ? AND product_name LIKE ?";
+	public void releaseProductById(int id) {
+		Connection conn = db.getConnection();
+		PreparedStatement selectStmt = null;
+		PreparedStatement insertStmt = null;
+		PreparedStatement deleteStmt = null;
+		PreparedStatement logStmt = null;
+		PreparedStatement quantityStmt = null;
+		ResultSet rs = null;
 
-        Connection conn = db.getConnection();
-        PreparedStatement pstmt = null;
-        ResultSet rs = null;
+		try {
+			conn.setAutoCommit(false); // 
 
-        try {
-            pstmt = conn.prepareStatement(sql);
-            pstmt.setInt(1, status);
-            pstmt.setString(2, "%" + keyword + "%");
-            rs = pstmt.executeQuery();
+			String selectSql = "SELECT product_id, product_name, product_brand, s, z, x, y, detail FROM stock_product WHERE stock_product_id = ?";
+			selectStmt = conn.prepareStatement(selectSql);
+			selectStmt.setInt(1, id);
+			rs = selectStmt.executeQuery();
 
-            while (rs.next()) {
-                StockProduct sp = new StockProduct();
-                sp.setStockprodutId(rs.getInt("stock_product_id"));
-                sp.setProductName(rs.getString("product_name"));
-                sp.setS(rs.getInt("s"));
-                sp.setZ(rs.getInt("z"));
-                sp.setX(rs.getInt("x"));
-                sp.setY(rs.getInt("y"));
+			if (rs.next()) {
+				String insertSql = "INSERT INTO release_product (product_id, product_name, product_brand, s, z, x, y, release_status, detail) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+				insertStmt = conn.prepareStatement(insertSql);
+				insertStmt.setInt(1, rs.getInt("product_id"));
+				insertStmt.setString(2, rs.getString("product_name"));
+				insertStmt.setString(3, rs.getString("product_brand"));
+				insertStmt.setInt(4, rs.getInt("s"));
+				insertStmt.setInt(5, rs.getInt("z"));
+				insertStmt.setInt(6, rs.getInt("x"));
+				insertStmt.setInt(7, rs.getInt("y"));
+				insertStmt.setInt(8, 4);
+				insertStmt.setString(9, rs.getString("detail"));
+				insertStmt.executeUpdate();
 
-                list.add(sp);
-            }
+				String deleteSql = "DELETE FROM stock_product WHERE stock_product_id = ?";
+				deleteStmt = conn.prepareStatement(deleteSql);
+				deleteStmt.setInt(1, id);
+				deleteStmt.executeUpdate();
 
-        } catch (SQLException e) {
-            e.printStackTrace();
-            throw new UserException("출고 검색 실패", e);
-        } finally {
-            db.release(pstmt, rs);
-        }
+				String logSql = "INSERT INTO release_log (product_id, product_name, product_brand, s, z, x, y, release_date, detail) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+				logStmt = conn.prepareStatement(logSql);
+				logStmt.setInt(1, rs.getInt("product_id"));
+				logStmt.setString(2, rs.getString("product_name"));
+				logStmt.setString(3, rs.getString("product_brand"));
+				logStmt.setInt(4, rs.getInt("s"));
+				logStmt.setInt(5, rs.getInt("z"));
+				logStmt.setInt(6, rs.getInt("x"));
+				logStmt.setInt(7, rs.getInt("y"));
+				logStmt.setObject(8, java.time.LocalDateTime.now());
+				logStmt.setString(9, rs.getString("detail"));
+				logStmt.executeUpdate();
 
-        return list;
-    }
+				String updateQuantitySql = "UPDATE shop_product SET stock_quantity = stock_quantity + 30 WHERE product_id = ?";
+				quantityStmt = conn.prepareStatement(updateQuantitySql);
+				quantityStmt.setInt(1, rs.getInt("product_id"));
+				quantityStmt.executeUpdate();
+			}
 
-    // 출고 상태 업데이트 (보통 5 = 출고 중 or 6 = 출고 완료)
-    public void updateStatus(int id, int statusNum) {
-        Connection conn = db.getConnection();
-        PreparedStatement pstmt = null;
+			conn.commit(); // ✅ 성공 시 커밋
+		} catch (SQLException e) {
+			try {
+				conn.rollback(); // ❗ 예외 발생 시 롤백
+			} catch (SQLException rollbackEx) {
+				rollbackEx.printStackTrace();
+			}
+			e.printStackTrace();
+			throw new UserException("출고 처리 중 오류 발생", e);
+		} finally {
+			db.release(selectStmt, rs);
+			db.release(insertStmt);
+			db.release(deleteStmt);
+			db.release(logStmt);
+			db.release(quantityStmt);
+			try {
+				conn.setAutoCommit(true); // 🧼 커넥션 자동 복구
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+	}
 
-        try {
-            String sql = "UPDATE stock_product SET stock_status = ? WHERE stock_product_id = ?";
-            pstmt = conn.prepareStatement(sql);
-            pstmt.setInt(1, statusNum);
-            pstmt.setInt(2, id);
-            pstmt.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-            throw new UserException("출고 상태 업데이트 실패", e);
-        } finally {
-            db.release(pstmt);
-        }
-    }
+	// 입고물품 키워드 검색
+	public List<StockProduct> searchByProductName(String keyword, int status) {
+		String sql = "SELECT * FROM stock_product WHERE stock_status = ? AND product_name LIKE ?";
+
+		Connection conn = db.getConnection();
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+
+		try {
+			List<StockProduct> list = new ArrayList<>();
+			pstmt = conn.prepareStatement(sql.toString());
+			pstmt.setInt(1, status);
+			pstmt.setString(2, "%" + keyword + "%"); // 와일드카드 검색
+
+			rs = pstmt.executeQuery();
+
+			while (rs.next()) {
+				StockProduct stockProduct = new StockProduct();
+				stockProduct.setStockProductId(rs.getInt("stock_product_id"));
+				stockProduct.setProductName(rs.getString("product_name"));
+				stockProduct.setS(rs.getInt("s"));
+				stockProduct.setZ(rs.getInt("z"));
+				stockProduct.setX(rs.getInt("x"));
+				stockProduct.setY(rs.getInt("y"));
+				stockProduct.setStock_time(rs.getTimestamp("stock_time"));
+				list.add(stockProduct);
+			}
+
+			return list;
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw new UserException(Integer.toString(e.getErrorCode()));
+		} finally {
+			db.release(pstmt, rs);
+		}
+	}
+
+	public void outbound(int id) {
+		String sql = "DELETE FROM stock_product WHERE stock_product_id = ?";
+
+		Connection conn = db.getConnection();
+		PreparedStatement pstmt = null;
+
+		try {
+			pstmt = conn.prepareStatement(sql.toString());
+			pstmt.setInt(1, id);
+
+			pstmt.executeUpdate();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
 }
