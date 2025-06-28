@@ -201,20 +201,17 @@ public class ProductUpdatePage extends JPanel {
 			}
 		});
 		
-		//수정버튼 이벤트 연결
-        if (updateBtn.getActionListeners().length == 0) {
-        	updateBtn.addActionListener(e->{
-	        	if (validateForm()) {
-	        		u_dialog = new UpdateModalDialog(mainFrame);
-	        		u_dialog.setVisible(true);
-	        		
-	        		if(u_dialog.isConfirmed()) {
-	        			updateProduct();
-	        		}
-	        		
-	        	}
-	        });
-        }
+		// 수정 버튼 이벤트 연결
+		if (updateBtn.getActionListeners().length == 0) {
+		    updateBtn.addActionListener(e -> {
+		        u_dialog = new UpdateModalDialog(mainFrame);
+		        u_dialog.setVisible(true);
+
+		        if (u_dialog.isConfirmed()) {
+		            updateProduct(); // 내부에서 validateForm 수행
+		        }
+		    });
+		}
 
 		// 목록 버튼 이벤트
 		listBtn.addActionListener(e -> {
@@ -296,7 +293,6 @@ public class ProductUpdatePage extends JPanel {
 	// 지정한 상품에 대한 정보 출력
 	public void setProduct(int productId) {
 		this.productId = productId;
-		System.out.println(productId);
 		loadProduct();
 	}
 	
@@ -354,6 +350,12 @@ public class ProductUpdatePage extends JPanel {
 	
 
 	public void updateProduct() {
+		
+	    // 유효성 검사 먼저 수행
+	    if (!validateForm()) {
+	        return; // 유효성 실패 시 메서드 종료
+	    }
+
 	    try {
 	        Product product = new Product();
 	        ProductImgDAO productImgDAO = new ProductImgDAO();
