@@ -17,7 +17,7 @@ public class DBManager {
             Class.forName("com.mysql.cj.jdbc.Driver");
             con = DriverManager.getConnection(PrivateConfig.URL, PrivateConfig.USER, PrivateConfig.PASS);
         } catch (ClassNotFoundException e) {
-            e.printStackTrace();          
+            e.printStackTrace();
         } catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -63,5 +63,17 @@ public class DBManager {
 		} catch (SQLException e) {
 			return false;
 		}
+    }
+    
+    /**
+     * 프로그램 종료 시 연결 해제
+     * @author 혜원
+     */
+    public void shutdown() {
+        try {
+            if (con != null && !con.isClosed()) con.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 }

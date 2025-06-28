@@ -14,7 +14,6 @@ import javax.swing.JPanel;
 import javax.swing.JTextArea;
 
 import com.eoneifour.common.util.ButtonUtil;
-import com.eoneifour.shop.view.ProductMenuPanel;
 import com.eoneifour.shop.view.ShopMainFrame;
 
 public class sh_OrderCompletePage extends JPanel{
@@ -65,7 +64,12 @@ public class sh_OrderCompletePage extends JPanel{
         JButton orderListBtn = ButtonUtil.createPrimaryButton("주문내역 보기", 14, 160, 40);
         JButton homeBtn = ButtonUtil.createDefaultButton("홈으로", 14, 120, 40);
         
-        orderListBtn.addActionListener(e->mainFrame.showPage("MY_ORDER_LIST", "MYPAGE_MENU"));
+        // 주문 완료 후 마이페이지-주문 내역으로 이동
+        orderListBtn.addActionListener(e-> {
+        	mainFrame.showPage("MY_ORDER_LIST", "MYPAGE_MENU");	
+        	mainFrame.mypageMenuPanel.updateMenuHighlight("MY_ORDER_LIST");
+        });
+        
         homeBtn.addActionListener(e->{
             mainFrame.showPage("SH_PRODUCT_LIST", "PRODUCT_MENU");
 
