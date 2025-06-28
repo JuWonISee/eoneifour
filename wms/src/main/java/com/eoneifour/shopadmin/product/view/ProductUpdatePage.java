@@ -169,7 +169,7 @@ public class ProductUpdatePage extends JPanel {
 		formPanel.add(Box.createVerticalStrut(18));
 
 		// 이미지 업로드 버튼 이벤트 연결 및 함수 호출
-		chooser = new JFileChooser("C:/");
+		chooser = new JFileChooser("src/main/resources/images");
 		chooser.setMultiSelectionEnabled(true); // 다중 선택 가능하도록 설정
 		imgBtn.addActionListener(e -> {
 			selectImg();
@@ -296,6 +296,7 @@ public class ProductUpdatePage extends JPanel {
 	// 지정한 상품에 대한 정보 출력
 	public void setProduct(int productId) {
 		this.productId = productId;
+		System.out.println(productId);
 		loadProduct();
 	}
 	
@@ -353,46 +354,47 @@ public class ProductUpdatePage extends JPanel {
 	
 
 	public void updateProduct() {
-		try {
-			Product product = new Product();
-			ProductImgDAO productImgDAO = new ProductImgDAO();
-			ProductImg productImg = new ProductImg();
+	    try {
+	        Product product = new Product();
+	        ProductImgDAO productImgDAO = new ProductImgDAO();
+	        ProductImg productImg = new ProductImg();
 
-			product.setProduct_id(productId);
-			product.setSub_category((SubCategory) cb_subcategory.getSelectedItem());
-			product.setName(productNameField.getText());
-			product.setBrand_name(brandField.getText());
-			product.setPrice(Integer.parseInt(priceField.getText()));
-			product.setDetail(detailField.getText());
-			
-			productDAO.updateProduct(product);
-			if(files != null && files.length >0) {
-				for (int i = 0; i < files.length; i++) {
-					File file = files[i]; 
-					productImg.setProduct(product); 
-					productImg.setFilename(file.getAbsolutePath()); 
-					
-					//update만 계속 돌게 되면 맨 마지막 파일만 남으므로
-					//0번째 index만 update , 그 이후는 insert
-					if(i==0) {
-						productImgDAO.updateProductImg(productImg);
-					}else {
-						productImgDAO.insertProductImg(productImg);
-					}
-					
-				}
-			}
-			
-			
-			clearForm();
-			new NoticeAlert(mainFrame, "수정이 완료되었습니다", "요청 성공").setVisible(true);
-			mainFrame.showContent("PRODUCT_LIST");
-			
-		} catch (UserException e) {
-			JOptionPane.showMessageDialog(this, e.getMessage());
-			e.printStackTrace();
-		}
+	        product.setProduct_id(productId);
+	        product.setSub_category((SubCategory) cb_subcategory.getSelectedItem());
+	        product.setName(productNameField.getText());
+	        product.setBrand_name(brandField.getText());
+	        product.setPrice(Integer.parseInt(priceField.getText()));
+	        product.setDetail(detailField.getText());
 
+	        productDAO.updateProduct(product);
+
+	        if (files != null && files.length > 0) {
+	            for (int i = 0; i < files.length; i++) {
+	                File file = files[i];
+
+	                productImg.setProduct(product);
+
+	                // 절대경로 대신 파일 이름만 추출 후 상대경로 붙임
+	                String fileName = file.getName();
+	                productImg.setFilename("images/" + fileName);
+
+	                // 0번째는 update, 이후는 insert
+	                if (i == 0) {
+	                    productImgDAO.updateProductImg(productImg);
+	                } else {
+	                    productImgDAO.insertProductImg(productImg);
+	                }
+	            }
+	        }
+
+	        clearForm();
+	        new NoticeAlert(mainFrame, "수정이 완료되었습니다", "요청 성공").setVisible(true);
+	        mainFrame.showContent("PRODUCT_LIST");
+
+	    } catch (UserException e) {
+	        JOptionPane.showMessageDialog(this, e.getMessage());
+	        e.printStackTrace();
+	    }
 	}
 	
 	private void clearForm() {
