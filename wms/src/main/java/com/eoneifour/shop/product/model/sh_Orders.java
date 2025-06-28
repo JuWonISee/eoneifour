@@ -3,6 +3,7 @@ package com.eoneifour.shop.product.model;
 import java.sql.Date;
 
 public class sh_Orders {
+	//ORDERS 모델
 	private int orders_id;
 	private Date order_date;
 	private int total_price;
@@ -10,6 +11,13 @@ public class sh_Orders {
 	private int user_id;
 	private String delivery_address;
 	private String delivery_address_detail;
+	
+	//ORDERITEM 모델 + orders_id 는 orders에서 보유
+	private int order_item_id;
+	private int quantity;
+	private int price;
+	private int product_id;  
+	private sh_Product product;
 	
 	public int getOrders_id() {
 		return orders_id;
@@ -53,6 +61,35 @@ public class sh_Orders {
 	public void setDelivery_address_detail(String delivery_address_detail) {
 		this.delivery_address_detail = delivery_address_detail;
 	}
-	
+	public int getOrder_item_id() {
+		return order_item_id;
+	}
+	public void setOrder_item_id(int order_item_id) {
+		this.order_item_id = order_item_id;
+	}
+	public int getQuantity() {
+		return quantity;
+	}
+	public void setQuantity(int quantity) {
+		this.quantity = quantity;
+	}
+	public int getPrice() {
+		return price;
+	}
+	public void setPrice(int price) {
+		this.price = price;
+	}
+	public int getProduct_id() {
+		return product_id;
+	}
+	public void setProduct_id(int product_id) {
+		this.product_id = product_id;
+	}
+	public sh_Product getProduct() {
+		return product;
+	}
+	public void setProduct(sh_Product product) {
+		this.product = product;
+	}	
 	
 }
