@@ -64,4 +64,16 @@ public class DBManager {
 			return false;
 		}
     }
+    
+    /**
+     * 프로그램 종료 시 연결 해제
+     * @author 혜원
+     */
+    public void shutdown() {
+        try {
+            if (con != null && !con.isClosed()) con.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 }

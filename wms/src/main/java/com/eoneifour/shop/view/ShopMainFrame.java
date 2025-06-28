@@ -5,6 +5,8 @@ import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -12,6 +14,7 @@ import javax.swing.JPanel;
 
 import com.eoneifour.common.frame.AbstractMainFrame;
 import com.eoneifour.common.util.ButtonUtil;
+import com.eoneifour.common.util.DBManager;
 import com.eoneifour.common.util.SessionUtil;
 import com.eoneifour.common.view.LoginPage;
 import com.eoneifour.shop.mypage.view.MyOrderDetailPage;
@@ -72,6 +75,14 @@ public class ShopMainFrame extends AbstractMainFrame {
         mypageMenuPanel = new MypageMenuPanel(this);
         
         initPages();
+        
+        // 커넥션 종료
+        addWindowListener(new WindowAdapter() {
+            public void windowClosing(WindowEvent e) {
+                DBManager.getInstance().shutdown();
+                System.exit(0);
+            }
+        });
     }
 
     // 메뉴/페이지 등록
