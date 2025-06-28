@@ -29,8 +29,10 @@ public class sh_ProductDAO {
 		StringBuffer sql = new StringBuffer();
 		sql.append("select product_id, t.name AS top_category_name, brand_name, p.name AS product_name, price, p.status, stock_quantity ");
 		sql.append(" from shop_top_category t , shop_sub_category s , shop_product p");
-		sql.append(" where t.top_category_id = s.top_category_id and");
-		sql.append(" s.sub_category_id = p.sub_category_id ");
+		sql.append(" where t.top_category_id = s.top_category_id ");
+		sql.append(" and s.sub_category_id = p.sub_category_id ");
+		sql.append(" and stock_quantity != 0 ");
+		sql.append(" and p.status != 1 ");
 		sql.append(" order by product_id desc");
 
 		try {
