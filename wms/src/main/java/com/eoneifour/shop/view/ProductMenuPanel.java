@@ -16,7 +16,7 @@ import com.eoneifour.shop.product.view.sh_ProductListPage;
 public class ProductMenuPanel extends JPanel {
 	private ShopMainFrame mainFrame;
 	private sh_ProductListPage sh_productListpage;
-	private List<JButton> menuButtons = new ArrayList<>();
+	public List<JButton> menuButtons = new ArrayList<>();
 	public JButton allBtn;
 	
 	public ProductMenuPanel(ShopMainFrame mainFrame) {

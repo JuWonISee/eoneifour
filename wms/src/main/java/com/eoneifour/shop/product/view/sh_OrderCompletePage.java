@@ -5,6 +5,7 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -73,9 +74,9 @@ public class sh_OrderCompletePage extends JPanel{
         homeBtn.addActionListener(e->{
             mainFrame.showPage("SH_PRODUCT_LIST", "PRODUCT_MENU");
 
-            // 버튼 스타일 적용
+            List<JButton> productButtons = mainFrame.productMenuPanel.menuButtons;
             JButton allBtn = mainFrame.productMenuPanel.getAllButton();
-            ButtonUtil.applyMenuActiveStyle(mainFrame.menuButtons, allBtn);
+            ButtonUtil.applyMenuActiveStyle(productButtons, allBtn);
 
             // 전체 상품 출력
             mainFrame.sh_productListPage.showAllProducts();
