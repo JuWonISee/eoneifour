@@ -20,7 +20,6 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
 import com.eoneifour.common.exception.UserException;
-import com.eoneifour.common.util.ButtonUtil;
 import com.eoneifour.common.util.FieldUtil;
 import com.eoneifour.common.util.SessionUtil;
 import com.eoneifour.shop.product.model.sh_OrderItem;

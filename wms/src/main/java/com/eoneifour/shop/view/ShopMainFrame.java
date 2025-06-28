@@ -45,6 +45,7 @@ public class ShopMainFrame extends AbstractMainFrame {
 	public sh_ProductDetailPage sh_productDetailPage;
 	public sh_OrderCompletePage sh_orderCompletePage;
 	
+	public MypageMenuPanel mypageMenuPanel;
 	public ProductMenuPanel productMenuPanel;
 
 	private JPanel rightWrapper;
@@ -68,6 +69,7 @@ public class ShopMainFrame extends AbstractMainFrame {
         sh_orderCompletePage = new sh_OrderCompletePage(this);
         
         productMenuPanel = new ProductMenuPanel(this);
+        mypageMenuPanel = new MypageMenuPanel(this);
         
         initPages();
     }
@@ -169,7 +171,12 @@ public class ShopMainFrame extends AbstractMainFrame {
         showContent(contentKey);
         ((CardLayout) menuCardPanel.getLayout()).show(menuCardPanel, menuKey);
         
-        if (menuChanged) updateHeaderButton();
+        if (menuChanged) {
+        	updateHeaderButton();
+        	if ("MYPAGE_MENU".equals(menuKey)) {
+        		mypageMenuPanel.updateMenuHighlight(contentKey);
+        	}
+        }
     }
 
 	@Override
