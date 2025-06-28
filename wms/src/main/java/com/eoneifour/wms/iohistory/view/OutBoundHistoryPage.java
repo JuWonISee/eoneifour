@@ -173,7 +173,7 @@ public class OutBoundHistoryPage extends AbstractTablePage implements Refreshabl
 		for (int i = 0; i < historyList.size(); i++) {
 			IoHistory h = historyList.get(i);
 			String pos = h.getS() + "-" + h.getZ() + "-" + h.getX() + "-" + h.getY();
-			data[i] = new Object[] { h.getStock_log_id(), h.getProduct_name(), h.getStock_date(), pos };
+			data[i] = new Object[] { h.getStock_log_id(), h.getProduct_name(), h.getRelease_date(), pos };
 		}
 		return data;
 	}

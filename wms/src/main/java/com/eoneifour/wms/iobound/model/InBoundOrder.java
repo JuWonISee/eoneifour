@@ -20,6 +20,15 @@ public class InBoundOrder {
 	private int requested_by;
 	private int product_id;
 	private Product product;
+	private String detail;
+
+	public String getDetail() {
+		return detail;
+	}
+
+	public void setDetail(String detail) {
+		this.detail = detail;
+	}
 
 	public int getQuantity() {
 		return quantity;

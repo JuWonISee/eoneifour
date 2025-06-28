@@ -16,6 +16,15 @@ public class PurchaseOrder {
 	private int reflect;
 	private Product product;
 	private User user;
+	private String detail;
+
+	public String getDetail() {
+		return detail;
+	}
+
+	public void setDetail(String detail) {
+		this.detail = detail;
+	}
 
 	public int getPurchase_order_id() {
 		return purchase_order_id;

@@ -10,6 +10,7 @@ import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.border.Border;
 
 /**
  * 버튼 공통 디자인 유틸 클래스
@@ -25,10 +26,12 @@ public class ButtonUtil {
 	public static final Color MENU_NORMAL = new Color(51, 51, 51);      // #333333 기본회색
 	public static final Color MENU_HOVER = new Color(13, 71, 161);      // #0D47A1 진한 파랑
 	public static final Color MENU_ACTIVE = new Color(0, 87, 255);    // #1976D2 파랑
+	public static final Color MENU_WHITE = Color.WHITE;
 
 	// 헤더 버튼 색상 상수
 	public static final Color HEADER_BG = new Color(231, 76, 60);  // 기본 빨간색
 	public static final Color HEADER_HOVER = new Color(192, 57, 43); // hover시 진한빨강
+	public static final Color HEADER_YELLOW = new Color(255, 255, 0); // hover시 진한빨강
     
     //기본 버튼 색상 상수
     public static final Color PRIMARY_COLOR = new Color(0, 104, 255);
@@ -98,6 +101,40 @@ public class ButtonUtil {
             }
         });
     }
+    
+    public static void styleWmsMenuButton(JButton btn) {
+    	
+    	Border fixedPadding = BorderFactory.createEmptyBorder(0, 10, 0, 10); // 예: 좌우 여백 고정
+    	btn.setBorder(fixedPadding); // 고정 여백 설정
+
+        // 기본 상태 설정
+        btn.setFocusPainted(false); // 포커스 테두리 제거
+        btn.setBorderPainted(false); // border 제거
+        btn.setContentAreaFilled(false); // 배경 투명
+        btn.setOpaque(false);
+        btn.setForeground(MENU_WHITE);
+        btn.setPreferredSize(new Dimension(160, 40));
+        btn.setCursor(new Cursor(Cursor.HAND_CURSOR)); // 마우스 손모양 표시
+        btn.setFont(new Font("맑은 고딕", Font.BOLD, 14)); // 폰트 설정
+        btn.putClientProperty("active", false); // 기본 상태는 비활성
+        
+        // 호버 시
+        btn.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                if (!(Boolean) btn.getClientProperty("active")) {
+                    btn.setForeground(HEADER_YELLOW); // hover 색상
+                }
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                if (!(Boolean) btn.getClientProperty("active")) {
+                    btn.setForeground(MENU_WHITE);
+                }
+            }
+        });
+    }
         
     // 기본 Default 버튼
     public static JButton createDefaultButton(String text, int fontSize, int width, int height) {
@@ -138,5 +175,19 @@ public class ButtonUtil {
         activeButton.putClientProperty("active", true);
         activeButton.setForeground(MENU_ACTIVE);
         activeButton.setFont(new Font("맑은 고딕", Font.BOLD, 16));
+    }
+    
+ // 선택된 메뉴 active 효과
+    public static void applyWmsMenuActiveStyle(List<JButton> menuButtons, JButton activeButton) {
+    	for (JButton btn : menuButtons) {
+            btn.putClientProperty("active", false);
+            btn.setForeground(MENU_WHITE);
+            btn.setFont(new Font("맑은 고딕", Font.BOLD, 14));
+            btn.setBorder(BorderFactory.createEmptyBorder());
+        }
+
+        activeButton.putClientProperty("active", true);
+        activeButton.setForeground(HEADER_YELLOW);
+        activeButton.setFont(new Font("맑은 고딕", Font.BOLD, 14));
     }
 }

@@ -6,7 +6,6 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Image;
-import java.util.Map;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -34,7 +33,7 @@ public class AdminLoginPage extends JPanel {
 
 	private MainFrame mainFrame; // 메인 프레임 참조 (로그인 후 페이지 전환 및 관리자 정보 갱신에 사용)
 	private Image backgroundImage;
-	
+
 	// 입력 필드 및 버튼
 	private JTextField emailField; // 이메일 입력 필드
 	private JPasswordField passwordField; // 비밀번호 입력 필드
@@ -49,7 +48,7 @@ public class AdminLoginPage extends JPanel {
 
 		// 레이아웃 설정
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-		
+
 		ImgUtil imgUtil = new ImgUtil();
 		backgroundImage = imgUtil.getImage("images/homeImage2.png", 1280, 800);
 
@@ -128,27 +127,24 @@ public class AdminLoginPage extends JPanel {
 		String pw = new String(passwordField.getPassword()); // 비밀번호 입력값 가져오기
 
 		Admin admin = adminDAO.login(email, pw); // DB에서 인증 시도
-		
 
 		if (admin != null) {
 			// 로그인 성공 시
 			JOptionPane.showMessageDialog(this, "로그인 성공" + admin.getName() + "님");
 
 			mainFrame.admin = admin; // 로그인 정보 저장
+			mainFrame.leftPanel.setVisible(true);
+//			mainFrame.activateAllSubMenus();
 			mainFrame.setAdminInfo(admin.getName() + "님 반갑습니다."); // 상단에 관리자 이름 표시
-			
 
 			// 비활성화 되어있는 메뉴 버튼들 활성화
 			for (JButton btn : mainFrame.menuButtons) {
 				btn.setEnabled(true);
 			}
-			
-			mainFrame.activateAllSubMenus(); // 딱 여기에서만 등록 & 표시
-			
+
 			mainFrame.menuPanel.setBackground(new Color(33, 33, 33));
 			mainFrame.menuPanel.setOpaque(true);
 			mainFrame.menuPanel.repaint();
-
 
 			mainFrame.adminEditPage.getAdminInfo(); // 수정 페이지에 관리자 정보 미리 설정
 
@@ -163,10 +159,10 @@ public class AdminLoginPage extends JPanel {
 			JOptionPane.showMessageDialog(this, "이메일 또는 비밀번호가 틀렸습니다.");
 		}
 	}
-	
+
 	@Override
 	protected void paintComponent(Graphics g) {
-		if(backgroundImage != null) {
+		if (backgroundImage != null) {
 			// 패널 크기에 맞게 이미지 늘려 그리기
 			g.drawImage(backgroundImage, 0, 0, getWidth(), getHeight(), this);
 		}
