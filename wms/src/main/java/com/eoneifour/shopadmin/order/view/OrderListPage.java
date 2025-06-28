@@ -87,7 +87,7 @@ public class OrderListPage extends AbstractTablePage implements Refreshable {
 			}
 
 			if (searchResults.isEmpty()) {
-				JOptionPane.showMessageDialog(null, "해당 제품이 없습니다.", "Info", JOptionPane.INFORMATION_MESSAGE);
+				JOptionPane.showMessageDialog(null, "해당 주문이 없습니다.", "Info", JOptionPane.INFORMATION_MESSAGE);
 				searchResults = orderDAO.getOrderList();
 				searchField.setText(null);
 				placeholder();
