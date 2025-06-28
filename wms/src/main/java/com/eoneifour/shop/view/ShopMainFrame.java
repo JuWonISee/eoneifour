@@ -101,7 +101,7 @@ public class ShopMainFrame extends AbstractMainFrame {
     	contentCardPanel.add(sh_orderCompletePage, "SH_ORDER_COMPLETE"); // 주문 완료 Alert 페이지 
     	
     	// 메뉴 등록
-    	menuCardPanel.add(new MypageMenuPanel(this), "MYPAGE_MENU");
+    	menuCardPanel.add(mypageMenuPanel, "MYPAGE_MENU");
     	menuCardPanel.add(productMenuPanel, "PRODUCT_MENU");
     	
     	// 초기 화면

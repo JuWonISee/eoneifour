@@ -10,6 +10,8 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -33,17 +35,14 @@ import com.eoneifour.wms.auth.view.AdminLoginPage;
 import com.eoneifour.wms.auth.view.AdminRegistPage;
 import com.eoneifour.wms.common.config.Config;
 import com.eoneifour.wms.inbound.view.RackInboundStatusPage;
-import com.eoneifour.wms.inboundrate.repository.RackDAO;
 import com.eoneifour.wms.inboundrate.view.AllInboundRatePage;
 import com.eoneifour.wms.inboundrate.view.StackerInboundRate;
 import com.eoneifour.wms.iobound.repository.InBoundOrderDAO;
 import com.eoneifour.wms.iobound.view.InboundOrderPage;
 import com.eoneifour.wms.iobound.view.OutBoundOrderPage;
 import com.eoneifour.wms.iobound.view.lookupProduct;
-
-import com.eoneifour.wms.monitoring.view.MonitoringPopup;
-
 import com.eoneifour.wms.monitoring.repository.ConveyorDAO;
+import com.eoneifour.wms.monitoring.view.MonitoringPopup;
 
 /**
  * - 사이드 메뉴바, 상단 메뉴바 구현. - 상태바에 DB 상태 표시. (추후 클래스 분리해야 함.)
@@ -59,12 +58,12 @@ public class MainFrame extends AbstractMainFrame {
 	ConveyorDAO cd;
 	InBoundOrderDAO io;
 	JPanel leftPane;
-	
-	
 
 	public Admin admin;
 	JLabel adminInfoLabel;
 
+	private List<JButton> mainMenuButtons; // @혜원
+	private List<JButton> subMenuButtons; // @혜원
 	public MainFrame() {
 		super("WMS 메인(관리자)"); // 타이틀 설정
 
@@ -228,8 +227,10 @@ public class MainFrame extends AbstractMainFrame {
 	// 카테고리별 메인 메뉴를 담을 패널
 	@Override
 	public JPanel createLeftPanel() {
+		mainMenuButtons = new ArrayList<>(); // @혜원
+		subMenuButtons =new ArrayList<>(); // @혜원
 		JPanel menuBar = createMainMenu();
-
+		
 		leftPanel = new JPanel(new BorderLayout());
 		leftPanel.setPreferredSize(new Dimension(150, 0)); // 사이드바 폭 설정
 		leftPanel.add(menuBar, BorderLayout.CENTER);
@@ -250,16 +251,24 @@ public class MainFrame extends AbstractMainFrame {
 			int index = i;
 			JButton button = new JButton(Config.MENUNAME[index]);
 			ButtonUtil.styleMenuButton(button);
-			button.addActionListener(e -> showTopMenu(Config.MENUKYES[index]));
+			mainMenuButtons.add(button); // 리스트에 버튼 추가 @혜원
+			button.addActionListener(e -> {
+				showTopMenu(Config.MENUKYES[index]);
+				ButtonUtil.applyMenuActiveStyle(mainMenuButtons, button); // 활성화  @혜원
+			});
 			button.setAlignmentX(JButton.CENTER_ALIGNMENT);
 			button.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40)); // 폭 자동 확장
 
 			menuPanel.add(Box.createVerticalStrut(20)); // 간격 추가
 			menuPanel.add(button);
-
+			
 		}
-		//
 		menuPanel.add(Box.createVerticalGlue()); // 아래 공간 채우기
+
+		if (!mainMenuButtons.isEmpty()) {
+		    ButtonUtil.applyMenuActiveStyle(mainMenuButtons, mainMenuButtons.get(0)); // "HOME" 활성화  @혜원
+		}
+		
 		return menuPanel;
 	};
 
@@ -277,9 +286,13 @@ public class MainFrame extends AbstractMainFrame {
 
 				JButton button = new JButton(Config.PAGENAME[i][j]);
 				ButtonUtil.styleMenuButton(button);
+				subMenuButtons.add(button);  // @ 혜원
 				final String PAGEKEY = Config.PAGEKEYS[i][j];
 
-				button.addActionListener(e -> showContent(PAGEKEY));
+				button.addActionListener(e -> {
+					showContent(PAGEKEY);
+					ButtonUtil.applyMenuActiveStyle(subMenuButtons, button); //  @ 혜원
+				});
 				button.setAlignmentX(JButton.CENTER_ALIGNMENT);
 				groupPanel.add(button);
 
@@ -297,6 +310,9 @@ public class MainFrame extends AbstractMainFrame {
 				}
 			}
 			menuCardPanel.add(groupPanel, groupKey);
+		}
+		if (!subMenuButtons.isEmpty()) { //@혜원
+		    ButtonUtil.applyMenuActiveStyle(subMenuButtons, subMenuButtons.get(0));
 		}
 
 	}
