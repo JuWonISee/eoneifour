@@ -181,7 +181,7 @@ public class ProductRegistPage extends JPanel {
         	isProductNameDuplicate  = productDAO.existByProductName(productNameField.getText());
         	if (isProductNameDuplicate ) {
         		isProductNameChecked  = false;
-        		showErrorMessage("상품명이 중복됐습니다. 다른 상품명을 입력해주세요.");
+        		new NoticeAlert(mainFrame, "상품명이 중복됐습니다. 다른 상품명을 입력해주세요.", "요청 실패").setVisible(true);
         	} else {
         		isProductNameChecked  = true;
         		JOptionPane.showMessageDialog(this, "사용 가능한 상품명입니다.");
@@ -405,12 +405,6 @@ public class ProductRegistPage extends JPanel {
 			e.printStackTrace();
 		}
 
-	}
-
-	//오류 메세지 출력
-	private boolean showErrorMessage(String msg) {
-		JOptionPane.showMessageDialog(this, msg);
-		return false;
 	}
 	
 	//등록 폼 초기화
