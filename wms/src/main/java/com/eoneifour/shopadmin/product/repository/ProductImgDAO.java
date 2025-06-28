@@ -71,35 +71,52 @@ public class ProductImgDAO {
 	}
 	
 	
-	public void updateProductImg(ProductImg productImg) throws UserException{
-		Connection con = null;
-		PreparedStatement pstmt = null;
-		
-	    con = dbManager.getConnection();
+	public void updateProductImg(ProductImg productImg) throws UserException {
+	    Connection con = null;
+	    PreparedStatement pstmt = null;
+	    ResultSet rs = null;
 
-	    StringBuffer sql = new StringBuffer();
-	    sql.append("UPDATE shop_product_img ");
-	    sql.append(" SET filename = ?");
-	    sql.append(" WHERE product_id = ?");
-		
-        try {
-			pstmt = con.prepareStatement(sql.toString());
-			pstmt.setString(1, productImg.getFilename());
-			pstmt.setInt(2, productImg.getProduct_img_id()); 
-			
-			int result = pstmt.executeUpdate();
-			
-			if (result == 0) {
-				throw new UserException("상품 이미지 수정에 실패했습니다");
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-			throw new UserException("상품이미지 수정 중 오류가 발생했습니다", e);
-		} finally {
-			dbManager.release(pstmt);
-		}
+	    try {
+	        con = dbManager.getConnection();
 
-		
+	        // 먼저, 해당 상품의 이미지가 존재하는지 확인
+	        String checkSql = "SELECT COUNT(*) FROM shop_product_img WHERE product_id = ?";
+	        pstmt = con.prepareStatement(checkSql);
+	        pstmt.setInt(1, productImg.getProduct().getProduct_id());
+	        rs = pstmt.executeQuery();
+
+	        int count = 0;
+	        if (rs.next()) {
+	            count = rs.getInt(1);
+	        }
+
+	        // 리소스 해제
+	        dbManager.release(pstmt, rs);
+
+	        if (count == 0) {
+	            // 이미지가 없으면 insert
+	            insertProductImg(productImg);
+
+	        } else {
+	            // 이미지가 있으면 update
+	            String updateSql = "UPDATE shop_product_img SET filename = ? WHERE product_id = ?";
+	            pstmt = con.prepareStatement(updateSql);
+	            pstmt.setString(1, productImg.getFilename());
+	            pstmt.setInt(2, productImg.getProduct().getProduct_id());
+
+	            int result = pstmt.executeUpdate();
+
+	            if (result == 0) {
+	                throw new UserException("상품 이미지 수정에 실패했습니다");
+	            }
+	        }
+
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	        throw new UserException("상품이미지 수정 중 오류가 발생했습니다", e);
+	    } finally {
+	        dbManager.release(pstmt, rs);
+	    }
 	}
 	
 

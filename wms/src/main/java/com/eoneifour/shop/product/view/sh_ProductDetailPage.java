@@ -22,11 +22,9 @@ import javax.swing.event.DocumentListener;
 import com.eoneifour.common.exception.UserException;
 import com.eoneifour.common.util.FieldUtil;
 import com.eoneifour.common.util.SessionUtil;
-import com.eoneifour.shop.product.model.sh_OrderItem;
 import com.eoneifour.shop.product.model.sh_Orders;
 import com.eoneifour.shop.product.model.sh_Product;
 import com.eoneifour.shop.product.model.sh_ProductImg;
-import com.eoneifour.shop.product.repository.sh_OrderItemDAO;
 import com.eoneifour.shop.product.repository.sh_OrdersDAO;
 import com.eoneifour.shop.product.repository.sh_ProductDAO;
 import com.eoneifour.shop.product.repository.sh_ProductImgDAO;
@@ -57,13 +55,11 @@ public class sh_ProductDetailPage extends JPanel {
 	private sh_ProductImg currentImg;
 	
 	private sh_OrdersDAO sh_ordersDAO;
-	private sh_OrderItemDAO sh_orderItemDAO;
 	
 	public sh_ProductDetailPage(ShopMainFrame mainFrame) {
 		this.mainFrame = mainFrame;
 		
 		this.sh_ordersDAO = new sh_OrdersDAO();
-		this.sh_orderItemDAO = new sh_OrderItemDAO();
 
 		setLayout(new GridLayout(1, 2)); // 좌우로 두 개의 영역 나눔
 		setLeftPanel();
@@ -179,6 +175,8 @@ public class sh_ProductDetailPage extends JPanel {
 		        totalLabel.setText("총 금액 " + FieldUtil.commaFormat(qty * currentProduct.getPrice()) + "원");
 		    }
 		});
+		
+
 
 		// 총 금액
 		totalLabel = new JLabel("총 금액 ");
@@ -191,32 +189,29 @@ public class sh_ProductDetailPage extends JPanel {
 		orderBtn.setBackground(new Color(0, 120, 215));
 		orderBtn.setForeground(Color.WHITE);
 		orderBtn.setFont(new Font("맑은 고딕", Font.BOLD, 14));
-		// 주문 버튼 이벤트 연결 (등록 이벤트 중복 방지)
+		// 주문 버튼 이벤트 연결 (등록 이벤트 중복 방지 , 수량 유효성 검사)
         if (orderBtn.getActionListeners().length == 0) {
         	orderBtn.addActionListener(e->{
         		if (validateqty()) {
-        	        String errorMsg = "정말 이 주소로 주문하시겠습니까?\n"
-        	        		  + SessionUtil.getLoginUser().getAddress() + " "
-        	        		  + SessionUtil.getLoginUser().getAddressDetail();
-        	        		  
+        	        String errorMsg = 
+      	        	"주소 : " 
+        	        +SessionUtil.getLoginUser().getAddress() + " " +SessionUtil.getLoginUser().getAddressDetail()
+        	        +"\n"
+        	        + "정말 이 주소로 주문하시겠습니까?";
+	  
         		    o_dialog = new OrderModalDialog(mainFrame, errorMsg);
         		    o_dialog.setVisible(true);
 
-        		    if (o_dialog.isConfirmed()) {
-        		        try {
-							insertOrder();
-							insertOrderItem();
-							mainFrame.showPage("SH_ORDER_COMPLETE", "PRODUCT_MENU");
-						} catch (UserException e1) {
-							JOptionPane.showMessageDialog(this, "상품 주문 중 오류 발생" + e1.getMessage());
-							e1.printStackTrace();
-						}
-        		    }
+        		    if (o_dialog.isConfirmed()) insertOrder();
         		}
 	        });
         }
 		
-
+		//주문수량을 키보드로 변경하였을 경우 , 엔터를 눌러도 주문 가능하도록 Key 이벤트 추가
+		qtyValue.addActionListener(e -> {
+			orderBtn.doClick(); //
+		});
+        
 		// 목록 버튼 생성 및 클릭 이벤트 연결
 		JButton backBtn = new JButton("목록"); 
 		backBtn.setBounds(210, 500, 120, 40);
@@ -332,6 +327,7 @@ public class sh_ProductDetailPage extends JPanel {
 	                "최대 주문 가능 수량: " + currentProduct.getStock_quantity() + "개";
 	        
 	        new NoticeAlert(mainFrame, errorMsg, "요청 실패").setVisible(true);
+	        qtyValue.setText(String.valueOf(currentProduct.getStock_quantity()));
 	        return false;
 	    }
 
@@ -339,48 +335,41 @@ public class sh_ProductDetailPage extends JPanel {
 	}
 	
 	public void insertOrder() {
-		try {
-			sh_Orders orders = new sh_Orders();
-			if (!validateqty()) return; 
-			int qty = Integer.parseInt(qtyValue.getText());
-			int userId = SessionUtil.getLoginUser().getUserId();
-			String address = SessionUtil.getLoginUser().getAddress();
-			String detailAddress = SessionUtil.getLoginUser().getAddressDetail();
-			
-			orders.setTotal_price(currentProduct.getPrice() * qty);
-			orders.setUser_id(userId);
-			orders.setDelivery_address(address);
-			orders.setDelivery_address_detail(detailAddress);
+	    try {
+	    	//유효성 검사가 반환시킨다면 insert 진행 X
+	        if (!validateqty()) return;
 
-			sh_ordersDAO.insertOrder(orders);
-			
-		} catch (UserException e) {
-			JOptionPane.showMessageDialog(this, e.getMessage());
-			e.printStackTrace();
-		}
-	}
-	
-	public void insertOrderItem() {
-		try {
-			sh_OrderItem orderItem = new sh_OrderItem();
-			if (!validateqty()) return; 
-			int quantity = Integer.parseInt(qtyValue.getText());
-			int price = currentProduct.getPrice();
-			int orders_id = sh_ordersDAO.selectRecentPk();
-			int product_id = currentProduct.getProduct_id();
-			
-			orderItem.setQuantity(quantity);
-			orderItem.setPrice(price);
-			orderItem.setOrders_id(orders_id);
-			orderItem.setProduct_id(product_id);
-			
-			sh_orderItemDAO.insertOrderItem(orderItem);
-			
-		} catch (UserException e) {
-			JOptionPane.showMessageDialog(this, e.getMessage());
-			e.printStackTrace();
-		}
-		
+	        int qty = Integer.parseInt(qtyValue.getText());
+	        int userId = SessionUtil.getLoginUser().getUserId();
+	        String address = SessionUtil.getLoginUser().getAddress();
+	        String detailAddress = SessionUtil.getLoginUser().getAddressDetail();
+
+	        // 주문 정보 세팅
+	        sh_Orders orders = new sh_Orders();
+	        orders.setTotal_price(currentProduct.getPrice() * qty);
+	        orders.setUser_id(userId);
+	        orders.setDelivery_address(address);
+	        orders.setDelivery_address_detail(detailAddress);
+
+	        // 주문 아이템 정보도 orders 객체에 함께 세팅
+	        orders.setProduct_id(currentProduct.getProduct_id());
+	        orders.setQuantity(qty);
+	        orders.setPrice(currentProduct.getPrice());
+
+	        // DAO 호출 (orders + order_item insert 둘 다 처리됨)
+	        sh_ordersDAO.insertOrder(orders, qty);
+
+	        // 스크롤 초기화 (UI 처리)
+	        if (mainFrame.sh_productListPage.scrollPane != null) {
+	            mainFrame.sh_productListPage.scrollPane.getVerticalScrollBar().setValue(0);
+	        }
+	        new NoticeAlert(mainFrame, "주문이 완료되었습니다.", "요청 성공").setVisible(true);
+	        mainFrame.showPage("SH_ORDER_COMPLETE", "PRODUCT_MENU");
+
+	    } catch (UserException e) {
+	        JOptionPane.showMessageDialog(this, e.getMessage());
+	        e.printStackTrace();
+	    }
 	}
 
 }

@@ -35,6 +35,7 @@ public class sh_ProductListPage extends JPanel{
 	private sh_ProductImgDAO sh_productImgDAO;
 	private sh_ProductDetailPage sh_productDetailPage;
 	private JPanel productContainer;
+	public JScrollPane scrollPane;
 	
 	public sh_ProductListPage(ShopMainFrame mainFrame){
 		this.mainFrame = mainFrame;
@@ -55,7 +56,7 @@ public class sh_ProductListPage extends JPanel{
         showAllProducts();
         
         // 스크롤 가능하게 설정
-        JScrollPane scrollPane = new JScrollPane(productContainer);
+        this.scrollPane = new JScrollPane(productContainer);
         scrollPane.setBorder(null);
         scrollPane.getVerticalScrollBar().setUnitIncrement(16);
 
@@ -113,7 +114,7 @@ public class sh_ProductListPage extends JPanel{
 	        imgLabel.setBorder(BorderFactory.createEmptyBorder(15, 0, 50, 0));
 			
 		} catch (UserException e) {
-			JOptionPane.showMessageDialog(this, "이미지 불러오기 중: " + e.getMessage());
+			JOptionPane.showMessageDialog(this, "이미지 불러오기 중 오류발생 " + e.getMessage());
 		}
         
 
@@ -157,13 +158,17 @@ public class sh_ProductListPage extends JPanel{
             //패널별 클릭 이벤트
             productPanel.addMouseListener(new MouseAdapter() {
                 public void mouseClicked(MouseEvent e) {
-                    System.out.println(productId);
                     mainFrame.sh_productDetailPage.setProduct(productId);
                     mainFrame.showPage("SH_PRODUCT_DETAIL", "PRODUCT_MENU");
                 }
             });
 
             productContainer.add(productPanel);
+        }
+        
+        // 스크롤 맨 위로 이동
+        if (scrollPane != null) {
+            scrollPane.getVerticalScrollBar().setValue(0);
         }
     }
 	

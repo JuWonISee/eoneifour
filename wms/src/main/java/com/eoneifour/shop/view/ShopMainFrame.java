@@ -5,6 +5,8 @@ import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -12,6 +14,7 @@ import javax.swing.JPanel;
 
 import com.eoneifour.common.frame.AbstractMainFrame;
 import com.eoneifour.common.util.ButtonUtil;
+import com.eoneifour.common.util.DBManager;
 import com.eoneifour.common.util.SessionUtil;
 import com.eoneifour.common.view.LoginPage;
 import com.eoneifour.shop.mypage.view.MyOrderDetailPage;
@@ -44,6 +47,9 @@ public class ShopMainFrame extends AbstractMainFrame {
 	public sh_ProductListPage sh_productListPage;
 	public sh_ProductDetailPage sh_productDetailPage;
 	public sh_OrderCompletePage sh_orderCompletePage;
+	
+	public MypageMenuPanel mypageMenuPanel;
+	public ProductMenuPanel productMenuPanel;
 
 	private JPanel rightWrapper;
 	public String currentMenuKey = "PRODUCT_MENU";
@@ -65,7 +71,18 @@ public class ShopMainFrame extends AbstractMainFrame {
         sh_productDetailPage = new sh_ProductDetailPage(this);
         sh_orderCompletePage = new sh_OrderCompletePage(this);
         
+        productMenuPanel = new ProductMenuPanel(this);
+        mypageMenuPanel = new MypageMenuPanel(this);
+        
         initPages();
+        
+        // 커넥션 종료
+        addWindowListener(new WindowAdapter() {
+            public void windowClosing(WindowEvent e) {
+                DBManager.getInstance().shutdown();
+                System.exit(0);
+            }
+        });
     }
 
     // 메뉴/페이지 등록
@@ -84,8 +101,8 @@ public class ShopMainFrame extends AbstractMainFrame {
     	contentCardPanel.add(sh_orderCompletePage, "SH_ORDER_COMPLETE"); // 주문 완료 Alert 페이지 
     	
     	// 메뉴 등록
-    	menuCardPanel.add(new MypageMenuPanel(this), "MYPAGE_MENU");
-    	menuCardPanel.add(new ProductMenuPanel(this), "PRODUCT_MENU");
+    	menuCardPanel.add(mypageMenuPanel, "MYPAGE_MENU");
+    	menuCardPanel.add(productMenuPanel, "PRODUCT_MENU");
     	
     	// 초기 화면
     	showPage("SH_PRODUCT_LIST", "PRODUCT_MENU");
@@ -165,7 +182,12 @@ public class ShopMainFrame extends AbstractMainFrame {
         showContent(contentKey);
         ((CardLayout) menuCardPanel.getLayout()).show(menuCardPanel, menuKey);
         
-        if (menuChanged) updateHeaderButton();
+        if (menuChanged) {
+        	updateHeaderButton();
+        	if ("MYPAGE_MENU".equals(menuKey)) {
+        		mypageMenuPanel.updateMenuHighlight(contentKey);
+        	}
+        }
     }
 
 	@Override

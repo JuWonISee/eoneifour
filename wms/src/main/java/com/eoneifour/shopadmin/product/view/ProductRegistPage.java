@@ -181,28 +181,22 @@ public class ProductRegistPage extends JPanel {
         	isProductNameDuplicate  = productDAO.existByProductName(productNameField.getText());
         	if (isProductNameDuplicate ) {
         		isProductNameChecked  = false;
-        		showErrorMessage("상품명이 중복됐습니다. 다른 상품명을 입력해주세요.");
+        		new NoticeAlert(mainFrame, "상품명이 중복됐습니다. 다른 상품명을 입력해주세요.", "요청 실패").setVisible(true);
         	} else {
         		isProductNameChecked  = true;
         		JOptionPane.showMessageDialog(this, "사용 가능한 상품명입니다.");
         	}
         });
-		// 등록 버튼 이벤트 연결 (등록 이벤트 중복 방지)
+     // 등록 버튼 이벤트 연결 (등록 이벤트 중복 방지)
         if (registBtn.getActionListeners().length == 0) {
-	        registBtn.addActionListener(e->{
-	        	if (validateForm()) {
-	        		r_dialog = new RegistModalDialog(mainFrame);
-	        		r_dialog.setVisible(true);
-	        		
-	        		if(r_dialog.isConfirmed()) {
-	        			registerProduct();
-	        			clearForm();
-	        			new NoticeAlert(mainFrame, "등록이 완료되었습니다", "요청 성공").setVisible(true);
-	        			mainFrame.showContent("PRODUCT_LIST");
-	        		}
-	        		
-	        	}
-	        });
+            registBtn.addActionListener(e -> {
+                r_dialog = new RegistModalDialog(mainFrame);
+                r_dialog.setVisible(true);
+
+                if (r_dialog.isConfirmed()) {
+                    registerProduct(); // 내부에서 validateForm 수행
+                }
+            });
         }
 		
 		//목록 버튼 이벤트
@@ -298,7 +292,7 @@ public class ProductRegistPage extends JPanel {
 	    }
 	}
 
-	// 유효성 검사 후 insert
+	// 유효성 검사
 	public boolean validateForm() {
 		
 		//가격에 0이상의 정수를 입력하였는지 검사
@@ -377,6 +371,12 @@ public class ProductRegistPage extends JPanel {
 
 	// DB 입력
 	public void registerProduct() {
+		
+	    // 유효성 검사 먼저 수행
+	    if (!validateForm()) {
+	        return; // 유효성 실패 시 메서드 종료
+	    }
+	    
 		try {
 			Product product = new Product();
 			ProductImg productImg = new ProductImg();
@@ -399,18 +399,16 @@ public class ProductRegistPage extends JPanel {
 			    productImg.setFilename("images/" + fileName); // DB에는 상대경로만 저장
 			    productImgDAO.insertProductImg(productImg);
 			}
+			
+			clearForm();
+			new NoticeAlert(mainFrame, "등록이 완료되었습니다", "요청 성공").setVisible(true);
+			mainFrame.showContent("PRODUCT_LIST");
 
 		} catch (UserException e) {
 			JOptionPane.showMessageDialog(this, e.getMessage());
 			e.printStackTrace();
 		}
 
-	}
-
-	//오류 메세지 출력
-	private boolean showErrorMessage(String msg) {
-		JOptionPane.showMessageDialog(this, msg);
-		return false;
 	}
 	
 	//등록 폼 초기화

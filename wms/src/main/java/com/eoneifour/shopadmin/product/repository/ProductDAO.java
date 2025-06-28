@@ -271,62 +271,92 @@ public class ProductDAO {
 
 	// 상품 상태 Togle (상품 상태가1이라면 0으로 , 0이라면 1로)
 	public void switchProductStatus(int productId) throws UserException {
-		Product product = new Product();
-		Connection con = null;
-		PreparedStatement pstmt = null;
-		int result = 0;
+	    Connection con = null;
+	    PreparedStatement pstmt = null;
+	    ResultSet rs = null;
 
-		con = dbManager.getConnection();
+	    con = dbManager.getConnection();
 
-		StringBuffer sql = new StringBuffer();
-		sql.append("UPDATE shop_product ");
-		sql.append("SET status = 1 - status ");
-		sql.append(" WHERE product_id = ?");
+	    try {
+	        // 1. 상품 존재 여부 확인
+	        String checkSql = "SELECT COUNT(*) FROM shop_product WHERE product_id = ?";
+	        pstmt = con.prepareStatement(checkSql);
+	        pstmt.setInt(1, productId);
+	        rs = pstmt.executeQuery();
 
-		try {
-			pstmt = con.prepareStatement(sql.toString());
-			pstmt.setInt(1, productId);
+	        if (rs.next()) {
+	            int count = rs.getInt(1);
+	            if (count == 0) {
+	                throw new UserException("해당 상품이 존재하지 않습니다.");
+	            }
+	        } else {
+	            throw new UserException("상품 조회 중 오류가 발생했습니다.");
+	        }
 
-			result = pstmt.executeUpdate();
-			if (result == 0) {
-				throw new UserException("상품이 삭제 되지 않았습니다");
-			}
+	        rs.close();
+	        pstmt.close();
 
-		} catch (SQLException e) {
-			e.printStackTrace();
-			throw new UserException("상품 삭제 중 오류가 발생했습니다.", e);
-		} finally {
-			dbManager.release(pstmt);
-		}
+	        // 2. 상품 상태 전환
+	        String updateSql = "UPDATE shop_product SET status = 1 - status WHERE product_id = ?";
+	        pstmt = con.prepareStatement(updateSql);
+	        pstmt.setInt(1, productId);
+	        int result = pstmt.executeUpdate();
+
+	        if (result == 0) {
+	            throw new UserException("상품 상태 변경에 실패했습니다.");
+	        }
+
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	        throw new UserException("상품 상태 변경 중 오류가 발생했습니다.", e);
+	    } finally {
+	        dbManager.release(pstmt, rs);
+	    }
 	}
 	
-	public void updateStock_quantity(Product product , int quantity) throws UserException{
-		Connection con = null;
-		PreparedStatement pstmt = null;
+	public void updateStock_quantity(Product product, int quantity) throws UserException {
+	    Connection con = null;
+	    PreparedStatement pstmt = null;
+	    ResultSet rs = null;
 
-		con = dbManager.getConnection();
+	    con = dbManager.getConnection();
 
-		StringBuffer sql = new StringBuffer();
-		sql.append("UPDATE shop_product ");
-		sql.append("SET stock_quantity = ? ");
-		sql.append(" WHERE product_id = ? ");
+	    try {
+	        // 1. 상품 존재 여부 확인
+	        String checkSql = "SELECT COUNT(*) FROM shop_product WHERE product_id = ?";
+	        pstmt = con.prepareStatement(checkSql);
+	        pstmt.setInt(1, product.getProduct_id());
+	        rs = pstmt.executeQuery();
 
-		try {
-			pstmt = con.prepareStatement(sql.toString());
-			pstmt.setInt(1, product.getStock_quantity() + quantity);
-			pstmt.setInt(2, product.getProduct_id());
+	        if (rs.next()) {
+	            int count = rs.getInt(1);
+	            if (count == 0) {
+	                throw new UserException("해당 상품이 존재하지 않습니다.");
+	            }
+	        } else {
+	            throw new UserException("상품 조회 중 오류가 발생했습니다.");
+	        }
 
-			int result = pstmt.executeUpdate();
-			if (result == 0) {
-				throw new UserException("재고 수정에 실패했습니다");
-			}
+	        rs.close();
+	        pstmt.close();
 
-		} catch (SQLException e) {
-			e.printStackTrace();
-			throw new UserException("재고 수정 중 오류가 발생했습니다.", e);
-		} finally {
-			dbManager.release(pstmt);
-		}
+	        // 2. 재고 수정
+	        String updateSql = "UPDATE shop_product SET stock_quantity = ? WHERE product_id = ?";
+	        pstmt = con.prepareStatement(updateSql);
+	        pstmt.setInt(1, product.getStock_quantity() + quantity);
+	        pstmt.setInt(2, product.getProduct_id());
+
+	        int result = pstmt.executeUpdate();
+	        if (result == 0) {
+	            throw new UserException("재고 수정에 실패했습니다.");
+	        }
+
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	        throw new UserException("재고 수정 중 오류가 발생했습니다.", e);
+	    } finally {
+	        dbManager.release(pstmt, rs);
+	    }
 	}
 	
 	public List<Product> searchByKeyword(String keyword){

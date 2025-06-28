@@ -10,6 +10,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -61,14 +62,20 @@ public class MainFrame extends AbstractMainFrame {
 	public InboundHistoryPage inboundHistoryPage;
 	public OutBoundHistoryPage outBoundHistoryPage;
 
+	public JPanel leftPane;
 	public Admin admin;
 	public JLabel adminInfoLabel;
 	public JLabel dbStatusLabel;
 	public DBManager db;
-	public ConveyorDAO cd;
-	public InBoundOrderDAO io;
 	public JPanel menuPanel;
+
+	public ConveyorDAO cd;
+
+	public InBoundOrderDAO io;
 	public Map<String, JPanel> subMenuMap = new HashMap<>();
+
+	private List<JButton> mainMenuButtons; // @혜원
+	private List<JButton> subMenuButtons; // @혜원
 
 	public MainFrame() {
 		super("WMS 메인(관리자)");
@@ -186,6 +193,10 @@ public class MainFrame extends AbstractMainFrame {
 
 	@Override
 	public JPanel createLeftPanel() {
+		mainMenuButtons = new ArrayList<>(); // @혜원
+		subMenuButtons = new ArrayList<>(); // @혜원
+		JPanel menuBar = createMainMenu();
+
 		leftPanel = new JPanel(new BorderLayout());
 		leftPanel.setOpaque(false);
 		leftPanel.setEnabled(false);
@@ -202,7 +213,15 @@ public class MainFrame extends AbstractMainFrame {
 
 		for (int i = 0; i < Config.MENUNAME.length; i++) {
 			int index = i;
-			JButton button = createMenuButton(Config.MENUNAME[index], Config.MENUKYES[index], menuButtons);
+			JButton button = new JButton(Config.MENUNAME[index]);
+			ButtonUtil.styleMenuButton(button);
+			mainMenuButtons.add(button); // 리스트에 버튼 추가 @혜원
+			button.addActionListener(e -> {
+				showTopMenu(Config.MENUKYES[index]);
+				ButtonUtil.applyMenuActiveStyle(mainMenuButtons, button); // 활성화 @혜원
+			});
+			button.setAlignmentX(JButton.CENTER_ALIGNMENT);
+			button.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40)); // 폭 자동 확장
 
 			button.setEnabled(admin != null);
 			button.setForeground(Color.WHITE);
@@ -211,8 +230,14 @@ public class MainFrame extends AbstractMainFrame {
 			menuPanel.add(Box.createVerticalStrut(20));
 			button.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
 			menuPanel.add(button);
+
 		}
-		menuPanel.add(Box.createVerticalGlue());
+		menuPanel.add(Box.createVerticalGlue()); // 아래 공간 채우기
+
+		if (!mainMenuButtons.isEmpty()) {
+			ButtonUtil.applyMenuActiveStyle(mainMenuButtons, mainMenuButtons.get(0)); // "HOME" 활성화 @혜원
+		}
+
 		return menuPanel;
 	}
 
@@ -229,10 +254,7 @@ public class MainFrame extends AbstractMainFrame {
 			for (int j = 0; j < Config.PAGENAME[i].length; j++) {
 				JButton button = new JButton(Config.PAGENAME[i][j]);
 				ButtonUtil.styleMenuButton(button);
-
-				button.setMaximumSize(new Dimension(180, 40));
-				button.setMinimumSize(new Dimension(160, 40));
-
+				subMenuButtons.add(button); // @ 혜원
 				final String PAGEKEY = Config.PAGEKEYS[i][j];
 				button.addActionListener(e -> {
 					if (admin == null) {
@@ -242,26 +264,32 @@ public class MainFrame extends AbstractMainFrame {
 					showContent(PAGEKEY);
 				});
 
+				button.addActionListener(e -> {
+					showContent(PAGEKEY);
+					ButtonUtil.applyMenuActiveStyle(subMenuButtons, button); // @ 혜원
+				});
+				button.setAlignmentX(JButton.CENTER_ALIGNMENT);
+				groupPanel.add(button);
+
+				/***
+				 * 팝업으로 띄울시 이곳에다가 추가
+				 */
+
 				if (PAGEKEY.equals("MONITORING")) {
 					button.addMouseListener(new MouseAdapter() {
 						@Override
 						public void mouseClicked(MouseEvent e) {
-							MonitoringPopup.showPopup(MainFrame.this);
+							MonitoringPopup.showPopup(MainFrame.this); // 팝업만 실행
 						}
 					});
 				}
-
-				groupPanel.add(button);
-
-				// 버튼 사이에 가로 간격 추가 (마지막 버튼 뒤에는 추가하지 않음)
-				if (j < Config.PAGENAME[i].length - 1) {
-					groupPanel.add(Box.createHorizontalStrut(10)); // 10픽셀 간격
-				}
 			}
-
-			groupPanel.setVisible(true);
-			subMenuMap.put(groupKey, groupPanel);
+			menuCardPanel.add(groupPanel, groupKey);
 		}
+		if (!subMenuButtons.isEmpty()) { // @혜원
+			ButtonUtil.applyMenuActiveStyle(subMenuButtons, subMenuButtons.get(0));
+		}
+
 	}
 
 	public void showTopMenu(String key) {
