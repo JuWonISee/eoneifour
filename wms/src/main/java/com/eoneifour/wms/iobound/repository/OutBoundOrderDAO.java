@@ -9,24 +9,24 @@ import java.util.List;
 
 import com.eoneifour.common.exception.UserException;
 import com.eoneifour.common.util.DBManager;
-import com.eoneifour.wms.iobound.model.selectAll;
+import com.eoneifour.wms.iobound.model.StockProduct;
 
 public class OutBoundOrderDAO {
 	DBManager db = DBManager.getInstance();
 
-	public List<selectAll> selectAll() {
+	public List<StockProduct> selectAll() {
 		Connection conn = db.getConnection();
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 
 		String sql = "SELECT * FROM stock_prdouct WHERE stock_status = 3";
-		List<selectAll> list = new ArrayList<>();
+		List<StockProduct> list = new ArrayList<>();
 
 		try {
 			pstmt = conn.prepareStatement(sql);
 			rs = pstmt.executeQuery();
 			while (rs.next()) {
-				selectAll stockProduct = new selectAll();
+				StockProduct stockProduct = new StockProduct();
 				stockProduct.setStockProductId(0);
 				stockProduct.setProductId(0);
 				stockProduct.setProductName(sql);
@@ -47,8 +47,8 @@ public class OutBoundOrderDAO {
 		return list;
 	}
 
-	public List<selectAll> getOutBoundList() {
-		List<selectAll> list = new ArrayList<>();
+	public List<StockProduct> getOutBoundList() {
+		List<StockProduct> list = new ArrayList<>();
 		Connection conn = db.getConnection();
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
@@ -67,14 +67,14 @@ public class OutBoundOrderDAO {
 			rs = pstmt.executeQuery();
 
 			while (rs.next()) {
-				selectAll sp = new selectAll();
+				StockProduct sp = new StockProduct();
 				sp.setStockProductId(rs.getInt("stock_product_id"));
 				sp.setProductName(rs.getString("product_name"));
 				sp.setS(rs.getInt("s"));
 				sp.setZ(rs.getInt("z"));
 				sp.setX(rs.getInt("x"));
 				sp.setY(rs.getInt("y"));
-				sp.setStock_time(rs.getTimestamp("stock_time"));
+				sp.setStock_time(rs.getDate("stock_time"));
 				list.add(sp);
 			}
 		} catch (SQLException e) {
@@ -87,8 +87,8 @@ public class OutBoundOrderDAO {
 		return list;
 	}
 	
-	public List<selectAll> searchByProductName(String keyword) {
-		List<selectAll> list = new ArrayList<>();
+	public List<StockProduct> searchByProductName(String keyword) {
+		List<StockProduct> list = new ArrayList<>();
 		Connection conn = db.getConnection();
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
@@ -110,14 +110,14 @@ public class OutBoundOrderDAO {
 			rs = pstmt.executeQuery();
 
 			while (rs.next()) {
-				selectAll sp = new selectAll();
+				StockProduct sp = new StockProduct();
 				sp.setStockProductId(rs.getInt("stock_product_id"));
 				sp.setProductName(rs.getString("product_name"));
 				sp.setS(rs.getInt("s"));
 				sp.setZ(rs.getInt("z"));
 				sp.setX(rs.getInt("x"));
 				sp.setY(rs.getInt("y"));
-				sp.setStock_time(rs.getTimestamp("stock_time"));
+				sp.setStock_time(rs.getDate("stock_time"));
 				list.add(sp);
 			}
 		} catch (SQLException e) {
@@ -137,6 +137,7 @@ public class OutBoundOrderDAO {
 		PreparedStatement deleteStmt = null;
 		PreparedStatement logStmt = null;
 		PreparedStatement quantityStmt = null;
+		PreparedStatement rackStmt = null;
 		ResultSet rs = null;
 
 		try {
@@ -183,6 +184,14 @@ public class OutBoundOrderDAO {
 				quantityStmt = conn.prepareStatement(updateQuantitySql);
 				quantityStmt.setInt(1, rs.getInt("product_id"));
 				quantityStmt.executeUpdate();
+				
+				String rackSql = "UPDATE rack SET rack_status = 0 WHERE s=? AND z=?  AND x = ? AND y =?";
+				rackStmt = conn.prepareStatement(rackSql);
+				rackStmt.setInt(1, rs.getInt("s"));
+				rackStmt.setInt(2, rs.getInt("z"));
+				rackStmt.setInt(3, rs.getInt("x"));
+				rackStmt.setInt(4, rs.getInt("y"));
+				rackStmt.executeUpdate();
 			}
 
 			conn.commit(); // ✅ 성공 시 커밋

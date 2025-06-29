@@ -27,15 +27,15 @@ import com.eoneifour.common.util.ButtonUtil;
 import com.eoneifour.common.util.Refreshable;
 import com.eoneifour.common.util.TableUtil;
 import com.eoneifour.wms.home.view.MainFrame;
-import com.eoneifour.wms.iobound.model.selectAll;
+import com.eoneifour.wms.iobound.model.StockProduct;
 import com.eoneifour.wms.iobound.repository.OutBoundOrderDAO;
 
 public class OutBoundOrderPage extends AbstractTablePage implements Refreshable {
 
 	private MainFrame mainFrame;
 	private OutBoundOrderDAO outBoundOrderDAO;
-	private List<selectAll> list;
-	private String[] cols = { "ID", "상품명", "출고위치", "작업" };
+	private List<StockProduct> list;
+	private String[] cols = { "ID", "제품명", "출고위치", "작업" };
 	private JTextField searchField;
 	
 	
@@ -50,7 +50,7 @@ public class OutBoundOrderPage extends AbstractTablePage implements Refreshable 
 		super(mainFrame);
 		this.mainFrame = mainFrame;
 		this.outBoundOrderDAO = new OutBoundOrderDAO();
-		keywordLabel = new JLabel("상품명");
+		keywordLabel = new JLabel("제품명");
 		
 		initTopPanel();
 		initTable();
@@ -76,11 +76,11 @@ public class OutBoundOrderPage extends AbstractTablePage implements Refreshable 
 		westPanel.add(outboundAllBtn);
 
 		// 검색 라벨 + 필드 + 버튼
-		keywordLabel = new JLabel("상품명");
+		keywordLabel = new JLabel("제품명");
 		keywordLabel.setFont(new Font("맑은 고딕", Font.BOLD, 18));
 		keywordLabel.setPreferredSize(new Dimension(60, 30));
 
-		searchField = new JTextField("상품명을 입력하세요");
+		searchField = new JTextField("제품명을 입력하세요");
 		searchField.setPreferredSize(new Dimension(200, 30));
 		searchField.setForeground(Color.GRAY);
 		searchField.setFont(new Font("맑은 고딕", Font.PLAIN, 16));
@@ -107,7 +107,7 @@ public class OutBoundOrderPage extends AbstractTablePage implements Refreshable 
 		outboundAllBtn.addActionListener(e -> {
 			int result = JOptionPane.showConfirmDialog(
 				null,
-				"모든 상품을 출고 처리하시겠습니까?",
+				"모든 제품을 출고 처리하시겠습니까?",
 				"일괄 출고 확인",
 				JOptionPane.YES_NO_OPTION,
 				JOptionPane.QUESTION_MESSAGE
@@ -148,7 +148,7 @@ public class OutBoundOrderPage extends AbstractTablePage implements Refreshable 
 				if (col == table.getColumn("작업").getModelIndex()) {
 					int id = (int) table.getValueAt(row, 0);
 
-					List<selectAll> list = new ArrayList<>();
+					List<StockProduct> list = new ArrayList<>();
 					outBoundOrderDAO.releaseProductById(id); // 출고 완료 상태 변경
 
 					JOptionPane.showMessageDialog(mainFrame, "출고지시가 완료되었습니다.", "Success!",
@@ -159,10 +159,10 @@ public class OutBoundOrderPage extends AbstractTablePage implements Refreshable 
 		});
 	}
 
-	private Object[][] toTableData(List<selectAll> list) {
+	private Object[][] toTableData(List<StockProduct> list) {
 		Object[][] data = new Object[list.size()][cols.length];
 		for (int i = 0; i < list.size(); i++) {
-			selectAll sp = list.get(i);
+			StockProduct sp = list.get(i);
 			String position = sp.getS() + "-" + sp.getZ() + "-" + sp.getX() + "-" + sp.getY();
 
 			data[i] = new Object[] { sp.getStockProductId(), sp.getProductName(), position, // 출고위치 표시
@@ -189,7 +189,7 @@ public class OutBoundOrderPage extends AbstractTablePage implements Refreshable 
 		searchField.addFocusListener(new FocusAdapter() {
 			@Override
 			public void focusGained(FocusEvent e) {
-				if (searchField.getText().equals("상품명을 입력하세요")) {
+				if (searchField.getText().equals("제품명을 입력하세요")) {
 					searchField.setText("");
 					searchField.setForeground(Color.BLACK);
 				}
@@ -199,7 +199,7 @@ public class OutBoundOrderPage extends AbstractTablePage implements Refreshable 
 			public void focusLost(FocusEvent e) {
 				if (searchField.getText().isEmpty()) {
 					searchField.setForeground(Color.GRAY);
-					searchField.setText("상품명을 입력하세요");
+					searchField.setText("제품명을 입력하세요");
 				}
 			}
 		});

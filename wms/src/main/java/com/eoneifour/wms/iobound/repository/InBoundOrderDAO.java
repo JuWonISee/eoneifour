@@ -9,15 +9,15 @@ import java.util.List;
 
 import com.eoneifour.common.exception.UserException;
 import com.eoneifour.common.util.DBManager;
-import com.eoneifour.wms.iobound.model.selectAll;
+import com.eoneifour.wms.iobound.model.StockProduct;
 
 public class InBoundOrderDAO {
 	DBManager db = DBManager.getInstance();
 
 	// 페이지 새로고침시 '입고대기'인 제품 출력 (status 0 줘야함 );
-	public List<selectAll> selectByStatus(int status) {
+	public List<StockProduct> selectByStatus(int status) {
 		String sql = "SELECT stock_product_id, product_name, s, z, x, y FROM stock_product WHERE stock_status = ?";
-		List<selectAll> list = new ArrayList<>();
+		List<StockProduct> list = new ArrayList<>();
 
 		Connection conn = db.getConnection();
 		PreparedStatement pstmt = null;
@@ -28,7 +28,7 @@ public class InBoundOrderDAO {
 			pstmt.setInt(1, status);
 			rs = pstmt.executeQuery();
 			while (rs.next()) {
-				selectAll stockProduct = new selectAll();
+				StockProduct stockProduct = new StockProduct();
 				stockProduct.setStockProductId(rs.getInt("stock_product_id"));
 				stockProduct.setProductName(rs.getString("product_name"));
 				stockProduct.setS(rs.getInt("s"));
@@ -49,9 +49,9 @@ public class InBoundOrderDAO {
 	}
 
 	// 입고물품 키워드 검색
-	public List<selectAll> searchByProductName(String keyword, int status) {
+	public List<StockProduct> searchByProductName(String keyword, int status) {
 		String sql = "SELECT stock_product_id, product_name, s, z, x, y  FROM stock_product WHERE stock_status = ? AND product_name LIKE ?";
-		List<selectAll> list = new ArrayList<>();
+		List<StockProduct> list = new ArrayList<>();
 
 		Connection conn = db.getConnection();
 		PreparedStatement pstmt = null;
@@ -63,7 +63,7 @@ public class InBoundOrderDAO {
 			pstmt.setString(2, "%" +keyword+"%");
 			rs = pstmt.executeQuery();
 			while (rs.next()) {
-				selectAll stockProduct = new selectAll();
+				StockProduct stockProduct = new StockProduct();
 				stockProduct.setStockProductId(rs.getInt("stock_product_id"));
 				stockProduct.setProductName(rs.getString("product_name"));
 				stockProduct.setS(rs.getInt("s"));
@@ -84,7 +84,7 @@ public class InBoundOrderDAO {
 	}
 
 	// 하차 버튼 클릭시 insert
-	public void insertByList(List<selectAll> stockProduct) throws UserException {
+	public void insertByList(List<StockProduct> stockProduct) throws UserException {
 		Connection conn = db.getConnection();
 		ResultSet rs = null;
 		PreparedStatement pstmt = null;
@@ -98,7 +98,7 @@ public class InBoundOrderDAO {
 			conn.setAutoCommit(false);
 			pstmt = conn.prepareStatement(sql.toString());
 
-			for (selectAll sp : stockProduct) {
+			for (StockProduct sp : stockProduct) {
 				pstmt.setInt(1, sp.getProductId());
 				pstmt.setString(2, sp.getProductName());
 				pstmt.setString(3, sp.getProductBrand());
@@ -187,11 +187,11 @@ public class InBoundOrderDAO {
 		}
 	}
 
-	public List<selectAll> selectGroupedProductCount(int status) {
+	public List<StockProduct> selectGroupedProductCount(int status) {
 		Connection conn = db.getConnection();
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
-		List<selectAll> list = new ArrayList<>();
+		List<StockProduct> list = new ArrayList<>();
 
 		String sql = "SELECT product_name, COUNT(*) AS total_quantity " + "FROM stock_product WHERE stock_status = ? "
 				+ "GROUP BY product_name";
@@ -202,7 +202,7 @@ public class InBoundOrderDAO {
 			rs = pstmt.executeQuery();
 
 			while (rs.next()) {
-				selectAll sp = new selectAll();
+				StockProduct sp = new StockProduct();
 				sp.setProductName(rs.getString("product_name"));
 				sp.setQuantity(rs.getInt("total_quantity")); // 🔧 필드명 다르면 setTotalCount(...)로
 				list.add(sp);
@@ -217,11 +217,11 @@ public class InBoundOrderDAO {
 		}
 	}
 	
-	public List<selectAll> selectGroupedProductCount(String keyword, int status) {
+	public List<StockProduct> selectGroupedProductCount(String keyword, int status) {
 		Connection conn = db.getConnection();
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
-		List<selectAll> list = new ArrayList<>();
+		List<StockProduct> list = new ArrayList<>();
 
 		String sql = "SELECT product_name, COUNT(*) AS total_quantity " + "FROM stock_product WHERE stock_status = ? AND product_name LIKE ?"
 				+ "GROUP BY product_name";
@@ -233,7 +233,7 @@ public class InBoundOrderDAO {
 			rs = pstmt.executeQuery();
 
 			while (rs.next()) {
-				selectAll sp = new selectAll();
+				StockProduct sp = new StockProduct();
 				sp.setProductName(rs.getString("product_name"));
 				sp.setQuantity(rs.getInt("total_quantity")); // 🔧 필드명 다르면 setTotalCount(...)로
 				list.add(sp);

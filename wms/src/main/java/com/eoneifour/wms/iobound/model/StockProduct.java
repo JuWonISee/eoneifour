@@ -1,8 +1,9 @@
 package com.eoneifour.wms.iobound.model;
 
+import java.sql.Date;
 import java.sql.Timestamp;
 
-public class selectAll {
+public class StockProduct {
 	private int stockProductId;
 	private int productId;
 	private String productName;
@@ -13,7 +14,7 @@ public class selectAll {
 	private int y;
 	private int stockStatus;
 	private String detail;
-	private Timestamp stock_time;
+	private Date stock_time;
 
 	private int quantity; // 또는 totalQuantity
 
@@ -105,11 +106,11 @@ public class selectAll {
 		this.detail = detail;
 	}
 
-	public Timestamp getStock_time() {
+	public Date getStock_time() {
 		return stock_time;
 	}
 
-	public void setStock_time(Timestamp stock_time) {
+	public void setStock_time(Date stock_time) {
 		this.stock_time = stock_time;
 	}
 }

@@ -38,6 +38,8 @@ import com.eoneifour.wms.auth.view.AdminEditPage;
 import com.eoneifour.wms.auth.view.AdminLoginPage;
 import com.eoneifour.wms.auth.view.AdminRegistPage;
 import com.eoneifour.wms.common.config.Config;
+import com.eoneifour.wms.inbound.view.InquireByDatePage;
+import com.eoneifour.wms.inbound.view.InquireByProductPage;
 import com.eoneifour.wms.inbound.view.RackInboundStatusPage;
 import com.eoneifour.wms.inboundrate.view.AllInboundRatePage;
 import com.eoneifour.wms.inboundrate.view.StackerInboundRatePage;
@@ -45,10 +47,12 @@ import com.eoneifour.wms.iobound.repository.InBoundOrderDAO;
 import com.eoneifour.wms.iobound.view.InboundOrderPage;
 import com.eoneifour.wms.iobound.view.LookupProductPage;
 import com.eoneifour.wms.iobound.view.OutBoundOrderPage;
-import com.eoneifour.wms.iohistory.view.InboundHistoryPage;
+import com.eoneifour.wms.iohistory.view.InBoundHistoryPage;
 import com.eoneifour.wms.iohistory.view.OutBoundHistoryPage;
 import com.eoneifour.wms.monitoring.repository.ConveyorDAO;
 import com.eoneifour.wms.monitoring.view.MonitoringPopup;
+import com.eoneifour.wms.outbound.view.OutInquireByDatePage;
+import com.eoneifour.wms.outbound.view.OutInquireByProductPage;
 
 public class MainFrame extends AbstractMainFrame {
 	public HomePage homePage;
@@ -56,15 +60,24 @@ public class MainFrame extends AbstractMainFrame {
 	public AdminRegistPage adminRegistPage;
 	public AdminEditPage adminEditPage;
 	public AdminDeletePage adminDeletePage;
+	
 	public InboundOrderPage inboundOrderPage;
 	public OutBoundOrderPage outBoundOrderPage;
+	
 	public LookupProductPage lookupProductPage;
 	public AllInboundRatePage allInboundRatePage;
 	public StackerInboundRatePage stackerInboundRatePage;
 	public RackInboundStatusPage rackInboundStatusPage;
-	public InboundHistoryPage inboundHistoryPage;
+	
+	
+	public InBoundHistoryPage inboundHistoryPage;
 	public OutBoundHistoryPage outBoundHistoryPage;
-
+	
+	public InquireByDatePage inquireByDatePage;
+	public InquireByProductPage inquireByProductPage;
+	public OutInquireByProductPage outInquireByProductPage;
+	public OutInquireByDatePage outInquireByDatePage;
+	
 	public JPanel leftPanl;
 	public Admin admin;
 	public JLabel adminInfoLabel;
@@ -125,8 +138,12 @@ public class MainFrame extends AbstractMainFrame {
 		allInboundRatePage = new AllInboundRatePage(this);
 		stackerInboundRatePage = new StackerInboundRatePage(this);
 		rackInboundStatusPage = new RackInboundStatusPage(this);
-		inboundHistoryPage = new InboundHistoryPage(this);
+		inboundHistoryPage = new InBoundHistoryPage(this);
 		outBoundHistoryPage = new OutBoundHistoryPage(this);
+		inquireByProductPage = new InquireByProductPage(this);
+		inquireByDatePage = new InquireByDatePage(this);
+		outInquireByDatePage = new OutInquireByDatePage(this);
+		outInquireByProductPage = new OutInquireByProductPage(this);
 
 		contentCardPanel.add(homePage, "HOME");
 		contentCardPanel.add(adminLoginPage, "ADMIN_LOGIN");
@@ -141,6 +158,10 @@ public class MainFrame extends AbstractMainFrame {
 		contentCardPanel.add(rackInboundStatusPage, "RACK_INBOUND_STATUS");
 		contentCardPanel.add(inboundHistoryPage, "INBOUND_HISTORY");
 		contentCardPanel.add(outBoundHistoryPage, "OUTBOUND_HISTORY");
+		contentCardPanel.add(inquireByProductPage, "INBOUND_BY_PRODUCT");
+		contentCardPanel.add(inquireByDatePage, "INBOUND_BY_DATE");
+		contentCardPanel.add(outInquireByDatePage, "OUTBOUND_BY_DATE");
+		contentCardPanel.add(outInquireByProductPage, "OUTBOUND_BY_PRODUCT");
 
 		contentCardPanel.revalidate();
 		contentCardPanel.repaint();
@@ -342,7 +363,6 @@ public class MainFrame extends AbstractMainFrame {
 			if (!subMenuButtons.isEmpty()) { //@혜원
 			    ButtonUtil.applyMenuActiveStyle(subMenuButtons, subMenuButtons.get(0));
 			}
-
 		}
 
 	// 메인 카테고리 버튼 클릭에 대응되는 세부 카테고리 패널

@@ -1,11 +1,22 @@
-package com.eoneifour.wms.iohistory.view;
+package com.eoneifour.wms.inbound.view;
 
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.sql.Date;
 import java.util.List;
-import javax.swing.*;
+
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JTable;
+import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
 
 import com.eoneifour.common.frame.AbstractTablePage;
@@ -13,29 +24,25 @@ import com.eoneifour.common.util.ButtonUtil;
 import com.eoneifour.common.util.Refreshable;
 import com.eoneifour.common.util.TableUtil;
 import com.eoneifour.wms.home.view.MainFrame;
-import com.eoneifour.wms.iohistory.model.IoHistory;
-import com.eoneifour.wms.iohistory.repository.IOHistoryDAO;
+import com.eoneifour.wms.inbound.repository.StockProductDAO;
+import com.eoneifour.wms.iobound.model.StockProduct;
 
-public class InboundHistoryPage extends AbstractTablePage implements Refreshable {
+public class InquireByDatePage extends AbstractTablePage implements Refreshable {
 	private MainFrame mainFrame;
-	private IOHistoryDAO ioHistoryDAO;
+	private StockProductDAO stockProductDAO;
+	List<StockProduct> list;
+	private String[] cols = { "ID", "입고일","제품명",  "입고위치" };
 
-	private List<IoHistory> list;
-	private String[] cols = { "ID", "제품명", "입고일", "입고위치" };
-
-	private JTextField searchField;
 	private JTextField startDateField;
 	private JTextField endDateField;
-	private JLabel keywordLabel;
 	private JLabel startLabel;
 	private JLabel endLabel;
 
-	public InboundHistoryPage(MainFrame mainFrame) {
+	public InquireByDatePage(MainFrame mainFrame) {
 		super(mainFrame);
 		this.mainFrame = mainFrame;
-		this.ioHistoryDAO = new IOHistoryDAO();
+		this.stockProductDAO = new StockProductDAO();
 
-		keywordLabel = new JLabel("상품명");
 		startLabel = new JLabel("날짜");
 		endLabel = new JLabel("~");
 
@@ -50,8 +57,8 @@ public class InboundHistoryPage extends AbstractTablePage implements Refreshable
 		topPanel.setBorder(BorderFactory.createEmptyBorder(15, 30, 0, 30));
 
 		// ▶ 서쪽: 타이틀 추가
-		JLabel title = new JLabel("입출고 로그");
-		title.setFont(new Font("맑은 고딕", Font.BOLD, 20));	
+		JLabel title = new JLabel("날짜별 입고상태");
+		title.setFont(new Font("맑은 고딕", Font.BOLD, 20));
 		title.setPreferredSize(new Dimension(200, 30));
 
 		JPanel westPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
@@ -59,9 +66,6 @@ public class InboundHistoryPage extends AbstractTablePage implements Refreshable
 		westPanel.add(title);
 
 		// ▶
-		searchField = new JTextField("상품명을 입력하세요");
-		searchField.setPreferredSize(new Dimension(160, 30));
-		searchField.setForeground(Color.GRAY);
 
 		startDateField = new JTextField("2000-01-01");
 		startDateField.setPreferredSize(new Dimension(130, 30));
@@ -71,23 +75,18 @@ public class InboundHistoryPage extends AbstractTablePage implements Refreshable
 		endDateField.setPreferredSize(new Dimension(130, 30));
 		endDateField.setForeground(Color.GRAY);
 
-		keywordLabel.setPreferredSize(new Dimension(60, 30));
 		startLabel.setPreferredSize(new Dimension(40, 30));
 		endLabel.setPreferredSize(new Dimension(15, 30));
 
-		keywordLabel.setFont(new Font("맑은 고딕", Font.BOLD, 18));
 		startLabel.setFont(new Font("맑은 고딕", Font.BOLD, 18));
 		endLabel.setFont(new Font("맑은 고딕", Font.BOLD, 18));
 
 		JButton searchBtn = ButtonUtil.createPrimaryButton("검색", 20, 100, 30);
 		searchBtn.setBorderPainted(false);
 		searchBtn.addActionListener(e -> performSearch());
-		searchField.addActionListener(e -> performSearch());
 
 		JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
 		rightPanel.setOpaque(false);
-		rightPanel.add(keywordLabel);
-		rightPanel.add(searchField);
 		rightPanel.add(startLabel);
 		rightPanel.add(startDateField);
 		rightPanel.add(endLabel);
@@ -101,7 +100,7 @@ public class InboundHistoryPage extends AbstractTablePage implements Refreshable
 	}
 
 	public void initTable() {
-		list = ioHistoryDAO.selectAll();
+		list = stockProductDAO.selectAll(false);
 		model = new DefaultTableModel(toTableData(list), cols) {
 			public boolean isCellEditable(int row, int column) {
 				return false;
@@ -112,7 +111,6 @@ public class InboundHistoryPage extends AbstractTablePage implements Refreshable
 	}
 
 	private void performSearch() {
-		String keyword = searchField.getText().trim();
 		String startStr = startDateField.getText().trim();
 		String endStr = endDateField.getText().trim();
 
@@ -131,17 +129,10 @@ public class InboundHistoryPage extends AbstractTablePage implements Refreshable
 			return;
 		}
 
-		if (keyword.equals("상품명을 입력하세요"))
-			keyword = "";
-
-		if (!keyword.isBlank() && startDate != null && endDate != null) {
-			list = ioHistoryDAO.searchByCondition(keyword, startDate, endDate);
-		} else if (!keyword.isBlank()) {
-			list = ioHistoryDAO.searchByCondition(keyword);
-		} else if (startDate != null && endDate != null) {
-			list = ioHistoryDAO.searchByCondition(startDate, endDate);
+		if (startDate != null && endDate != null) {
+			list = stockProductDAO.searchByCondition(startDate, endDate);
 		} else {
-			list = ioHistoryDAO.selectAll();
+			list = stockProductDAO.selectAll(false);
 		}
 
 		if (list.isEmpty()) {
@@ -157,14 +148,19 @@ public class InboundHistoryPage extends AbstractTablePage implements Refreshable
 				JOptionPane.INFORMATION_MESSAGE);
 	}
 
-	private Object[][] toTableData(List<IoHistory> historyList) {
-		if (historyList == null || historyList.isEmpty())
+	private Object[][] toTableData(List<StockProduct> list) {
+		if (list == null || list.isEmpty())
 			return new Object[0][cols.length];
-		Object[][] data = new Object[historyList.size()][cols.length];
-		for (int i = 0; i < historyList.size(); i++) {
-			IoHistory h = historyList.get(i);
+		Object[][] data = new Object[list.size()][cols.length];
+		for (int i = 0; i < list.size(); i++) {
+			StockProduct h = list.get(i);
 			String pos = h.getS() + "-" + h.getZ() + "-" + h.getX() + "-" + h.getY();
-			data[i] = new Object[] { h.getStock_log_id(), h.getProduct_name(), h.getStock_date(), pos };
+			data[i] = new Object[] {
+					h.getStockProductId(),
+					h.getStock_time(), 
+					h.getProductName(), 
+					pos 
+					};
 		}
 		return data;
 	}
@@ -178,28 +174,12 @@ public class InboundHistoryPage extends AbstractTablePage implements Refreshable
 
 	@Override
 	public void refresh() {
-		list = ioHistoryDAO.selectAll();
+		list = stockProductDAO.selectAll(false);
 		model.setDataVector(toTableData(list), cols);
 		applyStyle();
 	}
 
 	private void applyPlaceholderEvents() {
-		// 상품명
-		searchField.addFocusListener(new FocusAdapter() {
-			public void focusGained(FocusEvent e) {
-				if (searchField.getText().equals("상품명을 입력하세요")) {
-					searchField.setText("");
-					searchField.setForeground(Color.BLACK);
-				}
-			}
-
-			public void focusLost(FocusEvent e) {
-				if (searchField.getText().isEmpty()) {
-					searchField.setForeground(Color.GRAY);
-					searchField.setText("상품명을 입력하세요");
-				}
-			}
-		});
 
 		// 시작일
 		startDateField.addFocusListener(new FocusAdapter() {

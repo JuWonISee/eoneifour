@@ -117,11 +117,6 @@ public class AdminLoginPage extends JPanel {
 		add(Box.createVerticalGlue());
 	}
 
-	/**
-	 * 로그인 처리 메서드 - 이메일, 비밀번호 입력값을 검증하여 DB에서 로그인 시도 - 성공 시: 1. mainFrame에 로그인된 관리자
-	 * 정보 저장 2. 상단 바에 관리자 이름 표시 3. 관리자 수정 페이지(adminEditPage)에 현재 로그인된 정보 미리 채움 4.
-	 * 로그인 입력 필드 초기화 5. HOME 페이지로 전환 - 실패 시: 에러 메시지 출력
-	 */
 	private void doLogin() {
 		String email = emailField.getText().trim(); // 이메일 입력값 가져오기
 		String pw = new String(passwordField.getPassword()); // 비밀번호 입력값 가져오기

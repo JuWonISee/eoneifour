@@ -37,7 +37,7 @@ import com.eoneifour.shopadmin.purchaseOrder.repository.PurchaseOrderDAO;
 import com.eoneifour.wms.home.view.MainFrame;
 import com.eoneifour.wms.inboundrate.model.Rack;
 import com.eoneifour.wms.inboundrate.repository.RackDAO;
-import com.eoneifour.wms.iobound.model.selectAll;
+import com.eoneifour.wms.iobound.model.StockProduct;
 import com.eoneifour.wms.iobound.repository.InBoundOrderDAO;
 
 public class InboundOrderPage extends AbstractTablePage implements Refreshable {
@@ -49,10 +49,10 @@ public class InboundOrderPage extends AbstractTablePage implements Refreshable {
 
 	// 발주데이터를 창고 데이터로 파싱하기 위함
 	private List<PurchaseOrder> purchaseList;
-	public List<selectAll> waitingUnloadList;
+	public List<StockProduct> waitingUnloadList;
 
 	// 입고대기중인 리스트
-	private List<selectAll> stockOrderWaitList;
+	private List<StockProduct> stockOrderWaitList;
 
 	// 발주되어있는 리스트.
 
@@ -60,7 +60,7 @@ public class InboundOrderPage extends AbstractTablePage implements Refreshable {
 	private InBoundOrderDAO inBoundOrderDAO;
 	private RackDAO rackDAO;
 
-	private String[] cols = { "ID", "상품명", "입고위치", "작업" };
+	private String[] cols = { "ID", "제품명", "입고위치", "작업" };
 
 	private JTextField searchField;
 	private JLabel keywordLabel;
@@ -70,7 +70,7 @@ public class InboundOrderPage extends AbstractTablePage implements Refreshable {
 		this.inBoundOrderDAO = new InBoundOrderDAO();
 		this.purchaseOrderDAO = new PurchaseOrderDAO();
 		this.rackDAO = new RackDAO();
-		keywordLabel = new JLabel("상품명");
+		keywordLabel = new JLabel("제품명");
 
 		initTopPanel();
 		initTable();
@@ -99,14 +99,14 @@ public class InboundOrderPage extends AbstractTablePage implements Refreshable {
 		unloading = new JLabel("하차 대기 : 0건");
 		unloading.setFont(new Font("맑은 고딕", Font.BOLD, 15));
 
-		JButton unloadingBtn = ButtonUtil.createPrimaryButton("상품 하차", 20, 135, 30);
+		JButton unloadingBtn = ButtonUtil.createPrimaryButton("제품 하차", 20, 135, 30);
 		unloadingBtn.setBorderPainted(false);
 
-		keywordLabel = new JLabel("상품명");
+		keywordLabel = new JLabel("제품명");
 		keywordLabel.setPreferredSize(new Dimension(60, 30));
 		keywordLabel.setFont(new Font("맑은 고딕", Font.BOLD, 18));
 
-		searchField = new JTextField("상품명을 입력하세요");
+		searchField = new JTextField("제품명을 입력하세요");
 		searchField.setPreferredSize(new Dimension(200, 30));
 		searchField.setForeground(Color.GRAY);
 		searchField.setFont(new Font("맑은 고딕", Font.PLAIN, 16));
@@ -132,7 +132,7 @@ public class InboundOrderPage extends AbstractTablePage implements Refreshable {
 
 		// ▶ 이벤트 처리
 		inboundAllBtn.addActionListener(e -> {
-			int result = JOptionPane.showConfirmDialog(null, "모든 상품을 입고 처리하시겠습니까?", "일괄 입고 확인",
+			int result = JOptionPane.showConfirmDialog(null, "모든 제품을 입고 처리하시겠습니까?", "일괄 입고 확인",
 					JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
 			if (result == JOptionPane.YES_OPTION) {
 				for (int i = 0; i < model.getRowCount(); i++) {
@@ -157,7 +157,7 @@ public class InboundOrderPage extends AbstractTablePage implements Refreshable {
 
 		searchBtn.addActionListener(e -> {
 			String keyword = searchField.getText().trim();
-			if (keyword.isEmpty() || keyword.equals("상품명을 입력하세요")) {
+			if (keyword.isEmpty() || keyword.equals("제품명을 입력하세요")) {
 				stockOrderWaitList = inBoundOrderDAO.selectByStatus(0);
 			} else {
 				stockOrderWaitList = inBoundOrderDAO.searchByProductName(keyword, 0);
@@ -215,11 +215,11 @@ public class InboundOrderPage extends AbstractTablePage implements Refreshable {
 	}
 
 	// 테이블 데이터로 변환
-	private Object[][] toTableData(List<selectAll> stockProducts) {
+	private Object[][] toTableData(List<StockProduct> stockProducts) {
 		Object[][] data = new Object[stockProducts.size()][cols.length];
 
 		for (int i = 0; i < stockProducts.size(); i++) {
-			selectAll stock = stockProducts.get(i);
+			StockProduct stock = stockProducts.get(i);
 			String pos = stock.getS() + "-" + stock.getZ() + "-" + stock.getX() + "-" + stock.getY();
 			data[i] = new Object[] { stock.getStockProductId(), stock.getProductName(), pos, "입고" };
 		}
@@ -252,12 +252,12 @@ public class InboundOrderPage extends AbstractTablePage implements Refreshable {
 		purchaseList = purchaseOrderDAO.searchByStatus("창고도착");
 		waitingUnloadList = new ArrayList<>();
 
-		List<selectAll> stockList = new ArrayList<>();
+		List<StockProduct> stockList = new ArrayList<>();
 		int totalQuantity = 0;
 
 		for (PurchaseOrder po : purchaseList) {
 			for (int j = 0; j < po.getQuantity(); j++) {
-				selectAll stock = new selectAll();
+				StockProduct stock = new StockProduct();
 				stock.setProductId(po.getProduct().getProduct_id());
 				stock.setProductBrand(po.getProduct().getBrand_name());
 				stock.setProductName(po.getProduct().getName());
@@ -268,7 +268,7 @@ public class InboundOrderPage extends AbstractTablePage implements Refreshable {
 
 		totalQuantity = stockList.size();
 
-		// 위치 할당: 상품 수 만큼 랙 좌표 받아오기
+		// 위치 할당: 제품 수 만큼 랙 좌표 받아오기
 		List<String> positions = calcPosition(stockList);
 		if (positions.size() == 1 && positions.get(0).equals("-1")) {
 			JOptionPane.showMessageDialog(null, "랙 공간이 부족합니다. 관리자에게 문의하세요.");
@@ -277,7 +277,7 @@ public class InboundOrderPage extends AbstractTablePage implements Refreshable {
 
 		for (int i = 0; i < totalQuantity; i++) {
 			String[] pos = positions.get(i).split("-");
-			selectAll stock = stockList.get(i);
+			StockProduct stock = stockList.get(i);
 			stock.setS(Integer.parseInt(pos[0]));
 			stock.setZ(Integer.parseInt(pos[1]));
 			stock.setX(Integer.parseInt(pos[2]));
@@ -289,7 +289,7 @@ public class InboundOrderPage extends AbstractTablePage implements Refreshable {
 	}
 
 	// 창고 입고 위치 계산 로직
-	public List<String> calcPosition(List<selectAll> waitingUnloadList) {
+	public List<String> calcPosition(List<StockProduct> waitingUnloadList) {
 		List<Rack> emptyRacks = rackDAO.selectByRackStatus(0);
 		int needRack = waitingUnloadList.size();
 
@@ -348,7 +348,7 @@ public class InboundOrderPage extends AbstractTablePage implements Refreshable {
 		searchField.addFocusListener(new FocusAdapter() {
 			@Override
 			public void focusGained(FocusEvent e) {
-				if (searchField.getText().equals("상품명을 입력하세요")) {
+				if (searchField.getText().equals("제품명을 입력하세요")) {
 					searchField.setText("");
 					searchField.setForeground(Color.BLACK);
 				}
@@ -358,7 +358,7 @@ public class InboundOrderPage extends AbstractTablePage implements Refreshable {
 			public void focusLost(FocusEvent e) {
 				if (searchField.getText().isEmpty()) {
 					searchField.setForeground(Color.GRAY);
-					searchField.setText("상품명을 입력하세요");
+					searchField.setText("제품명을 입력하세요");
 				}
 			}
 		});
