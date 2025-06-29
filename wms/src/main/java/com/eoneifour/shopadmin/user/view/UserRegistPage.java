@@ -191,6 +191,7 @@ public class UserRegistPage extends JPanel {
         if (emailField.getText().trim().isEmpty()) return showErrorMessage("이메일을 입력해주세요.");
         if (!isEmailChecked) return showErrorMessage("이메일 중복확인을 해주세요.");
         if (isEmailDuplicate) return showErrorMessage("이메일이 중복됐습니다. 다른 이메일을 입력해주세요.");
+        if (!emailField.getText().trim().matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$")) return showErrorMessage("올바른 이메일 형식이 아닙니다.");
         String password = new String(passwordField.getPassword()).trim();
         String confirmPassword = new String(confirmPasswordField.getPassword()).trim();
         

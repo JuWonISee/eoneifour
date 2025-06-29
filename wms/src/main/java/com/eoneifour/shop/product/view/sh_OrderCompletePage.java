@@ -5,6 +5,7 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -14,7 +15,6 @@ import javax.swing.JPanel;
 import javax.swing.JTextArea;
 
 import com.eoneifour.common.util.ButtonUtil;
-import com.eoneifour.shop.view.ProductMenuPanel;
 import com.eoneifour.shop.view.ShopMainFrame;
 
 public class sh_OrderCompletePage extends JPanel{
@@ -65,13 +65,18 @@ public class sh_OrderCompletePage extends JPanel{
         JButton orderListBtn = ButtonUtil.createPrimaryButton("주문내역 보기", 14, 160, 40);
         JButton homeBtn = ButtonUtil.createDefaultButton("홈으로", 14, 120, 40);
         
-        orderListBtn.addActionListener(e->mainFrame.showPage("MY_ORDER_LIST", "MYPAGE_MENU"));
+        // 주문 완료 후 마이페이지-주문 내역으로 이동
+        orderListBtn.addActionListener(e-> {
+        	mainFrame.showPage("MY_ORDER_LIST", "MYPAGE_MENU");	
+        	mainFrame.mypageMenuPanel.updateMenuHighlight("MY_ORDER_LIST");
+        });
+        
         homeBtn.addActionListener(e->{
             mainFrame.showPage("SH_PRODUCT_LIST", "PRODUCT_MENU");
 
-            // 버튼 스타일 적용
+            List<JButton> productButtons = mainFrame.productMenuPanel.menuButtons;
             JButton allBtn = mainFrame.productMenuPanel.getAllButton();
-            ButtonUtil.applyMenuActiveStyle(mainFrame.menuButtons, allBtn);
+            ButtonUtil.applyMenuActiveStyle(productButtons, allBtn);
 
             // 전체 상품 출력
             mainFrame.sh_productListPage.showAllProducts();
