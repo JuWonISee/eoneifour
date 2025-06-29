@@ -14,165 +14,158 @@ import com.eoneifour.shop.product.model.sh_SubCategory;
 import com.eoneifour.shop.product.model.sh_TopCategory;
 
 public class sh_ProductDAO {
-	DBManager dbManager = DBManager.getInstance();
+    DBManager dbManager = DBManager.getInstance();
 
-	// 전체 상품 리스트 조회
-	public List getProductList() {
-		Connection con = null;
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
+    // 전체 상품 리스트 조회
+    public List<sh_Product> getProductList() {
+        List<sh_Product> productList = new ArrayList<>();
+        Connection con = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
 
-		List<sh_Product> list = new ArrayList<>();
+        StringBuffer sql = new StringBuffer();
+        sql.append("SELECT ");
+        sql.append("    p.product_id, p.name, p.price, p.status, ");
+        sql.append("    (SELECT filename FROM shop_product_img i ");
+        sql.append("     WHERE i.product_id = p.product_id LIMIT 1) AS filename ");
+        sql.append("FROM shop_product p ");
+        sql.append("ORDER BY p.product_id DESC");
 
-		con = dbManager.getConnection();
+        try {
+            con = dbManager.getConnection();
+            pstmt = con.prepareStatement(sql.toString());
+            rs = pstmt.executeQuery();
 
-		StringBuffer sql = new StringBuffer();
-		sql.append("select product_id, t.name AS top_category_name, brand_name, p.name AS product_name, price, p.status, stock_quantity ");
-		sql.append(" from shop_top_category t , shop_sub_category s , shop_product p");
-		sql.append(" where t.top_category_id = s.top_category_id ");
-		sql.append(" and s.sub_category_id = p.sub_category_id ");
-		sql.append(" and stock_quantity != 0 ");
-		sql.append(" and p.status != 1 ");
-		sql.append(" order by product_id desc");
+            while (rs.next()) {
+                sh_Product product = new sh_Product();
+                product.setProduct_id(rs.getInt("product_id"));
+                product.setName(rs.getString("name"));
+                product.setPrice(rs.getInt("price"));
+                product.setStatus(rs.getInt("status"));
+                product.setFilename(rs.getString("filename")); // 이미지 파일명 포함
 
-		try {
-			pstmt = con.prepareStatement(sql.toString());
-			rs = pstmt.executeQuery();
+                productList.add(product);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new UserException("상품 리스트 조회 중 오류 발생", e);
+        } finally {
+            dbManager.release(pstmt, rs);
+        }
 
-			while (rs.next()) {
-				sh_Product product = new sh_Product();
-				product.setProduct_id(rs.getInt("product_id"));
+        return productList;
+    }
 
-				sh_SubCategory subCategory = new sh_SubCategory();
-				sh_TopCategory topCategory = new sh_TopCategory();
-				topCategory.setName(rs.getString("top_category_name"));
-				subCategory.setTop_category(topCategory);
-				product.setSub_category(subCategory);
+    // Product_id 기준으로 상품 1건 조회
+    public sh_Product getProduct(int productId) {
+        sh_Product product = new sh_Product();
+        Connection con = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
 
-				product.setBrand_name(rs.getString("brand_name"));
-				product.setName(rs.getString("product_name"));
-				product.setPrice(rs.getInt("price"));
-				product.setStatus(rs.getInt("status"));
-				product.setStock_quantity(rs.getInt("stock_quantity"));
+        con = dbManager.getConnection();
+        StringBuffer sql = new StringBuffer();
+        sql.append("SELECT ");
+        sql.append("    p.product_id, t.top_category_id, t.name AS top_category_name, ");
+        sql.append("    s.sub_category_id, s.name AS sub_category_name, ");
+        sql.append("    p.brand_name, p.name AS product_name, p.price, p.detail, p.stock_quantity, ");
+        sql.append("    (SELECT filename FROM shop_product_img i WHERE i.product_id = p.product_id LIMIT 1) AS filename ");
+        sql.append("FROM shop_product p ");
+        sql.append("JOIN shop_sub_category s ON p.sub_category_id = s.sub_category_id ");
+        sql.append("JOIN shop_top_category t ON s.top_category_id = t.top_category_id ");
+        sql.append("WHERE p.product_id = ?");
 
-				list.add(product);
-			}
-			return list;
-		} catch (SQLException e) {
-			e.printStackTrace();
-			throw new UserException("상품 목록 조회 중 오류 발생", e);
-		} finally {
-			dbManager.release(pstmt, rs);
-		}
+        try {
+            pstmt = con.prepareStatement(sql.toString());
+            pstmt.setInt(1, productId);
+            rs = pstmt.executeQuery();
 
-	}
+            if (rs.next()) {
+                product.setProduct_id(rs.getInt("product_id"));
+                product.setBrand_name(rs.getString("brand_name"));
+                product.setName(rs.getString("product_name"));
+                product.setPrice(rs.getInt("price"));
+                product.setDetail(rs.getString("detail"));
+                product.setStock_quantity(rs.getInt("stock_quantity"));
+                product.setFilename(rs.getString("filename")); // 이미지 파일명 추가
 
-	// Product_id 기준으로 상품 1건 조회
-	public sh_Product getProduct(int productId) {
-		sh_Product product = new sh_Product();
-		Connection con = null;
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
+                sh_TopCategory topCategory = new sh_TopCategory();
+                topCategory.setTop_category_id(rs.getInt("top_category_id"));
+                topCategory.setName(rs.getString("top_category_name"));
 
-		con = dbManager.getConnection();
-		StringBuffer sql = new StringBuffer();
-		sql.append("select ");
-		sql.append(" p.product_id, t.top_category_id, t.name AS top_category_name");
-		sql.append(" , s.sub_category_id, s.name AS sub_category_name, ");
-		sql.append(" p.brand_name, p.name AS product_name, p.price, p.detail, p.stock_quantity");
-		sql.append(" from shop_product p");
-		sql.append(" join shop_sub_category s on p.sub_category_id = s.sub_category_id");
-		sql.append(" join shop_top_category t on s.top_category_id = t.top_category_id");
-		sql.append(" where p.product_id = ?;");
+                sh_SubCategory subCategory = new sh_SubCategory();
+                subCategory.setSub_category_id(rs.getInt("sub_category_id"));
+                subCategory.setName(rs.getString("sub_category_name"));
 
-		try {
-			pstmt = con.prepareStatement(sql.toString());
+                subCategory.setTop_category(topCategory);
+                product.setSub_category(subCategory);
+                product.setTop_category(topCategory);
 
-			pstmt.setInt(1, productId);
-			rs = pstmt.executeQuery();
+                return product;
+            } else {
+                throw new UserException("해당 상품이 존재하지 않습니다.");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new UserException("상품 조회 중 오류가 발생했습니다.", e);
+        } finally {
+            dbManager.release(pstmt, rs);
+        }
+    }
 
-			if (rs.next()) {
-				product.setProduct_id(rs.getInt("product_id"));
-				product.setBrand_name(rs.getString("brand_name"));
-				product.setName(rs.getString("product_name"));
-				product.setPrice(rs.getInt("price"));
-				product.setDetail(rs.getString("detail"));
-				product.setStock_quantity(rs.getInt("stock_quantity"));
+    // 카테고리별 상품 리스트 조회 (상위 카테고리 기준)
+    public List<sh_Product> getProductsByTopCategory(int topCategoryId) {
+        Connection con = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
 
-				sh_TopCategory topCategory = new sh_TopCategory();
-				topCategory.setTop_category_id(rs.getInt("top_category_id"));
-				topCategory.setName(rs.getString("top_category_name"));
+        List<sh_Product> list = new ArrayList<>();
 
-				sh_SubCategory subCategory = new sh_SubCategory();
-				subCategory.setSub_category_id(rs.getInt("sub_category_id"));
-				subCategory.setName(rs.getString("sub_category_name"));
+        con = dbManager.getConnection();
 
-				subCategory.setTop_category(topCategory);
-				product.setSub_category(subCategory);
-				product.setTop_category(topCategory);
+        StringBuffer sql = new StringBuffer();
+        sql.append("SELECT ");
+        sql.append("    p.product_id, p.name AS product_name, p.brand_name, p.price, p.status, p.stock_quantity, ");
+        sql.append("    t.name AS top_category_name, ");
+        sql.append("    (SELECT filename FROM shop_product_img i WHERE i.product_id = p.product_id LIMIT 1) AS filename ");
+        sql.append("FROM shop_product p ");
+        sql.append("JOIN shop_sub_category s ON p.sub_category_id = s.sub_category_id ");
+        sql.append("JOIN shop_top_category t ON s.top_category_id = t.top_category_id ");
+        sql.append("WHERE t.top_category_id = ? ");
+        sql.append("ORDER BY p.product_id DESC");
 
-				return product;
-			} else {
-				throw new UserException("해당 상품이 존재하지 않습니다.");
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-			throw new UserException("상품 조회 중 오류가 발생했습니다.", e);
-		} finally {
-			dbManager.release(pstmt, rs);
-		}
+        try {
+            pstmt = con.prepareStatement(sql.toString());
+            pstmt.setInt(1, topCategoryId);
+            rs = pstmt.executeQuery();
 
-	}
-	
-	// 카테고리별 상품 리스트 조회 (상위 카테고리 기준)
-	public List getProductsByTopCategory(int topCategoryId) {
-		Connection con = null;
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
+            while (rs.next()) {
+                sh_Product product = new sh_Product();
+                product.setProduct_id(rs.getInt("product_id"));
+                product.setName(rs.getString("product_name"));
+                product.setBrand_name(rs.getString("brand_name"));
+                product.setPrice(rs.getInt("price"));
+                product.setStatus(rs.getInt("status"));
+                product.setStock_quantity(rs.getInt("stock_quantity"));
+                product.setFilename(rs.getString("filename")); // 이미지 파일명 추가
 
-		List<sh_Product> list = new ArrayList<>();
+                // 카테고리 정보
+                sh_TopCategory topCategory = new sh_TopCategory();
+                topCategory.setName(rs.getString("top_category_name"));
+                sh_SubCategory subCategory = new sh_SubCategory();
+                subCategory.setTop_category(topCategory);
+                product.setSub_category(subCategory);
+                product.setTop_category(topCategory);
 
-		con = dbManager.getConnection();
+                list.add(product);
+            }
 
-		StringBuffer sql = new StringBuffer();
-		sql.append("select product_id, t.name AS top_category_name, brand_name, p.name AS product_name, price, p.status, stock_quantity ");
-		sql.append(" from shop_top_category t , shop_sub_category s , shop_product p");
-		sql.append(" where t.top_category_id = s.top_category_id and");
-		sql.append(" s.sub_category_id = p.sub_category_id and");
-		sql.append(" t.top_category_id = ?");
-		sql.append(" order by product_id desc");
-
-		try {
-			pstmt = con.prepareStatement(sql.toString());
-			pstmt.setInt(1, topCategoryId);
-			rs = pstmt.executeQuery();
-
-			while (rs.next()) {
-				sh_Product product = new sh_Product();
-				product.setProduct_id(rs.getInt("product_id"));
-
-				sh_SubCategory subCategory = new sh_SubCategory();
-				sh_TopCategory topCategory = new sh_TopCategory();
-				topCategory.setName(rs.getString("top_category_name"));
-				subCategory.setTop_category(topCategory);
-				product.setSub_category(subCategory);
-
-				product.setBrand_name(rs.getString("brand_name"));
-				product.setName(rs.getString("product_name"));
-				product.setPrice(rs.getInt("price"));
-				product.setStatus(rs.getInt("status"));
-				product.setStock_quantity(rs.getInt("stock_quantity"));
-
-				list.add(product);
-			}
-			return list;
-		} catch (SQLException e) {
-			e.printStackTrace();
-			throw new UserException("상품 목록 조회 중 오류 발생", e);
-		} finally {
-			dbManager.release(pstmt, rs);
-		}
-
-	}
-	
+            return list;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new UserException("카테고리 상품 조회 중 오류 발생", e);
+        } finally {
+            dbManager.release(pstmt, rs);
+        }
+    }
 }

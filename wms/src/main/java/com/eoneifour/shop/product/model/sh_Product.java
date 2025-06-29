@@ -10,6 +10,7 @@ public class sh_Product {
 	private String detail;
 	private sh_SubCategory sub_category; 
 	private sh_TopCategory top_category;
+	private String filename;
 	
 	public int getProduct_id() {
 		return product_id;
@@ -64,6 +65,12 @@ public class sh_Product {
 	}
 	public void setTop_category(sh_TopCategory top_category) {
 		this.top_category = top_category;
+	}
+	public String getFilename() {
+	    return filename;
+	}
+	public void setFilename(String filename) {
+	    this.filename = filename;
 	}
 	
 	
