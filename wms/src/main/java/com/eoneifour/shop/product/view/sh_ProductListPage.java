@@ -69,19 +69,12 @@ public class sh_ProductListPage extends JPanel {
 
         try {
             String filename = product.getFilename();
-            ImageIcon icon = ImgUtil.getImageIcon(filename);
+            ImageIcon scaledIcon = ImgUtil.getScaledImageIcon(filename, 140, 140);
 
-            boolean imageLoaded = false;
-            if (icon != null) {
-                Image img = icon.getImage();
-                if (img != null && img.getWidth(null) > 0) {
-                    Image scaledImg = img.getScaledInstance(140, 140, Image.SCALE_SMOOTH);
-                    imgLabel.setIcon(new ImageIcon(scaledImg));
-                    imageLoaded = true;
-                }
-            }
-
-            if (!imageLoaded) {
+            if (scaledIcon != null) {
+                imgLabel.setIcon(scaledIcon);
+            } else {
+                // 이미지 없음 처리
                 imgLabel.setPreferredSize(new Dimension(140, 190));
                 imgLabel.setOpaque(true);
                 imgLabel.setBackground(Color.LIGHT_GRAY);
@@ -96,7 +89,7 @@ public class sh_ProductListPage extends JPanel {
             imgLabel.setBorder(BorderFactory.createEmptyBorder(15, 0, 50, 0));
 
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "이미지 불러오기 중 오류발생 " + e.getMessage());
+            JOptionPane.showMessageDialog(this, "이미지 불러오기 중 오류 발생: " + e.getMessage());
         }
 
         // 상품 이름
