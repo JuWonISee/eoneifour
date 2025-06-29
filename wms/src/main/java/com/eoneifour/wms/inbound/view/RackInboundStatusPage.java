@@ -126,14 +126,14 @@ public class RackInboundStatusPage extends JPanel {
 
         if (stockProduct != null) {
             cellInfoArea.setText(
-                "\n상품 번호 : " + stockProduct.getProductId() +
+                "\n제품 번호 : " + stockProduct.getProductId() +
                 "\n\n브랜드 : " + stockProduct.getProductBrand() +
-                "\n\n상품명 : " + stockProduct.getProductName() +
+                "\n\n제품명 : " + stockProduct.getProductName() +
                 "\n\n위치 : " + stockProduct.getS() + " - " + stockProduct.getZ() + " - " + stockProduct.getX() + " - " + stockProduct.getY() +
                 "\n\n상세사항 : " + stockProduct.getDetail()
             );
         } else {
-            cellInfoArea.setText("\n상품 번호 : " + "\n\n브랜드 : " + "\n\n상품명 : " + "\n\n위치 : " + "\n\n상세사항 : ");
+            cellInfoArea.setText("\n제품 번호 : " + "\n\n브랜드 : " + "\n\n제품명 : " + "\n\n위치 : " + "\n\n상세사항 : ");
         }
     }
 

@@ -58,7 +58,7 @@ public class RackDAO {
 		sql.append(" select count(*) as cnt 	");
 		sql.append("	from rack               		");
 		sql.append(" where 1 = 1					");
-				
+			
 		try {
 			if(statusNum != -1) {
 				sql.append( "and rack_status = ? 	");
@@ -68,7 +68,7 @@ public class RackDAO {
 			if(statusNum != -1) {
 				pstmt.setInt(1, statusNum);
 			}
-			
+			System.out.println(sql.toString());
 			rs = pstmt.executeQuery();
 			rs.next();
 			

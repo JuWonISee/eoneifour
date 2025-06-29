@@ -21,20 +21,19 @@ import com.eoneifour.wms.home.view.MainFrame;
 import com.eoneifour.wms.inboundrate.model.Rack;
 import com.eoneifour.wms.inboundrate.repository.RackDAO;
 
-public class AllInboundRatePage extends JPanel implements Refreshable{
+public class AllInboundRatePage extends JPanel implements Refreshable {
 
-	private static final Color[] BAR_COLORS = { 
-			new Color(0x4CAF50), // 공Cell
+	private static final Color[] BAR_COLORS = { new Color(0x4CAF50), // 공Cell
 			new Color(0x2196F3), // 입고
 			new Color(0xFF9800), // 출고대기
 			new Color(0xFA8EE5), // 입고중
-			Color.GRAY              // 입고대기
+			Color.GRAY // 입고대기
 	};
 
-	private static final Font FONT_TITLE      = new Font("맑은 고딕", Font.BOLD, 28);
+	private static final Font FONT_TITLE = new Font("맑은 고딕", Font.BOLD, 28);
 	private static final Font FONT_PERCENT = new Font("맑은 고딕", Font.BOLD, 60);
-	private static final Font FONT_LABEL     = new Font("맑은 고딕", Font.BOLD, 40);
-	private static final Font FONT_LEGEND  = new Font("맑은 고딕", Font.BOLD, 20);
+	private static final Font FONT_LABEL = new Font("맑은 고딕", Font.BOLD, 40);
+	private static final Font FONT_LEGEND = new Font("맑은 고딕", Font.BOLD, 20);
 
 	private MainFrame mainFrame;
 	private JFreeChart chart;
@@ -49,12 +48,12 @@ public class AllInboundRatePage extends JPanel implements Refreshable{
 
 	private CategoryDataset createDataset() {
 		DefaultCategoryDataset dataset = new DefaultCategoryDataset();
-		dataset.addValue(rackDAO.selectRackStatusCnt(0), "공Cell"	 , "");
-		dataset.addValue(rackDAO.selectRackStatusCnt(3), "입고"	 , "");
-		dataset.addValue(rackDAO.selectRackStatusCnt(2), "입고중"	 , "");
+		dataset.addValue(rackDAO.selectRackStatusCnt(0), "공Cell", "");
+		dataset.addValue(rackDAO.selectRackStatusCnt(3), "입고", "");
 		dataset.addValue(rackDAO.selectRackStatusCnt(4), "출고대기", "");
+		dataset.addValue(rackDAO.selectRackStatusCnt(2), "입고중", "");
 		dataset.addValue(rackDAO.selectRackStatusCnt(1), "입고대기", "");
-		
+
 		return dataset;
 	}
 
@@ -66,24 +65,24 @@ public class AllInboundRatePage extends JPanel implements Refreshable{
 		if (chart.getLegend() != null) {
 			chart.getLegend().setItemFont(FONT_LEGEND);
 			chart.getLegend().setPosition(RectangleEdge.TOP);
-			chart.getLegend().setItemLabelPadding(new RectangleInsets(5, 20, 5, 20));  // 위, 왼쪽, 아래, 오른쪽 여백
+			chart.getLegend().setItemLabelPadding(new RectangleInsets(5, 20, 5, 20)); // 위, 왼쪽, 아래, 오른쪽 여백
 			chart.getLegend().setFrame(new BlockBorder(Color.WHITE)); // 경계선 제거 (선택사항)
 		}
 	}
-	
+
 	private void customizeLegendItems() {
-	    LegendItemCollection legendItems = new LegendItemCollection();
+		LegendItemCollection legendItems = new LegendItemCollection();
 
-	    String[] labels = { "공Cell", "입고", "출고대기", "입고중", "입고대기" };
-	    
-	    for (int i = 0; i < labels.length; i++) {
-	        Shape shape = new Rectangle(25, 25); // 사각형 크기 (폭, 높이)
-	        LegendItem item = new LegendItem(labels[i], null, null, null, shape, BAR_COLORS[i]);
-	        item.setLabelFont(FONT_LEGEND); // 텍스트 폰트 설정
-	        legendItems.add(item);
-	    }
+		String[] labels = { "공Cell", "입고", "출고대기", "입고중", "입고대기" };
 
-	    plot.setFixedLegendItems(legendItems);
+		for (int i = 0; i < labels.length; i++) {
+			Shape shape = new Rectangle(25, 25); // 사각형 크기 (폭, 높이)
+			LegendItem item = new LegendItem(labels[i], null, null, null, shape, BAR_COLORS[i]);
+			item.setLabelFont(FONT_LEGEND); // 텍스트 폰트 설정
+			legendItems.add(item);
+		}
+
+		plot.setFixedLegendItems(legendItems);
 	}
 
 	private void configurePlotStyle() {
@@ -93,7 +92,7 @@ public class AllInboundRatePage extends JPanel implements Refreshable{
 		plot.setDomainGridlinesVisible(false);
 		plot.getDomainAxis().setVisible(false);
 		plot.getRangeAxis().setVisible(false);
-		plot.getRangeAxis().setRange(0, 200);
+		plot.getRangeAxis().setRange(0, 220);
 	}
 
 	private void configureRenderer(final CategoryDataset dataset) {
@@ -131,7 +130,8 @@ public class AllInboundRatePage extends JPanel implements Refreshable{
 		titleLabel.setFont(FONT_TITLE);
 		titleLabel.setForeground(new Color(0x333333));
 
-	    int percentValue = (int)((double)getSumFromDataset(dataset, "입고", "출고대기") / rackDAO.selectRackStatusCnt(-1)  * 100);
+		int percentValue = (int) ((double) getSumFromDataset(dataset, "입고", "출고대기") / rackDAO.selectRackStatusCnt(-1)
+				* 100);
 		JLabel percentLabel = new JLabel(percentValue + "%", SwingConstants.CENTER);
 		percentLabel.setFont(FONT_PERCENT);
 		percentLabel.setForeground(new Color(236, 0, 63)); // 입고 색상과 매칭
@@ -141,19 +141,19 @@ public class AllInboundRatePage extends JPanel implements Refreshable{
 
 		return topPanel;
 	}
-	
+
 	private int getSumFromDataset(CategoryDataset dataset, String... rowKeys) {
-	    int sum = 0;
-	    for (String key : rowKeys) {
-	        for (int i = 0; i < dataset.getRowCount(); i++) {
-	            if (key.equals(dataset.getRowKey(i))) {
-	                Number value = dataset.getValue(i, 0);
-	                sum += (value != null) ? value.intValue() : 0;
-	                break;  // 찾았으면 다음 key로
-	            }
-	        }
-	    }
-	    return sum;
+		int sum = 0;
+		for (String key : rowKeys) {
+			for (int i = 0; i < dataset.getRowCount(); i++) {
+				if (key.equals(dataset.getRowKey(i))) {
+					Number value = dataset.getValue(i, 0);
+					sum += (value != null) ? value.intValue() : 0;
+					break; // 찾았으면 다음 key로
+				}
+			}
+		}
+		return sum;
 	}
 
 	private ChartPanel createChartPanel() {
@@ -165,25 +165,25 @@ public class AllInboundRatePage extends JPanel implements Refreshable{
 
 	@Override
 	public void refresh() {
-		if(chart != null) {
-	        chart.removeLegend();
-	    }
+		if (chart != null) {
+			chart.removeLegend();
+		}
 
-	    CategoryDataset dataset = createDataset();
-	    this.chart = createChart(dataset);
-	    this.plot = chart.getCategoryPlot();
+		CategoryDataset dataset = createDataset();
+		this.chart = createChart(dataset);
+		this.plot = chart.getCategoryPlot();
 
-	    configureLegendFont();
-	    customizeLegendItems();
-	    configurePlotStyle();
-	    configureRenderer(dataset);
+		configureLegendFont();
+		customizeLegendItems();
+		configurePlotStyle();
+		configureRenderer(dataset);
 
-	    removeAll(); 
-	    setLayout(new BorderLayout());
-	    add(createTopPanel(dataset), BorderLayout.NORTH);
-	    add(createChartPanel(), BorderLayout.CENTER);
+		removeAll();
+		setLayout(new BorderLayout());
+		add(createTopPanel(dataset), BorderLayout.NORTH);
+		add(createChartPanel(), BorderLayout.CENTER);
 
-	    revalidate(); 
-	    repaint();    
+		revalidate();
+		repaint();
 	}
 }

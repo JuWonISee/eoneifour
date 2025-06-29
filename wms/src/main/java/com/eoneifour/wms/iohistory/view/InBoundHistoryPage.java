@@ -142,7 +142,7 @@ public class InBoundHistoryPage extends AbstractTablePage implements Refreshable
 			return;
 		}
 
-		if (keyword.equals("상품명을 입력하세요"))
+		if (keyword.equals("제품명을 입력하세요"))
 			keyword = "";
 
 		if (!keyword.isBlank() && startDate != null && endDate != null) {
@@ -195,10 +195,10 @@ public class InBoundHistoryPage extends AbstractTablePage implements Refreshable
 	}
 
 	private void applyPlaceholderEvents() {
-		// 상품명
+		// 제품명
 		searchField.addFocusListener(new FocusAdapter() {
 			public void focusGained(FocusEvent e) {
-				if (searchField.getText().equals("상품명을 입력하세요")) {
+				if (searchField.getText().equals("제품명을 입력하세요")) {
 					searchField.setText("");
 					searchField.setForeground(Color.BLACK);
 				}
@@ -207,7 +207,7 @@ public class InBoundHistoryPage extends AbstractTablePage implements Refreshable
 			public void focusLost(FocusEvent e) {
 				if (searchField.getText().isEmpty()) {
 					searchField.setForeground(Color.GRAY);
-					searchField.setText("상품명을 입력하세요");
+					searchField.setText("제품명을 입력하세요");
 				}
 			}
 		});

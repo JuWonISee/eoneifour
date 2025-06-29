@@ -271,7 +271,7 @@ public class IOHistoryDAO {
 
 	public List<IoHistory> searchOutBoundByCondition(String keyword, Date start, Date end) {
 		List<IoHistory> list = new ArrayList<>();
-		String sql = "SELECT * FROM release_log WHERE product_name LIKE ? AND release BETWEEN ? AND ?";
+		String sql = "SELECT * FROM release_log WHERE product_name LIKE ? AND release_date BETWEEN ? AND ?";
 
 		Connection conn = null;
 		PreparedStatement pstmt = null;
