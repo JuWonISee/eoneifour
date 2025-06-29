@@ -5,12 +5,15 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Image;
 import java.awt.event.ActionEvent;
 
 import javax.swing.*;
 
 import com.eoneifour.common.frame.AbstractMainFrame;
 import com.eoneifour.common.util.ButtonUtil;
+import com.eoneifour.common.util.ImgUtil;
 import com.eoneifour.wms.auth.model.Admin;
 import com.eoneifour.wms.auth.repository.AdminDAO;
 import com.eoneifour.wms.home.view.MainFrame;
@@ -25,12 +28,15 @@ public class AdminDeletePage extends JPanel {
     private AbstractMainFrame mainFrame; // 메인 프레임 참조
     private AdminDAO adminDAO = new AdminDAO(); // DB 접근 객체
 
+	private Image backgroundImage;
+    
     public AdminDeletePage(AbstractMainFrame mainFrame) {
         this.mainFrame = mainFrame;
 
         // 전체 패널 설정
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-        setBackground(Color.WHITE);
+		ImgUtil imgUtil = new ImgUtil();
+		backgroundImage = imgUtil.getImage("images/homeImage2.png", 1280, 800);
 
         // 중앙 box 설정
         JPanel box = new JPanel();
@@ -140,4 +146,12 @@ public class AdminDeletePage extends JPanel {
         add(box);
         add(Box.createVerticalGlue());
     }
+    
+	@Override
+	protected void paintComponent(Graphics g) {
+		if(backgroundImage != null) {
+			// 패널 크기에 맞게 이미지 늘려 그리기
+			g.drawImage(backgroundImage, 0, 0, getWidth(), getHeight(), this);
+		}
+	}
 }

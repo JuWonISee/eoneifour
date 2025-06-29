@@ -227,7 +227,7 @@ public class PurchaseOrderDAO {
 			StringBuffer sql = new StringBuffer();
 			sql.append("select po.purchase_order_id, p.name AS product_name, po.quantity, ");
 			sql.append(" po.request_date, u.name AS requested_by_name, po.status, ");
-			sql.append(" po.complete_date, po.requested_by, po.product_id, p.brand_name as brand_name");
+			sql.append(" po.complete_date, po.requested_by, po.product_id, p.brand_name as brand_name, p.detail");
 			sql.append(" FROM shop_purchase_order po ");
 			sql.append(" JOIN shop_user u ON po.requested_by = u.user_id ");
 			sql.append(" JOIN shop_product p ON po.product_id = p.product_id");
@@ -247,6 +247,7 @@ public class PurchaseOrderDAO {
 					product.setProduct_id(rs.getInt("product_id"));
 					product.setName(rs.getString("product_name"));
 					product.setBrand_name(rs.getString("brand_name"));
+					product.setDetail(rs.getString("detail"));
 					purchaseOrder.setQuantity(rs.getInt("quantity"));
 					purchaseOrder.setRequest_date(rs.getDate("request_date"));
 					user.setName(rs.getString("requested_by_name"));
@@ -254,6 +255,7 @@ public class PurchaseOrderDAO {
 					purchaseOrder.setComplete_date(rs.getDate("complete_date"));
 					purchaseOrder.setProduct(product);
 					purchaseOrder.setUser(user);
+					purchaseOrder.setDetail(rs.getString("detail"));
 					
 					list.add(purchaseOrder);
 				}

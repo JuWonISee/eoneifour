@@ -1,5 +1,6 @@
 package com.eoneifour.wms.iobound.model;
 
+import java.sql.Date;
 import java.sql.Timestamp;
 
 public class StockProduct {
@@ -13,14 +14,24 @@ public class StockProduct {
 	private int y;
 	private int stockStatus;
 	private String detail;
-	private Timestamp stock_time;
+	private Date stock_time;
+
+	private int quantity; // 또는 totalQuantity
+
+	public int getQuantity() {
+		return quantity;
+	}
+
+	public void setQuantity(int quantity) {
+		this.quantity = quantity;
+	}
 
 	public int getStockProductId() {
-	    return stockProductId;
+		return stockProductId;
 	}
 
 	public void setStockProductId(int stockProductId) {
-	    this.stockProductId = stockProductId;
+		this.stockProductId = stockProductId;
 	}
 
 	public int getProductId() {
@@ -95,11 +106,11 @@ public class StockProduct {
 		this.detail = detail;
 	}
 
-	public Timestamp getStock_time() {
+	public Date getStock_time() {
 		return stock_time;
 	}
 
-	public void setStock_time(Timestamp stock_time) {
+	public void setStock_time(Date stock_time) {
 		this.stock_time = stock_time;
 	}
 }

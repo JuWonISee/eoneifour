@@ -18,7 +18,7 @@ import com.eoneifour.common.util.Refreshable;
 import com.eoneifour.wms.home.view.MainFrame;
 import com.eoneifour.wms.inboundrate.repository.RackDAO;
 
-public class StackerInboundRate extends JPanel implements Refreshable{
+public class StackerInboundRatePage extends JPanel implements Refreshable{
     MainFrame mainFrame;
     RackDAO rackDAO;
     
@@ -27,7 +27,7 @@ public class StackerInboundRate extends JPanel implements Refreshable{
     private static final Font FONT_LABEL    = new Font("맑은 고딕", Font.BOLD, 20);
     private static final Font FONT_LEGEND = new Font("맑은 고딕", Font.BOLD, 22);
     
-    public StackerInboundRate(MainFrame mainFrame) {
+    public StackerInboundRatePage(MainFrame mainFrame) {
         this.mainFrame = mainFrame;
         this.rackDAO = new RackDAO();
     }
